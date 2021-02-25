@@ -1,0 +1,34 @@
+{
+  "streams": [
+    {
+      "streamTitle": "First Stream 2",
+      "streamDescription": "This is my first stream",
+      "userId": "110041886164727201953",
+      "id": 1
+    },
+    {
+      "streamTitle": "React Course 2",
+      "streamDescription": "React Programming",
+      "userId": "110041886164727201953",
+      "id": 4
+    },
+    {
+      "streamTitle": "Python Course Vol.3",
+      "streamDescription": "Learning How To Write Python Applications",
+      "userId": "110041886164727201953",
+      "id": 5
+    },
+    {
+      "streamTitle": "Witcher 3 Stream",
+      "streamDescription": "Witcher 3 Stream w/My Best Friends",
+      "userId": "106601410933309630607",
+      "id": 6
+    },
+    {
+      "streamTitle": "React Instagram Clone",
+      "streamDescription": "Lets make a Instagram Clone with React",
+      "userId": "106601410933309630607",
+      "id": 7
+    }
+  ]
+}

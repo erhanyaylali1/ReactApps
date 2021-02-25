@@ -1,0 +1,13 @@
+.VideoItem {
+    display: flex!important;
+    align-items: center!important;
+    cursor: pointer;
+}
+
+.VideoItem.item img {
+    max-width: 150px!important;
+}
+
+.ui.buttons .or:before {
+    content: ''!important;
+}
