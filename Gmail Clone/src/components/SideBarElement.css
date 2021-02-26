@@ -1,0 +1,21 @@
+.SideBarElement--active,
+.SideBarElement--active > h3,
+.SideBarElement--active > p {
+	
+	background-color: #fcecec;
+	color: #c04b37;
+	font-weight: 800!important;
+}
+
+.SideBarElement--active > p {
+	display: inline!important;
+}
+
+.MuiButtonBase-root:focus {
+	outline: none!important;
+}
+
+.section--selected {
+	background-color: whitesmoke;
+	border-width: 3px!important;
+}
