@@ -1,3 +1,5 @@
+Image Search Engine Application with React
+--------------------------------
 Inside root folder run following commands  
 npm install  
 npm start  
