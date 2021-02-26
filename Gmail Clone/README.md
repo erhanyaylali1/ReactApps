@@ -2,8 +2,8 @@ Gmail Clone Application.
 React, Redux, Firebase
 --------------------------------
 Inside root folder run following commands  
-npm install  
-npm start  
+###npm install  
+###npm start  
 
 ScreenShots
 ![image](https://user-images.githubusercontent.com/32177766/109287716-00fb4880-7835-11eb-9a2b-f94bc26497af.png)  
