@@ -37,12 +37,13 @@ const DetailChart = ({data, unit}) => {
                         >
                             <div
                                 style={{
-                                    background: '#3A3A48',
-                                    borderRadius: "10px",
-                                    minWidth: '7em',
+                                    background: '#fefefe',
+                                    borderRadius: "5px",
+                                    width: 'max-content',
                                     padding: '0.8em',
                                     fontSize: '14px',
-                                    color: 'white'
+                                    color: 'white !important',
+                                    marginTop: '15px'
                                   }}
                             >
                                 <h5>{selected && selected[0].x.toUTCString().substring(0, 16)}</h5>

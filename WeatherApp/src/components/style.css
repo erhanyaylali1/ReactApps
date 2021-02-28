@@ -26,10 +26,38 @@ th, td {
     margin: 0px!important;
 }
 
-.accordion .title h3:hover {
-    color: grey
+
+.statCard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.content.active .value, .content.active .label{
-    color: tomato!important;
+.ant-carousel .slick-dots li button {
+    background: black!important;
+}
+
+.ant-carousel .slick-dots-bottom {
+    bottom: -30px!important
+}
+
+.ant-carousel {
+    width: 80%;
+}
+
+.ant-carousel .slick-prev,
+.ant-carousel .slick-next {
+  color: unset !important;
+  font-size: unset !important;
+}
+
+.ant-carousel .slick-prev:hover,
+.ant-carousel .slick-next:hover,
+.ant-carousel .slick-prev:focus,
+.ant-carousel .slick-next:focus {
+  color: unset !important;
+}
+
+.swiper-button-prev, .swiper-button-next {
+    color: white!important;
 }
