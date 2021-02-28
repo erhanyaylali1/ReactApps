@@ -1,7 +1,7 @@
 import React from 'react';
 import Map from './Map';
-import { useSelector } from 'react-redux';
-import { getSelected } from '../features/weathcerSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchWiki, getSelected, getWiki } from '../features/weathcerSlice';
 import '../../node_modules/react-vis/dist/style.css';
 import _ from 'lodash';
 import './style.css';
@@ -13,7 +13,15 @@ import Informations from './Informations';
 
 const City = (props) => {
     
+
+    const dispath = useDispatch();
     const selected = useSelector(getSelected);
+    const wiki = useSelector(getWiki);
+
+    React.useState(() => {
+        selected.cityInformation && dispath(fetchWiki(selected.cityInformation.name));
+    },[selected]);
+
 
     if(!selected.weather){
         props.history.push('/');
@@ -50,7 +58,6 @@ const City = (props) => {
                         <Map lon={lon} lat={lat} />
                         <div className="col-4 mr-5">
                             <div className="list-group">        
-                                
                                 <div className="mb-5">
                                     <h2 className="ui header">City: { selected.cityInformation.name } </h2>
                                     <h4 className="ui header">Country: { country } </h4>
@@ -64,9 +71,9 @@ const City = (props) => {
                                     avgTemp={avgTemp}
                                     avgPressure={avgPressure}
                                     avgWind={avgWind}
-                                    
-                                />
-                               
+                                />                               
+                            </div>
+                            <div className="mt-5" dangerouslySetInnerHTML={{__html: wiki}}>
                             </div>
                         </div>   
                     </div>
@@ -76,7 +83,6 @@ const City = (props) => {
                         humidity={humidity}
                         pressure={pressure}
                     />
-
                 </div>
             </React.Fragment>
         )
