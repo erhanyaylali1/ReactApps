@@ -8,9 +8,6 @@ import './style.css';
 import SearchBar from './SearchBar';
 import { withRouter } from 'react-router-dom';
 import SwiperContainer from './SwiperContainer';
-import { Carousel } from 'antd';
-import { RightOutlined, LeftOutlined } from '@ant-design/icons';
-import 'antd/dist/antd.css';
 import Informations from './Informations';
 
 

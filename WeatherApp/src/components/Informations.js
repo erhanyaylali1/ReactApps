@@ -2,6 +2,7 @@ import React from 'react';
 import { Carousel } from 'antd';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons';
 import { Statistic } from 'semantic-ui-react';
+import 'antd/dist/antd.css';
 
 export default function Informations({population, lat, lon, seaLevel, avgTemp, avgWind, avgHumidity, avgPressure}) {
     return (
