@@ -1,0 +1,35 @@
+th, td {
+    text-align: center!important;
+    vertical-align: middle!important;
+}
+
+.cityContainer .mapContainer > div:first-of-type {
+    height: 300px;  
+    width: 300px;
+}
+
+.graph {
+    background-color: whitesmoke;
+    width: max-content;
+    padding: 20px 40px;
+    border-radius: 5px;
+    margin-top: 50px;
+}
+
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.list-group-item-action {
+    margin: 0px!important;
+}
+
+.accordion .title h3:hover {
+    color: grey
+}
+
+.content.active .value, .content.active .label{
+    color: tomato!important;
+}
