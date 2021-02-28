@@ -9,7 +9,7 @@ import SearchBar from './SearchBar';
 import { withRouter } from 'react-router-dom';
 import SwiperContainer from './SwiperContainer';
 import Informations from './Informations';
-
+import { Divider } from 'antd';
 
 const City = (props) => {
     
@@ -43,7 +43,6 @@ const City = (props) => {
             return null;
         });
         
-        const country = selected.cityInformation.country;
         const {lat, lon} = selected.cityInformation.coord;
         const temp = resArr.map((each) => ({x: new Date(each.dt_txt.substring(0, 10)), y: _.round(each.main.temp - 273)}));
         const wind = resArr.map((each) => ({x: new Date(each.dt_txt.substring(0, 10)), y: _.round(each.wind.speed)}));
@@ -59,8 +58,9 @@ const City = (props) => {
                         <div className="col-4 mr-5">
                             <div className="list-group">        
                                 <div className="mb-5">
-                                    <h2 className="ui header">City: { selected.cityInformation.name } </h2>
-                                    <h4 className="ui header">Country: { country } </h4>
+                                    <Divider orientation="left"><h2 className="ui header">{ selected.cityInformation.name } </h2></Divider>
+                                    <p dangerouslySetInnerHTML={{__html: wiki}}>
+                                    </p>
                                 </div>
                                 <Informations 
                                     population={population}
@@ -73,8 +73,7 @@ const City = (props) => {
                                     avgWind={avgWind}
                                 />                               
                             </div>
-                            <div className="mt-5" dangerouslySetInnerHTML={{__html: wiki}}>
-                            </div>
+                            
                         </div>   
                     </div>
                     <SwiperContainer 
