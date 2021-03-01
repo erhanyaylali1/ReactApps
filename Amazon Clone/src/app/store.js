@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import cardSlice from '../features/counterSlice';
+import cardSlice from '../features/cardSlice';
 import userReducer from '../features/userSlice';
 
 export default configureStore({

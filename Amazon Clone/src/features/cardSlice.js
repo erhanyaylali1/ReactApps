@@ -17,12 +17,9 @@ export const cardSlice = createSlice({
 		removeFromCard: (state, action) => {
 		
 			const index = state.items.findIndex(item => item.id === action.payload.id);
-			if (index > 0) {
-				const newBasket = [...state.items.splice(0, index), ...state.items.splice(index)];
-				state.items = newBasket;
-				state.total -= action.payload.price;
-			} else if (index === 0) {
-				state.items.shift();
+            console.log(index);
+			if (index >= 0) {
+				state.items.splice(index, 1); 
 				state.total -= action.payload.price;
 			} else {
 				console.warn(`${action.payload.title} can't remove from Shopping Basket`);

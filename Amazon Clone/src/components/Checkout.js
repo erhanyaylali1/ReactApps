@@ -2,9 +2,10 @@ import React from 'react';
 import './styles/Checkout.css';
 import Subtotal from './Subtotal';
 import { useSelector } from 'react-redux';
-import { getItems } from '../features/counterSlice';
+import { getItems } from '../features/cardSlice';
 import CardRow from './CardRow';
 import { getUser } from '../features/userSlice';
+import FlipMove from 'react-flip-move';
 
 
 const Checkout = () => {
@@ -15,7 +16,7 @@ const Checkout = () => {
     const renderCheckoutProducts = () => {
         return basket?.map((item) => {
             return (
-                <React.Fragment>
+                <div>
                     <CardRow
                         id={item.id}
                         title={item.title}
@@ -23,7 +24,7 @@ const Checkout = () => {
                         image={item.image}
                         rating={item.rating}
                     />
-                </React.Fragment>
+                </div>
             )
         })
     }
@@ -41,7 +42,9 @@ const Checkout = () => {
                         <h4>Hello, {user?.email}</h4>
                         Your Shopping Basket
                     </h2>
-                    {renderCheckoutProducts()}
+                    <FlipMove leaveAnimation="elevator" >
+                        {renderCheckoutProducts()}  
+                    </FlipMove>
                 </div>    
             </div>
             <div className="checkout__right">

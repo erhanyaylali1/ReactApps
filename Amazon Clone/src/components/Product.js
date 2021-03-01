@@ -2,7 +2,7 @@ import React from 'react';
 import './styles/Product.css';
 import _ from 'lodash';
 import { useDispatch } from 'react-redux';
-import { addToCard } from '../features/counterSlice';
+import { addToCard } from '../features/cardSlice';
 
 
 const Product = ({ id, title, price, image, rating }) => {

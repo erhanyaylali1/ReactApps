@@ -2,7 +2,7 @@ import React from 'react'
 import CurrencyFormat from 'react-currency-format';
 import './styles/Subtotal.css';
 import { useSelector } from 'react-redux';
-import { getItems, getTotal } from '../features/counterSlice';
+import { getItems, getTotal } from '../features/cardSlice';
 import { getIsLogged } from '../features/userSlice';
 import { withRouter } from 'react-router-dom';
 
@@ -13,6 +13,8 @@ const Subtotal = (props) => {
     const proceed = () => {
         if(!isLogged) {
             props.history.push('/login');
+        } else {
+            props.history.push('/payment');
         }
     }
 

@@ -3,15 +3,19 @@
     justify-content: center;
     margin-left: auto;
     margin-right: auto;
-    max-width: 1500px;
 }
 
 .home__image {
     width: 100%;
     z-index: -1;
     margin-bottom: -100px;
-    margin-top: -100px;
+    margin-top: -200px;
     mask-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0));
+}
+
+.home__row__container {
+    width: 85%;
+    margin: -100px auto;
 }
 
 .home__row {
@@ -19,4 +23,11 @@
     z-index: 1;
     margin-left: 5px;
     margin-right: 5px;
+}
+
+@media screen and (max-width: 1000px) {
+    .home__image {
+        margin-top: -100px;
+        margin-bottom: 0;
+    }
 }

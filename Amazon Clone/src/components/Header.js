@@ -4,8 +4,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { getItems } from '../features/counterSlice';
-import { getIsLogged } from '../features/userSlice';
+import { getItems } from '../features/cardSlice';
+import { getIsLogged, } from '../features/userSlice';
 import { auth } from '../FirebaseConfig';
 import { withRouter } from 'react-router-dom';
 
@@ -41,7 +41,7 @@ const Header = (props) => {
                 {isLogged ? (
                     <div className="header__option" onClick={SignOut}>
                         <span className="header__optionLineOne">
-                            Hi Again
+                            Welcome
                         </span>
                         <span className="header__optionLineTwo">
                             Sign Out
@@ -51,7 +51,7 @@ const Header = (props) => {
                     <Link to="/login">
                         <div className="header__option">
                             <span className="header__optionLineOne">
-                                Welcome
+                                Hello Guest
                             </span>
                             <span className="header__optionLineTwo">
                                 Sign In
