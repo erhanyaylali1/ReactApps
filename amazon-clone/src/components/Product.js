@@ -1,8 +1,24 @@
 import React from 'react';
 import './styles/Product.css';
 import _ from 'lodash';
+import { useDispatch } from 'react-redux';
+import { addToCard } from '../features/counterSlice';
 
-const Product = ({ title, price, image, rating }) => {
+
+const Product = ({ id, title, price, image, rating }) => {
+
+    const dispatch = useDispatch();
+
+    const addToBasket = () => {
+        dispatch(addToCard({
+            id,
+            title,
+            price,
+            image,
+            rating
+        }))
+    }
+
     return (
         <div className="product">
             <div className="product__info">
@@ -20,7 +36,7 @@ const Product = ({ title, price, image, rating }) => {
                 src={image}
                 alt="product"
             />
-            <button>Add to Basket</button>            
+            <button onClick={addToBasket}>Add to Basket</button>            
         </div>
     )
 }

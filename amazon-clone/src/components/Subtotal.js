@@ -1,16 +1,29 @@
 import React from 'react'
 import CurrencyFormat from 'react-currency-format';
 import './styles/Subtotal.css';
+import { useSelector } from 'react-redux';
+import { getItems, getTotal } from '../features/counterSlice';
+import { getIsLogged } from '../features/userSlice';
+import { withRouter } from 'react-router-dom';
 
-const Subtotal = () => {
+const Subtotal = (props) => {
+
+    const length = useSelector(getItems).length;
+    const isLogged = useSelector(getIsLogged);
+    const proceed = () => {
+        if(!isLogged) {
+            props.history.push('/login');
+        }
+    }
+
     return (
         <div className="subtotal">
             <CurrencyFormat
                 renderText={(value) => (
                     <React.Fragment>
                         <p>
-                            Subtotal (0 items):
-                            <strong> 0</strong>
+                            Subtotal ({length} items):
+                            <strong> {value}</strong>
                         </p>
                         <small className="subtotal__gift">
                             <input type="checkbox" />
@@ -19,14 +32,16 @@ const Subtotal = () => {
                     </React.Fragment>
                 )}
                 decimalScale={2}
-                value={0}
+                value={useSelector(getTotal)}
                 displayType={"text"}
                 thousandSeparator={true}
                 prefix={"$"}
             />
-            <button>Proceed to Checkout</button>
+            
+            <button onClick={proceed}>Proceed to Checkout</button>
+            
         </div>
     )
 }
 
-export default Subtotal
+export default withRouter(Subtotal)

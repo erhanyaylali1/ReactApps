@@ -1,0 +1,30 @@
+.cardrow {
+	padding: 20px;
+	display: flex;
+}
+
+.cardrow__image {
+	height: 200px;
+	width: 200px;
+	min-width: 200px;
+	max-width: 200px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.cardrow__image > img {
+	width: auto;
+	height: 200px;
+	margin-right: 30px;
+	object-fit: cover;
+	object-position: center center;
+}
+
+.cardrow__button {
+	background: #f0c14b;
+    border: 1px solid;
+    margin-top: 10px;
+    border-color: #a88734 #9c7e31 #846a29;
+    color: #111;
+}
