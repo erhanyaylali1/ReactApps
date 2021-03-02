@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Home from './components/Home';
 import Payment from './components/Payment';
 import SignIn from './components/SignIn';
+import Orders from './components/Orders';
 import { auth } from './FirebaseConfig';
 import { logIn, logOut } from './features/userSlice';
 import { loadStripe } from '@stripe/stripe-js';
@@ -55,6 +56,10 @@ function App() {
                         <Elements stripe={promise}>
                             <Payment />
                         </Elements>
+                    </Route>
+                    <Route path="/orders">
+                        <Header />
+                        <Orders />
                     </Route>
                 </Switch>
             </div>

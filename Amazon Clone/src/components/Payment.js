@@ -1,36 +1,51 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { getItems, getTotal } from '../features/cardSlice';
+import { clearCard, getItems, getTotal } from '../features/cardSlice';
 import { getUser } from '../features/userSlice';
 import CardRow from './CardRow';
 import './styles/Payment.css';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import CurrencyFormat from 'react-currency-format';
+import { withRouter } from 'react-router-dom';
 
-const Payment = () => {
+const Payment = (props) => {
 
+    const dispatch = useDispatch();
     const user = useSelector(getUser);
     const basket = useSelector(getItems);
-
+    const price = useSelector(getTotal);
     const stripe = useStripe();
     const elements = useElements();
 
     const [error, setError] = useState(null);
-    const [processing, setProcessing] = useState(false);
-    const [succeeded, setSucceeded] = useState(false);
-    const [disabled, setDisabled] = useState(true);
     const [clientSecret, setClientSecret] = useState(true);
+
+    useEffect(() => {
+
+        const getClientSecret = async () => {
+            const url = "http://localhost:5001/ey1-f69b8/us-central1/api/payments/create?total=" + price * 100;
+            await fetch(url)
+            .then((res) => res.json())
+            .then((rep) => setClientSecret(rep.clientSecret));
+        }
+        getClientSecret();
+    },[basket])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setProcessing(true);
-
-        const payload = await stripe.confirmCardPayment()
+        await stripe.confirmCardPayment(clientSecret,{
+            payment_method: {
+                card: elements.getElement(CardElement)
+            }
+        }).then(() => {
+            setError(null);
+            props.history.replace('/orders');
+            dispatch(clearCard());
+        })
     }
 
     const handleChange = (e) => {
-        setDisabled(e.empty);
         setError(e.error ? e.error.message:"");
     }
     
@@ -83,17 +98,14 @@ const Payment = () => {
                                         </React.Fragment>
                                     )}
                                     decimalScale={2}
-                                    value={useSelector(getTotal)}
+                                    value={price}
                                     displayType={"text"}
                                     thousandSeparator={true}
                                     prefix={"$"}
                                 />
                             </div>
-                            <button 
-                                disabled={processing || disabled || succeeded }
-                                type="submit"
-                            >
-                                <span>{processing ? 'Processing':'Buy Now'}</span>
+                            <button type="submit">
+                                <span>Buy Now</span>
                             </button>
                             {error && <div>{error}</div>}
                         </form>
@@ -104,4 +116,4 @@ const Payment = () => {
     )
 }
 
-export default Payment
+export default withRouter(Payment)
