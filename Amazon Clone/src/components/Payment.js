@@ -8,6 +8,9 @@ import './styles/Payment.css';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import CurrencyFormat from 'react-currency-format';
 import { withRouter } from 'react-router-dom';
+import { db } from '../FirebaseConfig';
+import { message } from 'antd';
+import 'antd/dist/antd.css';
 
 const Payment = (props) => {
 
@@ -23,8 +26,13 @@ const Payment = (props) => {
 
     useEffect(() => {
 
+        if(basket.length === 0) {
+            props.history.replace('/');
+        }
+
         const getClientSecret = async () => {
-            const url = "http://localhost:5001/ey1-f69b8/us-central1/api/payments/create?total=" + price * 100;
+            const url = "http://localhost:5001/ey1-f69b8/us-central1/api/payments/create?total=" + Math.ceil((price * 100).toFixed(2));
+            console.log(url);   
             await fetch(url)
             .then((res) => res.json())
             .then((rep) => setClientSecret(rep.clientSecret));
@@ -34,14 +42,26 @@ const Payment = (props) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const key = "updatable";
+        message.loading({ content: "Order is Receiving", key });
         await stripe.confirmCardPayment(clientSecret,{
             payment_method: {
                 card: elements.getElement(CardElement)
             }
-        }).then(() => {
+        }).then(({ paymentIntent }) => {
             setError(null);
-            props.history.replace('/orders');
+            db.collection('users').doc(user?.id)
+            .collection('orders').doc(paymentIntent.id)
+            .set({
+                basket,
+                amount: paymentIntent.amount / 100,
+                created: paymentIntent.created
+            });
             dispatch(clearCard());
+            message.success({ content: "Order is Successfully Recieved", key , duration: 1.5 });
+            setTimeout(() => {
+                props.history.push('/orders');
+            },500)
         })
     }
 
@@ -75,7 +95,7 @@ const Payment = (props) => {
                                 price={item.price}
                                 image={item.image}
                                 rating={item.rating}
-                                payment
+                                hideButton
                             />
                         )})}
                     </div>

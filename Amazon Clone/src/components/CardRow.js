@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { useDispatch } from 'react-redux';
 import { removeFromCard } from '../features/cardSlice';
 
-const CardRow = ({ id, title, price, rating, image, payment}) => {
+const CardRow = ({ id, title, price, rating, image, hideButton}) => {
 
 	const dispatch = useDispatch();
 
@@ -30,7 +30,7 @@ const CardRow = ({ id, title, price, rating, image, payment}) => {
 					<strong>{price}</strong>
 				</p>
 				<p className="cardrow_rating">{_.times(rating,() => <span>⭐</span>)}</p>
-                {!payment && (
+                {!hideButton && (
                     <button 
                         onClick={removeFromBasket}
                         className="cardrow__button"

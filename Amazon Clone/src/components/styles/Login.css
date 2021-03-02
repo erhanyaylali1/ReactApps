@@ -69,3 +69,8 @@
 	margin-top: 10px;
 	border-color: darkgray;
 }
+
+.ant-message-custom-content.ant-message-error, .ant-message-custom-content.ant-message-loading, .ant-message-custom-content.ant-message-success {
+    display: flex !important;
+    align-items: center !important;
+}

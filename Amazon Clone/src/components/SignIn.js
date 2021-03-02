@@ -3,6 +3,8 @@ import './styles/Login.css';
 import { Link } from 'react-router-dom';
 import { auth } from '../FirebaseConfig';
 import { withRouter } from 'react-router-dom';
+import { message } from 'antd';
+import 'antd/dist/antd.css';
 
 const SignIn = (props) => {
 
@@ -12,16 +14,31 @@ const SignIn = (props) => {
 	const signInFunc = (e) => {
 		e.preventDefault();
 		auth.signInWithEmailAndPassword(email, password)
-        .then(() => props.history.push('/'))
-		.catch((error) => alert(error.message))
+        .then(() => showMessage("Signed In","Signing...","success"))
+		.catch((error) => showMessage(error.message,"Signing...","fail"))
 	}
 
 	const register = (e) => {
 		e.preventDefault();
 		auth.createUserWithEmailAndPassword(email, password)
-        .then(() => props.history.push('/'))
-		.catch((error) => alert(error.message))
+        .then(() => showMessage("Registered!","Registering...","success"))
+		.catch((error) => showMessage(error.message,"Registering...","fail"))
 	}
+
+    const showMessage = async (op2, op1, situation) => {
+        const key = "updatable";
+        message.loading({ content: op1, key });
+        setTimeout(() => {  
+            if(situation === "success"){
+                message.success({ content: op2, key , duration: 1 });
+                setTimeout(() => {
+                    props.history.push('/');
+                },500)
+            } else {
+                message.error({ content: op2, key, duration: 3 });
+            }
+        }, 1000);
+    }
 
 	return (
 		<div className="login">
@@ -61,6 +78,7 @@ const SignIn = (props) => {
 					>
 						Create your Amazon Account
 					</button>
+
 				</form>
 			</div>
 		</div>
