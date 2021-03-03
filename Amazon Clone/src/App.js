@@ -7,10 +7,11 @@ import Home from './components/Home';
 import Payment from './components/Payment';
 import SignIn from './components/SignIn';
 import Orders from './components/Orders';
-import { auth } from './FirebaseConfig';
+import { auth, db } from './FirebaseConfig';
 import { logIn, logOut } from './features/userSlice';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
+import SignUp from './components/SignUp';
 
 
 const key = "pk_test_51IQHEZIgvsyIQmisQpIWaWpTlFwzNdsd5UPVGDmSMLCUcRg6pqnhqRYyfqzbwQnMSwH60z53vOiUNWvEgz83G8ac00yepirUSJ"
@@ -23,14 +24,20 @@ function App() {
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
             if(user) {
-                dispatch(logIn({
-                    id: user.uid,
-                    name: user.displayName,
-                    email: user.email,
-                    phone: user.phoneNumber,
-                    photo: user.photoURL,
-                }));
-            } else {
+                db.collection('users').doc(user?.uid).get()
+                .then((doc) => {            
+                    if(doc.data()){
+                        dispatch(logIn({
+                            id: user?.uid,
+                            name: doc.data()?.name,
+                            username: doc.data().username,
+                            email: doc.data().email,
+                            password: doc.data().password,
+                            address: doc.data().address,
+                            phone: doc.data().number
+                        }));   
+                    }                                         
+            })} else {
                 dispatch(logOut());
             }
         })
@@ -47,6 +54,9 @@ function App() {
                     <Route path="/login">
                         <SignIn />
                     </Route>
+                    <Route path="/signup">
+                        <SignUp />
+                    </Route>
                     <Route path="/checkout">
                         <Header />
                         <Checkout />
@@ -61,6 +71,11 @@ function App() {
                         <Header />
                         <Orders />
                     </Route>
+                    <Route path="/orders">
+                        <Header />
+                        <Orders />
+                    </Route>
+                    
                 </Switch>
             </div>
         </Router>

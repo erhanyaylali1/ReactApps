@@ -39,7 +39,7 @@ const Checkout = () => {
                 />
                 <div>
                     <h2 className="checkout__title">
-                        <h4>Hello, {user?.email}</h4>
+                        <h4>Hello, {user?.name}</h4>
                         Your Shopping Basket
                     </h2>
                     <FlipMove leaveAnimation="elevator" >

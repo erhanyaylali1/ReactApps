@@ -62,12 +62,21 @@
 }
 
 .register__button {
-	border-radius: 2px;
-	width: 100%;
-	height: 30px;
-	border: 1px solid;
-	margin-top: 10px;
-	border-color: darkgray;
+    border-radius: 2px;
+    width: 100%;
+    padding: 5px 0;
+    text-align: center;
+    font-weight: 600;
+    color: black;
+    vertical-align: middle;
+    border: 1px solid;
+    margin-top: 10px;
+    background-color: #f0c14b;
+    border-color: darkgray;
+}
+
+.register__button:hover {
+    color:darkslategray;
 }
 
 .ant-message-custom-content.ant-message-error, .ant-message-custom-content.ant-message-loading, .ant-message-custom-content.ant-message-success {

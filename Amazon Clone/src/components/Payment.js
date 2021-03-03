@@ -31,7 +31,7 @@ const Payment = (props) => {
         }
 
         const getClientSecret = async () => {
-            const url = "http://localhost:5001/ey1-f69b8/us-central1/api/payments/create?total=" + Math.ceil((price * 100).toFixed(2));
+            const url = "https://us-central1-ey1-f69b8.cloudfunctions.net/api/payments/create?total=" + Math.ceil((price * 100).toFixed(2));
             console.log(url);   
             await fetch(url)
             .then((res) => res.json())
@@ -83,9 +83,9 @@ const Payment = (props) => {
                         <h3>Delivery Address</h3>
                     </div>
                     <div className="payment__address">
+                        <p>{user?.phone}</p>
                         <p>{user?.email}</p>
-                        <p>1267 Street</p>
-                        <p>Menemen, İzmir</p>
+                        <p>{user?.address}</p>
                     </div>
                 </div>
                 <div className="payment__section">

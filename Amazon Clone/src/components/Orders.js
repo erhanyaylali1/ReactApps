@@ -21,7 +21,8 @@ const Orders = () => {
                     id: doc.id,
                     data: doc.data()
                 })))
-            })
+            });
+            
         } else {
             setOrders([]);
         }

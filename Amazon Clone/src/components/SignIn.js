@@ -18,13 +18,6 @@ const SignIn = (props) => {
 		.catch((error) => showMessage(error.message,"Signing...","fail"))
 	}
 
-	const register = (e) => {
-		e.preventDefault();
-		auth.createUserWithEmailAndPassword(email, password)
-        .then(() => showMessage("Registered!","Registering...","success"))
-		.catch((error) => showMessage(error.message,"Registering...","fail"))
-	}
-
     const showMessage = async (op2, op1, situation) => {
         const key = "updatable";
         message.loading({ content: op1, key });
@@ -68,16 +61,15 @@ const SignIn = (props) => {
 						className="signIn__button" 
 						type="submit"
 						onClick={signInFunc}					
-					>Sign In</button>
+					>
+                        Sign In
+                    </button>
 					<p>
 						By signing-in you are agree to Amazon's Conditions of Use & Sale. Please see our Privacy Notice, our Cookies Notice and out Interest Based Ads Notice.
 					</p>
-					<button 
-						className="register__button"
-						onClick={register}
-					>
+					<a className="register__button" href="/signup">
 						Create your Amazon Account
-					</button>
+					</a>
 
 				</form>
 			</div>
