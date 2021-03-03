@@ -35,7 +35,10 @@ const Payment = (props) => {
             console.log(url);   
             await fetch(url)
             .then((res) => res.json())
-            .then((rep) => setClientSecret(rep.clientSecret));
+            .then((rep) => setClientSecret(rep.clientSecret))
+            .catch((err) => {
+                message.error({ content: "Could Not Connected to Server", key: "updatable" , duration: 4 });
+            })
         }
         getClientSecret();
     },[basket])
@@ -62,6 +65,8 @@ const Payment = (props) => {
             setTimeout(() => {
                 props.history.push('/orders');
             },500)
+        }).catch((err) => {
+            message.error({ content: "An Error Ocurred During the Payment", key: "updatable" , duration: 4 });
         })
     }
 
