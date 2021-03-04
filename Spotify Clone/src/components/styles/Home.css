@@ -1,0 +1,9 @@
+.home {
+    display: flex;
+    flex-direction: column;
+}
+
+.home__body {
+    display: flex;
+    flex-direction: row;
+}

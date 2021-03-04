@@ -1,0 +1,40 @@
+.body {
+    flex: 0.8;
+    background-image: linear-gradient(rgb(91, 87, 115),rgba(0, 0, 0, .7)) ;
+    height: 100vh;
+    color: white;
+    padding: 20px 30px;
+}
+
+.body__info {
+    display: flex;
+    align-items: flex-end;
+}
+
+.album__logo {
+    width: auto;
+    height: 150px;
+    object-fit: contain;
+    object-position: center left;
+}
+
+.body__infoText {
+    display: flex;
+    margin-left: 20px;
+    flex-direction: column;
+
+}
+
+.body__infoText strong {
+    margin: 5px 0;
+}
+
+.body__infoText h2 {
+    margin: 0;
+    font-size: 48px;
+}
+
+.body__infoText p {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}

@@ -1,0 +1,23 @@
+.sidebarOption {
+    color: white;
+    cursor: pointer;
+    transition: 100ms color ease-in;
+    display: flex;
+    align-items: center;
+}
+
+.sidebarOption:hover {
+    color: rgba(255,255,255,0.7);
+}
+
+.sidebarOption__icon {
+    margin-right: 15px;
+}
+
+.sidebarOption > h3 {
+    margin: 10px 0;
+}
+
+.sidebarOption > p {
+    margin: 8px 0;
+}
