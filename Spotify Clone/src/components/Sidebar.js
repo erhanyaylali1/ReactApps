@@ -7,7 +7,7 @@ import LibraryMusicIcon from '@material-ui/icons/LibraryMusic';
 import { useSelector } from 'react-redux';
 import { getPlaylists } from '../features/userSlice';
 
-const Sidebar = () => {
+const Sidebar = ({spotify}) => {
 
     const playlists = useSelector(getPlaylists);
     return (

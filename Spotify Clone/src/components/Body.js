@@ -1,15 +1,26 @@
-import React from 'react';
+import { Favorite, MoreHoriz, PlayCircleFilled } from '@material-ui/icons';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { getSpotify } from '../features/userSlice';
 import Header from './Header';
+import SongRow from './SongRow';
 import './styles/Body.css';
 
-const Body = ({ spotify }) => {
-    
+const Body = () => {
+
+    const spotify = useSelector(getSpotify);
+    const discover = null;
+
+    // useEffect(() => {
+    //     spotify.
+    // }, [])
+
     return (
         <div className="body">
             <Header spotify={spotify} />
             <div className="body__info">
                 <img 
-                    src="https://images.ctfassets.net/tvhwpwv117no/6pR0M0vcgPBB8LzYs1oP3A/5dfdc789956339c8ffc526562b029574/Five_years_of_discovery_and_engagement_through_Discover_Weekly.jpg"
+                    src={discover?.images && discover?.images[0]?.url}
                     alt="album logo"
                     className="album__logo"
                 />
@@ -19,7 +30,17 @@ const Body = ({ spotify }) => {
                     <p>Description...</p>
                 </div>
             </div>
-        </div>
+            <div className="body__songs">
+                <div className="body__icons">
+                    <PlayCircleFilled />
+                    <Favorite />
+                    <MoreHoriz />
+                </div>
+                {discover?.tracks?.items.map(item => {
+                    return <SongRow track={item.track} />
+                })}
+            </div>
+    </div>
     )
 }
 

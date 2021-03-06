@@ -5,9 +5,9 @@ export const counterSlice = createSlice({
     initialState: {
         info: {},
         playlists: [],
-        playing: false,
-        item: null,
-        token: ""
+        spotify: {},
+        token: "",
+        playlistId: ""
     },
     reducers: {
         login: (state, action) => {
@@ -18,16 +18,22 @@ export const counterSlice = createSlice({
         },
         setPlaylists: (state, action) => {
             state.playlists = action.payload;
+        },
+        setSpotify: (state, action) => {
+            state.spotify = action.payload;
+        },
+        setPlaylistId: (state, action) => {
+            state.playlistId = action.payload;
         }
     },
 });
 
-export const { login, setToken, setPlaylists } = counterSlice.actions;
+export const { login, setToken, setPlaylists, setSpotify, setPlaylistId } = counterSlice.actions;
 
 export const getUserInfo = (state) => state.user.info;
 export const getPlaylists = (state) => state.user.playlists;
-export const getPlaying = (state) => state.user.playing;
-export const getItem = (state) => state.user.item;
+export const getSpotify = (state) => state.user.spotify;
 export const getToken = (state) => state.user.token;
+export const getPlaylistId = (state) => state.user.playlistId;
 
 export default counterSlice.reducer;

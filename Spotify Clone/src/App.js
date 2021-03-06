@@ -5,8 +5,6 @@ import Home from './components/Home';
 import { getTokenFromUrl } from './spotify';
 import SpotifyWebApi from 'spotify-web-api-js';
 import { getToken, login, setToken, setPlaylists } from './features/userSlice';
-import Sidebar from './components/Sidebar';
-import { SpeakerPhone } from '@material-ui/icons';
 
 const spotify = new SpotifyWebApi();
 
@@ -27,6 +25,10 @@ function App() {
             spotify.getUserPlaylists().then((playlists) => {
                 dispatch(setPlaylists(playlists.items))
             })
+            // spotify.getPlaylist("37i9dQZEVXcN17Ckx6clPZ").then((playlist) => {
+            //     dispatch(setDiscover(playlist))
+            // })
+
         }
     },[dispatch]);
 
@@ -34,7 +36,7 @@ function App() {
         <div className="App">
             { token ? (
                 <React.Fragment>
-                    <Home spotify={spotify} />
+                    <Home />
                 </React.Fragment>                
             ): (
                 <Login />
