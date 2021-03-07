@@ -15,4 +15,9 @@ export default makeStyles(() => ({
         display: 'flex',
         justifyContent: 'space-between',
     },
+    productName: {
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+    }
 }));

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Card, CardMedia, CardContent, CardActions, Typography, IconButton} from '@material-ui/core';
+import { Grid, Card, CardMedia, CardContent, CardActions, Typography, IconButton} from '@material-ui/core';
 import { AddShoppingCart } from '@material-ui/icons';
 import useStyles from './styles';
 
@@ -14,26 +14,34 @@ function Product({ product, onAddToCart }) {
             />
             <CardContent>
                 <div className={classes.cardContent}>
-                    <Typography variant="h4"  gutterBottom>
+                    <Typography variant="h5" className={classes.productName}>
                         {product?.name}
-                    </Typography>
-                    <Typography variant="h6"  gutterBottom>
-                        {product?.price.formatted_with_symbol}
                     </Typography>
                 </div>
                 <Typography 
+                    className={classes.productName}
                     dangerouslySetInnerHTML={{ __html: product?.description}}
                     variant="body2" 
                     color="textSecondary"
                 >
                 </Typography>
                 <CardActions className={classes.CardActions}>
-                     <IconButton 
-                        aria-label="Add to Cart"
-                        onClick={() => onAddToCart(product?.id, 1)}
-                     >
-                         <AddShoppingCart />
-                     </IconButton>
+                    <Grid container align="center" direction="row">
+                        <Grid style={{ display: 'flex', alignItems: 'center'}}>
+                            <Typography variant="h6">
+                                {product?.price.formatted_with_symbol}
+                            </Typography>
+                        </Grid>
+                        <Grid item style={{ marginLeft: 'auto'}}>
+                            <IconButton 
+                                aria-label="Add to Cart"
+                                onClick={() => onAddToCart(product?.id, 1)}
+                            >
+                                <AddShoppingCart />
+                            </IconButton>
+                        </Grid>
+                        
+                    </Grid>
                 </CardActions>
             </CardContent>
         </Card>

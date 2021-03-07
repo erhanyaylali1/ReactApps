@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, CardActions, CardContent, CardMedia, Typography } from '@material-ui/core';
+import { Button, Card, CardActions, CardContent, CardMedia, Grid, Typography } from '@material-ui/core';
 import useStyles from './styles';
 
 const CartItem = ({ item, updateCart, deleteItem }) => {
@@ -12,13 +12,15 @@ const CartItem = ({ item, updateCart, deleteItem }) => {
                 className={classes.media}
             />
             <CardContent className={classes.cardContent}>
-                <Typography variant="h4">
+                <Typography variant="h5" className={classes.productName}>
                     {item.name}
-                </Typography>
-                <Typography variant="h5">
-                    {item.line_total.formatted_with_symbol}
-                </Typography>
+                </Typography> 
             </CardContent>
+            <Grid container>
+                <Typography variant="h6" className={classes.priceTag}>
+                    {item.line_total.formatted_with_symbol}
+                </Typography>  
+            </Grid>
             <CardActions className={classes.cartActions}>
                 <div className={classes.buttons}>
                     <Button 

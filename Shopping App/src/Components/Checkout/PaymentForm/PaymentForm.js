@@ -44,7 +44,7 @@ const PaymentForm = ({ token, data, back, handleCheckout, next }) => {
         }
     }
     return (
-        <React.Fragment>
+        <div style={{ padding: '15px' }}>
             <Review token={token} />
             <Divider />
             <Typography variant="h6" gutterBottom style={{ margin: '20px 0'}}>
@@ -76,7 +76,7 @@ const PaymentForm = ({ token, data, back, handleCheckout, next }) => {
                     )}
                 </ElementsConsumer>
             </Elements>
-        </React.Fragment>
+        </div>
     )
 }
 

@@ -56,7 +56,10 @@ const AddressForm = ({ token, next }) => {
                 Shipping Address
             </Typography>
             <FormProvider {...methods}>
-                <form onSubmit={methods.handleSubmit((data) => next({...data, shippingCountry, shippingSubdivision, shippingOption}) )}>
+                <form 
+                    style={{ marginLeft: '15px', marginRight: '15px' }}
+                    onSubmit={methods.handleSubmit((data) => next({...data, shippingCountry, shippingSubdivision, shippingOption}) )}
+                >
                     <Grid container spacing={3}>
                         <CustomTextField name="firstName" label="First Name" />
                         <CustomTextField name="lastName" label="Last Name" />

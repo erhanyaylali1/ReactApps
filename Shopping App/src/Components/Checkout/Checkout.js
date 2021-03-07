@@ -22,7 +22,7 @@ const Checkout = ({ cart, order, error, handleCheckout }) => {
                 const response = await commerce.checkout.generateToken(cart.id, { type: 'cart' });
                 setToken(response);
             } catch (error) {
-                history.pushState('/');
+                history.push('/');
             }
         }
         generateToken();
@@ -41,7 +41,7 @@ const Checkout = ({ cart, order, error, handleCheckout }) => {
     <PaymentForm data={shippingData} token={token} back={backStep} next={next} handleCheckout={handleCheckout}/>
 
     let Confirmation = () => order.customer ? (
-        <React.Fragment>
+        <div style={{ padding: '20px' }}>
             <CssBaseline />
             <div>
                 <Typography variant="h5">
@@ -61,7 +61,7 @@ const Checkout = ({ cart, order, error, handleCheckout }) => {
             >
                 Back to Home
             </Button>
-        </React.Fragment>
+        </div>
     ):(
         <div className={classes.spinner}>
             <CircularProgress />

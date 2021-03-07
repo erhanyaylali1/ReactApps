@@ -21,7 +21,7 @@ function Cart({ cart, deleteItem, emptyCart, updateCart }) {
     const FilledCart = () => {
         return (
             <React.Fragment>
-                <Grid container spacing={3}>
+                <Grid container  spacing={3}>
                     {cart.line_items.map((item) => {
                         return (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
@@ -34,11 +34,13 @@ function Cart({ cart, deleteItem, emptyCart, updateCart }) {
                         )
                     })}
                 </Grid>
-                <div className={classes.cardDetails}>
-                    <Typography variant="h4">
-                        Subtotal: { cart.subtotal.formatted_with_symbol }
-                    </Typography>
-                    <div>
+                <Grid container spacing={2} gutterBottom className={classes.cardDetails}>
+                    <Grid item xs={12} md={6}>
+                        <Typography variant="h4">
+                            Subtotal: { cart.subtotal.formatted_with_symbol }
+                        </Typography>
+                    </Grid>                    
+                    <Grid>
                         <Button 
                             className={classes.emptyButton} 
                             size="large"
@@ -60,8 +62,8 @@ function Cart({ cart, deleteItem, emptyCart, updateCart }) {
                         >
                             Checkout
                         </Button>
-                    </div>
-                </div>
+                    </Grid>
+                </Grid>
             </React.Fragment>
         )
     }

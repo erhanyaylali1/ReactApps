@@ -3,7 +3,7 @@ import { Typography, List, ListItem, ListItemText } from '@material-ui/core';
 
 const Review = ({ token }) => {
     return (
-        <React.Fragment>
+        <div>
             <Typography variant="h6" gutterBottom>
                 Order Summary
             </Typography>
@@ -26,7 +26,7 @@ const Review = ({ token }) => {
                     </Typography>
                 </ListItem>
             </List>
-        </React.Fragment>
+        </div>
     )
 }
 
