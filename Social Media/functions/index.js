@@ -296,9 +296,10 @@ app.post('/post/:postId/comment', (req, res) => {
 })
 
 app.post('/post/:postId/like', (req, res) => {
-    var query = db.collection('likes').where('userId','==', req.body.userId);
-    query = query.where('postId','==',req.params.postId);
-    query.get()
+    db.collection('likes')
+    .where('userId','==', req.body.userId)
+    .where('postId','==',req.params.postId)
+    .get()
         .then((doc) => {
             if(doc._size) return res.status(404).json({ error: 'This Post Already Liked' }); 
             else {
