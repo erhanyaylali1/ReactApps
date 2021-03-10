@@ -2,7 +2,6 @@ const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const express = require('express');
 const firebase = require('firebase');
-const { Dns } = require("@material-ui/icons");
 
 const firebaseConfig = {
     apiKey: "AIzaSyBIx9cMuT2QGpen69G8CS_RvUfuAhOV7Bw",
@@ -20,7 +19,7 @@ firebase.initializeApp(firebaseConfig);
 const db = admin.firestore();
 
 // SIGN UP
-// EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
+// EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONEb
 app.post('/signup', (req, res) => {    
 
     const newUser = {
@@ -477,24 +476,66 @@ app.delete('/post/:postId/comment', (req, res) => {
 })
 
 
+
 exports.api = functions.https.onRequest(app);
 
-exports.api = functions.firestore.document('likes/{id}')
-    .onCreate((snapshot) => {
-        db.collection('posts')
-            .doc(snapshot.data().postId)
-            .get()
-            .then((doc) => {
-                return db.collection('doc')
-                        .doc(snapshot.id)
-                        .set({
-                            createdAt: new Date().toISOString(),
-                            reciepent: doc.data().userId,
-                            sender: snapshot.data().userId,
-                            type: 'like',
-                            read: false,
-                            postId: doc.id
-                        })
-            })
-            .catch((err) => console.log(err));
-    })
+exports.createLikeNotification = functions.firestore.document('likes/{id}')
+  .onCreate((snapshot) => {
+    return db
+      .doc(`/posts/${snapshot.data().postId}`)
+      .get()
+      .then((doc) => {
+          return db.doc(`/notifications/${snapshot.id}`).set({
+            createdAt: new Date().toISOString(),
+            recipient: doc.data().userId,
+            sender: snapshot.data().userId,
+            type: 'like',
+            read: false,
+            screamId: doc.id
+          });
+        }
+      )
+      .catch((err) => console.error(err));
+  });
+
+
+exports.deleteLikeNotification = functions.firestore.document('likes/{id}')
+.onDelete((snapshot) => {
+    db.collection('notifications')
+        .doc(snapshot.id)
+        .delete()
+        .then(() => { return; })
+        .catch((err) => console.log(err));
+})
+
+
+exports.createCommentNotification = functions.firestore.document('comments/{id}')
+.onCreate((snapshot) => {
+    db.collection('posts')
+        .doc(snapshot.data().postId)
+        .get()
+        .then((doc) => {
+            return db.collection('notifications')
+                    .doc(snapshot.id)
+                    .set({
+                        createdAt: new Date().toISOString(),
+                        reciepent: doc.data().userId,
+                        sender: snapshot.data().userId,
+                        type: 'comment',
+                        read: false,
+                        postId: doc.id
+                    })
+        })
+        .then(() => { return; })
+        .catch((err) => console.log(err));
+}) 
+
+
+exports.deleteCommentNotification = functions.firestore.document('comments/{id}')
+.onDelete((snapshot) => {
+    db.collection('notifications')
+        .doc(snapshot.id)
+        .delete()
+        .then(() => { return; })
+        .catch((err) => console.log(err));
+})

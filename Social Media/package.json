@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^7.2.1",
     "antd": "^4.13.1",
     "axios": "^0.21.1",
+    "deploy": "^1.0.3",
     "firebase": "^8.2.10",
     "firebase-tools": "^9.5.0",
     "grommet": "^2.16.3",
