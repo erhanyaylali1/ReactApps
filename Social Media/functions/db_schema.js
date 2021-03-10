@@ -41,6 +41,17 @@ export const db = {
             postId: '',
             createdAt: ''
         }
+    ],
+
+    notifications: [
+        {
+            reciepent: '',
+            sender: '',
+            read: 'true | false',
+            postId: '',
+            type: 'like | comment',
+            createdAt: ''
+        }
     ]
 
 }

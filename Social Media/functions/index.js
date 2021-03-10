@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const express = require('express');
 const firebase = require('firebase');
+const { Dns } = require("@material-ui/icons");
 
 const firebaseConfig = {
     apiKey: "AIzaSyBIx9cMuT2QGpen69G8CS_RvUfuAhOV7Bw",
@@ -18,7 +19,8 @@ const app = express();
 firebase.initializeApp(firebaseConfig);
 const db = admin.firestore();
 
-
+// SIGN UP
+// EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
 app.post('/signup', (req, res) => {    
 
     const newUser = {
@@ -57,6 +59,9 @@ app.post('/signup', (req, res) => {
         });
 });
 
+
+// LOGIN
+// EMAIL, PASSWORD
 app.post('/login', (req, res) => {
 
     firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password)
@@ -77,7 +82,10 @@ app.post('/login', (req, res) => {
     )
 });
 
-app.post('/user/add-detail', (req, res) => {
+
+// ADD USER DETAIL
+// BIO, WEBSITE, LOCATION
+app.post('/user/:userId/add-detail', (req, res) => {
     
     const userDetails = {
         bio: req.body.bio,
@@ -85,25 +93,27 @@ app.post('/user/add-detail', (req, res) => {
         location: req.body.location
     };
     
-    db.collection('users').doc(req.body.userId).update(userDetails)
+    db.collection('users').doc(req.params.userId).update(userDetails)
     .then(() => {
         return res.json({ message: "Details Added Successfully."});
     })
     .catch((err) => {
         return res.status(500).json({ error: err.message })
     })
-})
+});
 
-app.get('/user', (req, res) => {
+
+// GET USER DETAILS
+app.get('/user/:userId', (req, res) => {
 
     let userData = {};
     db.collection('users')
-        .doc(req.body.userId)
+        .doc(req.params.userId)
         .get()
         .then((doc) => {
             userData.credentials = doc.data();
             return db.collection('posts')
-                    .where('userId', '==', req.body.userId)
+                    .where('userId', '==', req.params.userId)
                     .orderBy('createdAt', 'desc')
                     .get();
         })
@@ -119,9 +129,33 @@ app.get('/user', (req, res) => {
         .catch((err) => {
             return res.status(500).json({ error: err.message })
         })
+});
+
+
+// FOLLOW A USER
+// FOLLOWERID
+app.post('/user/:userId/follow', (req, res) => {
+    db.collection('follows')
+        .where('followerId','==',req.body.followerId)
+        .where('userId', '==', req.params.userId)
+        .get()
+        .then((docs) => {
+            if(!docs.empty) return res.status(500).json({ error: "This User Already Followed!" });
+            const newFollowing = {
+                followerId: req.body.followerId,
+                userId: req.params.userId,
+                createdAt: new Date().toISOString()
+            }
+            db.collection('follows')
+                .add(newFollowing)
+                .then(() => res.json({ message: "User Successfully Followed!" }));
+        })
+        .catch((err) => res.json({ error: err.message }))
 })
 
-app.post('/user/image', (req, res) => {
+
+// POST USER IMAGE
+app.post('/user/:userId/image', (req, res) => {
 
     const BusBoy = require("busboy");
     const path = require("path");
@@ -161,7 +195,7 @@ app.post('/user/image', (req, res) => {
         })
         .then(() => {
             const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${imageFileName}?alt=media&token=${generatedToken}`;
-            db.collection('users').doc(req.body.id).update({ imageUrl });
+            db.collection('users').doc(req.params.userId).update({ imageUrl });
             return;
         })
         .then(() => {
@@ -173,8 +207,10 @@ app.post('/user/image', (req, res) => {
     })
     
     busboy.end(req.rawBody);  
-})
+});
 
+
+// GET ALL POSTS
 app.get('/posts', (req, res) => {
 
     db.collection('posts')
@@ -197,7 +233,10 @@ app.get('/posts', (req, res) => {
     .catch((err) => console.error(err));
 });
 
-app.post('/createpost', (req, res) => {
+
+// CREATE A POST
+// USERID, CONTENT
+app.post('/post', (req, res) => {
 
     if(req.method !== "POST"){
         return res.status(400).json({ error: "Method not allowed." });
@@ -227,6 +266,8 @@ app.post('/createpost', (req, res) => {
     }
 });
 
+
+// GET A POST
 app.get('/post/:postId', (req, res ) => {
 
     let postData = {};
@@ -255,8 +296,54 @@ app.get('/post/:postId', (req, res ) => {
         .catch((err) => {
             return res.status(500).json({ message: err.message});
         })
+});
+
+
+// DELETE A POST
+// USERID
+app.delete('/post/:postId', (req, res) => {
+    db.collection('posts')
+        .doc(req.params.postId)
+        .get()
+        .then((doc) => {
+            if(!doc.exists) return res.status(404).json({ error: "Post Not Found" });
+            if(doc.data().userId === req.body.userId) return res.status(403).json({ error: "You Can't Delete This Post!" });
+            else {
+                db.collection('posts')
+                .doc(req.params.postId)
+                .delete()
+                .then(() => {
+                    db.collection('comments')
+                    .where('postId', '==', req.params.postId)
+                    .get()
+                    .then((docs) => {
+                        if(docs.empty) return
+                        docs.forEach((doc) => {
+                            db.doc(`/comments/${doc.id}`).delete()
+                        })
+                    })
+                })
+                .then(() => {
+                    db.collection('likes')
+                    .where('postId', '==', req.params.postId)
+                    .get()
+                    .then((docs) => {
+                        if(docs.empty) return
+                        docs.forEach((doc) => {
+                            db.doc(`/likes/${doc.id}`).delete()
+                        })
+                    })
+                })                
+                .then(() => res.json({ message: "Post Deleted Successfully!" }));
+            }
+        })
+        .catch((err) => res.json({ error: err.message }));
+        
 })
 
+
+// POST A COMMENT TO A POST
+// USERID, CONTENT
 app.post('/post/:postId/comment', (req, res) => {
 
     let commentsCount = 0;
@@ -293,13 +380,16 @@ app.post('/post/:postId/comment', (req, res) => {
                 .then(() => res.json({ message: "Comment Posted Successfully! "}));
         })
         .catch((err) => res.status(500).json({ error: err.message }));      
-})
+});
 
+
+// LIKE A POST
+// USERID
 app.post('/post/:postId/like', (req, res) => {
     db.collection('likes')
-    .where('userId','==', req.body.userId)
-    .where('postId','==',req.params.postId)
-    .get()
+        .where('userId','==', req.body.userId)
+        .where('postId','==',req.params.postId)
+        .get()
         .then((doc) => {
             if(doc._size) return res.status(404).json({ error: 'This Post Already Liked' }); 
             else {
@@ -320,18 +410,91 @@ app.post('/post/:postId/like', (req, res) => {
                         };
                         db.collection('likes')
                             .add(newLike)
-                            .then(() => res.json({ message: "Post Liked Successfully! "}));
+                            .then(() => res.json({ message: "Post Liked Successfully!" }));
                     })
             }
         })
         .catch((err) => res.status(500).json({ error: err.message }));
+});
+
+
+// UNLIKE A POST
+// USERID
+app.post('/post/:postId/unlike', (req, res) => {
+    db.collection('likes')
+        .where('userId','==', req.body.userId)
+        .where('postId','==', req.params.postId)
+        .get()
+        .then((results) => {
+            if(!results.size) return res.status(404).json({ error: 'This Post Have Not Liked Before'})
+            else {
+                let id;
+                results.forEach((doc) => {
+                    id = doc.id;
+                })
+               
+                db.collection('likes')
+                    .doc(id)
+                    .delete()   
+                    .then(() => {
+                        db.collection('posts')
+                            .doc(req.params.postId)
+                            .get()
+                            .then((doc) => doc.data().likesCount - 1)
+                            .then((likesCount) => {
+                                db.collection('posts')
+                                .doc(req.params.postId)
+                                .update({ likesCount })
+                                return res.json({ message: 'This Post Unliked Successfully!' });
+                            })
+                    })
+            }
+        })
+        .catch((err) => res.json({ error: err.message }));
+    
+});
+
+
+// DELETE A COMMENT
+// COMMENTID
+app.delete('/post/:postId/comment', (req, res) => {
+    db.collection('comments')
+        .doc(req.body.commentId)
+        .delete()
+        .then(() => {
+            db.collection('posts')
+                .doc(req.params.postId)
+                .get()
+                .then((doc) => doc.data().commentsCount - 1)
+                .then((commentsCount) => {
+                    db.collection('posts')
+                        .doc(req.params.postId)
+                        .update({ commentsCount })
+                        .then(() => res.json({ message: "Comment Deleted Successfully! "}));
+                })
+        })
+        .catch((err) => res.json({ error: err.message }));
 })
 
 
-// TO DO
-// UNLIKE A POST
-// DELETE A POST
-// DELETE A COMMENT
-// FOLLOW A USER
-
 exports.api = functions.https.onRequest(app);
+
+exports.api = functions.firestore.document('likes/{id}')
+    .onCreate((snapshot) => {
+        db.collection('posts')
+            .doc(snapshot.data().postId)
+            .get()
+            .then((doc) => {
+                return db.collection('doc')
+                        .doc(snapshot.id)
+                        .set({
+                            createdAt: new Date().toISOString(),
+                            reciepent: doc.data().userId,
+                            sender: snapshot.data().userId,
+                            type: 'like',
+                            read: false,
+                            postId: doc.id
+                        })
+            })
+            .catch((err) => console.log(err));
+    })
