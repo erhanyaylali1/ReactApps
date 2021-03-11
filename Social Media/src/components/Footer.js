@@ -43,7 +43,8 @@ const useStyles = makeStyles((theme) => ({
 		padding: "10px",
 		position: "fixed",
 		bottom: "0",
-		height: "fit-content",
+		height: "5vh",
+		maxHeight: "5vh",
 		backgroundColor: "#3D138D"
 	},
 	button: {

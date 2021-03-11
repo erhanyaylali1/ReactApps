@@ -17,7 +17,7 @@ const User = () => {
 					<Grid item xs={12} lg={2} className={classes.leftheader}>
 						<img 
 							className={classes.profilepicture}
-							src="https://lh3.googleusercontent.com/proxy/qg-AjG5v0uG33OABc4yhOQoJmJuoDVa-SxyFb7KuCbLJy1GBiz41At7pXK5QCFD3cKNPTCxKi8n-0WaweKa2xfr8g5RtUnI8PHW0ebohMQTjYnbm9r1P"
+							src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
                             alt="pp"
 						/>
 					</Grid>
@@ -118,9 +118,8 @@ const useStyle = makeStyles((theme) => ({
         paddingBottom: "60px"
 	},
 	pageheader: {
-        
 		padding: "15px",
-		backgroundColor: "#333333",
+		backgroundColor: "#333",
 		borderRadius: "5px",
 		marginBottom: "50px"
 	},

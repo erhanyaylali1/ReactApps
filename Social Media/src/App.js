@@ -6,6 +6,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 import User from './components/User';
 import Footer from './components/Footer';
+import Messages from './components/Messages';
+import Notifications from './components/Notifications';
 
 function App() {
     return (
@@ -24,6 +26,12 @@ function App() {
               </Route>
               <Route path='/user'>
                   <User />
+              </Route>
+              <Route path='/messages'>
+                  <Messages />
+              </Route>
+              <Route path='/notifications'>
+                  <Notifications />
               </Route>
             </Switch>
             <Footer />
