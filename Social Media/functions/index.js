@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const express = require('express');
 const firebase = require('firebase');
+const cors = require('cors');
 
 const firebaseConfig = {
     apiKey: "AIzaSyBIx9cMuT2QGpen69G8CS_RvUfuAhOV7Bw",
@@ -15,8 +16,25 @@ const firebaseConfig = {
 
 admin.initializeApp();
 const app = express();
+app.use(cors());
 firebase.initializeApp(firebaseConfig);
 const db = admin.firestore();
+
+//GET IS LOGGED IN
+app.get('/islogged', (req, res) => {
+    firebase.auth().onAuthStateChanged((user) => {
+        if(user) {
+            db.collection('users')
+                .doc(user.uid)
+                .get()
+                .then((doc) => res.status(201).json(doc.data()))
+                .catch((err) => res.status(500).json({ error: err.message }))
+        } else {
+            return res.json({ error: "User Not Signed In! "});
+        }
+    })
+})
+
 
 // SIGN UP
 // EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONEb
@@ -73,13 +91,21 @@ app.post('/login', (req, res) => {
             .get()
             .then((doc) => {
                 return res.status(201).json(doc.data());
-            });
+            })
+            .catch((err) => res.status(501).json({ error: err.message }))
         })
         .catch((err) => {
             return res.status(501).json({ error: err.message });    
         }
     )
 });
+
+
+// LOGOUT
+app.post('/logout', (req, res) => {
+    firebase.auth().signOut();
+    return res.status(201).json({ message: "Signed Out Succesfully!" });
+})
 
 
 // ADD USER DETAIL
@@ -123,6 +149,19 @@ app.get('/user/:userId', (req, res) => {
                     userData.posts.push(doc.data());
                 })
             }
+            return db.collection('notifications')
+                    .where('reciepent','==', req.params.userId)
+                    .orderBy('createdAt','desc')
+                    .limit(10)
+                    .get();
+        })
+        .then((data) => {
+            userData.notifications = []
+            if(data){
+                data.forEach((doc) => {
+                    userData.notifications.push(doc.data())
+                });
+            }
             return res.json(userData);
         })
         .catch((err) => {
@@ -133,7 +172,7 @@ app.get('/user/:userId', (req, res) => {
 
 // FOLLOW A USER
 // FOLLOWERID
-app.post('/user/:userId/follow', (req, res) => {
+app.post('/user/:userId/follow', (req, res) => {   
     db.collection('follows')
         .where('followerId','==',req.body.followerId)
         .where('userId', '==', req.params.userId)
@@ -169,7 +208,6 @@ app.post('/user/:userId/image', (req, res) => {
     let generatedToken = uuid();
 
     busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
-        console.log(fieldname, file, filename, encoding, mimetype);
         if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
           return res.status(400).json({ error: "Wrong file type submitted" });
         }
@@ -366,7 +404,6 @@ app.post('/post/:postId/comment', (req, res) => {
                 .then((doc) => doc.data().imageUrl)
         })
         .then((imageUrl) => {
-            console.log(imageUrl);
             const newComment = {
                 content: req.body.content,
                 createdAt: new Date().toISOString(),
@@ -476,6 +513,18 @@ app.delete('/post/:postId/comment', (req, res) => {
 })
 
 
+// MARK NOTIFICATION READ
+app.post('/notifications', (req, res) => {
+    let batch = db.batch();
+    req.body.forEach((notificationId) => {
+        const notification = db.doc(`/notifications/${notificationId}`);
+        batch.update(notification, { read: true });
+    });
+    batch.commit()
+        .then(() => res.json({ message: "Notifications marked read!" }))
+        .catch((err) => res.status(500).json({ error: err.message })); 
+})
+
 
 exports.api = functions.https.onRequest(app);
 
@@ -532,6 +581,29 @@ exports.createCommentNotification = functions.firestore.document('comments/{id}'
 
 
 exports.deleteCommentNotification = functions.firestore.document('comments/{id}')
+.onDelete((snapshot) => {
+    db.collection('notifications')
+        .doc(snapshot.id)
+        .delete()
+        .then(() => { return; })
+        .catch((err) => console.log(err));
+})
+
+exports.createFollowNotification = functions.firestore.document('follows/{id}')
+.onCreate((snapshot) => {
+    db.collection('notifications')
+        .doc(snapshot.id)
+        .set({
+            createdAt: new Date().toISOString(),
+            reciepent: snapshot.data().userId,
+            sender: snapshot.data().followerId,
+            type: 'follow',
+            read: false,
+            postId: snapshot.id
+        })
+})
+
+exports.deleteFollowNotification = functions.firestore.document('follows/{id}')
 .onDelete((snapshot) => {
     db.collection('notifications')
         .doc(snapshot.id)

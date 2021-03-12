@@ -5,3 +5,9 @@
 .krgMkD:hover, .bpWvhi:hover{
 	text-decoration: none !important;
 }
+.activeMessageUser{
+    background-color: #0a4574 !important;
+}
+.activeMessageUser h6 {
+    color: white !important;
+}

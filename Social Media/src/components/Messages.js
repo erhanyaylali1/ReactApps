@@ -2,7 +2,7 @@ import React,{ useRef, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Avatar, Typography, IconButton } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import { Input } from 'semantic-ui-react';
+import { Icon, Input } from 'semantic-ui-react';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { useSelector } from 'react-redux';
 import { getIsNavbarOpen } from '../features/status';
@@ -13,7 +13,9 @@ const Messages = () => {
 	const [width, setWindowWidth] = useState(0);
 	const left = useRef();
 	const right = useRef();
+
     const isOpen = useSelector(getIsNavbarOpen);
+    const [newMessage, setNewMessage] = useState('');
 
 	useEffect(() => {
 		if(width < 450){			
@@ -37,7 +39,9 @@ const Messages = () => {
 		setWindowWidth(width);
 	}
 
-	const chatClick = () => {
+	const openChat = (e) => {
+        [...e.target.parentElement.children].forEach(sib => sib.classList.remove('activeMessageUser'))
+        e.target.classList.add('activeMessageUser')
 		if(width < 450) {
 			left.current.style.display = "none";
 			right.current.style.display = "flex";
@@ -48,11 +52,16 @@ const Messages = () => {
 		left.current.style.display = "flex";
 		right.current.style.display = "none";
 	}
+    const sentMessage = (e) => {
+        e.preventDefault();
+        console.log(newMessage);
+        setNewMessage('');
+    };
 
 	return (
-		<Grid container className={classes.root} style={{ height: isOpen ? "75vh":"88vh" }}>
-			<Grid item container xs={12} lg={12} className={classes.main}  style={{ height: isOpen ? "75vh":"88vh" }}>
-				<Grid item container xS={12} lg={4} className={classes.left} ref={left}>
+		<Grid container className={classes.root} style={{ height: isOpen ? "79vh":"92vh" }}>
+			<Grid item container xs={12} lg={12} className={classes.main}  style={{ height: isOpen ? "79vh":"92vh" }}>
+				<Grid item container xs={12} lg={4} className={classes.left} ref={left}>
 					<Grid container item className={classes.header}>
 						<Avatar
 							className={classes.headeravatar}
@@ -70,7 +79,7 @@ const Messages = () => {
 						<Typography variant="h5" style={{ fontWeight: "bolder" }}>Conversations</Typography>					
 					</Grid>
 					<Grid container item direction="column" className={classes.chats}>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -78,7 +87,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -86,7 +95,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -94,7 +103,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -102,7 +111,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -110,7 +119,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -118,7 +127,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -126,7 +135,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -134,7 +143,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -142,7 +151,7 @@ const Messages = () => {
 							/>
 							<Typography variant="h6">Erhan Yaylalı</Typography>
 						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={chatClick}>
+						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
 							<Avatar
 								className={classes.chatavatar}
 								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
@@ -167,9 +176,17 @@ const Messages = () => {
 					</Grid>
 					<Grid item container className={classes.chatmessages}>
 						<Grid item container className={classes.input}>
-						<Input
-							placeholder='Send...'
-						/>
+                            <form onSubmit={sentMessage}>
+                                <Input
+                                    fluid
+                                    value={newMessage}
+                                    icon={<Icon name='send' inverted circular link 
+                                        onClick={sentMessage}
+                                    />}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    placeholder='Send...'
+                                />
+                            </form>
 						</Grid>
 						<Grid item container className={classes.messages}>
 							<Grid item container lg={12} className={classes.message}>
@@ -235,18 +252,21 @@ const useStyle = makeStyles((theme) => ({
 	},
 	title: {
 		padding: "20px",
-		paddingBottom: "10px",
-		height: "10vh"
+		paddingBottom: "0",
+		height: "10vh",
+        borderBottom: "2px solid #efefef"
 	}, 
 	each: {
 		cursor: "pointer",
 		padding: "10px 30px",
+        borderBottom: "1px solid #efefef",
 		"& h6": {
 			marginLeft: "15px",
 			fontSize: "1.5rem !important"
 		},
 		"&:hover": {
-			backgroundColor: "#f0f3f7"
+			backgroundColor: "#f0f3f7",
+            paddingLeft: "40px"
 		}
 	},
 	messageheader: {
@@ -268,8 +288,8 @@ const useStyle = makeStyles((theme) => ({
 	input: {
 		padding: "5px 10px 5px 10px",
 		flex: 0.1,
-		"& div": {
-			flex: "1",
+		"& form": {
+			width: "100%",
 		},
 		"& input": {
 			borderRadius: "20px !important",
@@ -277,7 +297,6 @@ const useStyle = makeStyles((theme) => ({
 			paddingLeft: "20px !important",
 			backgroundColor: "transparent !important",
 			height: "40px",
-            border: "2px solid rgb(61 19 141) !important"
 		},
 		"& button": {
 			position: "absolute",

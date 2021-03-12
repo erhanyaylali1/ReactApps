@@ -41,8 +41,6 @@ export default Footer
 const useStyles = makeStyles((theme) => ({
 	root: {
 		padding: "10px",
-		position: "fixed",
-		bottom: "0",
 		height: "5vh",
 		maxHeight: "5vh",
 		backgroundColor: "#3D138D"

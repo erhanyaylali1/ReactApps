@@ -49,7 +49,7 @@ export const db = {
             sender: '',
             read: 'true | false',
             postId: '',
-            type: 'like | comment',
+            type: 'like | comment | follow',
             createdAt: ''
         }
     ]

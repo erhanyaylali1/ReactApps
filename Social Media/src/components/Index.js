@@ -1,9 +1,14 @@
-import React from 'react'
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { getUser } from '../features/userSlice';
 
 const Index = () => {
-	return (
+
+    const user = useSelector(getUser);  
+
+    return (
 		<div>
-			Index
+			{`${user?.name} WELCOME`}
 		</div>
 	)
 }
