@@ -18,28 +18,27 @@ export const db = {
 
     posts: [
         {
-            userId: '',
             content: '',
             createdAt: '',
-            likesCount: 0,
-            commentsCount: 0
+            likesCount: '',
+            commentsCount: '',
+            userId: '',
+            name: '',
+            surname: '',
+            likes: [
+
+            ],
+            comments: [
+
+            ]
         }
     ],
 
-    comments: [
+    follows: [
         {
+            createdAt: '',
+            followerId: '',
             userId: '',
-            postId: '',
-            content: '',
-            createdAt: ''
-        }
-    ],
-
-    likes: [
-        {
-            userId: '',
-            postId: '',
-            createdAt: ''
         }
     ],
 

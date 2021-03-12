@@ -25,7 +25,7 @@ function App() {
             if(!user.data.error) dispatch(login(user.data))
         })
         .catch(() => dispatch(logout));
-    })
+    },[]);
 
     return (
       <Router>
@@ -41,7 +41,7 @@ function App() {
               <Route path='/register'>
                   <Register />
               </Route>
-              <Route path='/user'>
+              <Route path='/user/:userId'>
                   <User />
               </Route>
               <Route path='/messages'>

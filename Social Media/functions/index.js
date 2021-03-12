@@ -27,7 +27,7 @@ app.get('/islogged', (req, res) => {
             db.collection('users')
                 .doc(user.uid)
                 .get()
-                .then((doc) => res.status(201).json(doc.data()))
+                .then((doc) => res.status(201).json({ ...doc.data(), userId: user.uid }))
                 .catch((err) => res.status(500).json({ error: err.message }))
         } else {
             return res.json({ error: "User Not Signed In! "});
@@ -37,7 +37,7 @@ app.get('/islogged', (req, res) => {
 
 
 // SIGN UP
-// EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONEb
+// EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
 app.post('/signup', (req, res) => {    
 
     const newUser = {
@@ -47,6 +47,8 @@ app.post('/signup', (req, res) => {
         name: req.body.name,
         surname: req.body.surname,
         phone: req.body.phone,
+        followersCount: 0,
+        followsCount: 0,
         createdAt: new Date().toLocaleDateString(),
         imageUrl: `https://firebasestorage.googleapis.com/v0/b/socialony.appspot.com/o/no-img.png?alt=media&token=d7d666ee-60dd-4487-ba4b-ef76e961fe4b`
     };
@@ -61,19 +63,22 @@ app.post('/signup', (req, res) => {
                     return res.status(400).json({ error: "This phone is already taken." });
                 }
             })
-        });
-
-    firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password)
-        .then((data) => {
-            db.collection('users')
-            .doc(data.user.uid)
-            .set(newUser);
-            return res.status(201).json({ message: `User ${data.user.uid} signed up successfully.` });
         })
-        .catch((err) => {
-            console.error(err);
-            return res.status(500).json({ error: err.code });
-        });
+        .then(() => {
+            firebase.auth().createUserWithEmailAndPassword(newUser.email, newUser.password)
+            .then((data) => {
+                db.collection('users')
+                .doc(data.user.uid)
+                .set(newUser);
+                return res.status(201).json({ message: `User ${data.user.uid} signed up successfully.` });
+            })
+            .catch((err) => {
+                console.error(err);
+                return res.status(500).json({ error: err.code });
+            });
+        })
+
+   
 });
 
 
@@ -90,7 +95,7 @@ app.post('/login', (req, res) => {
             .doc(userId)
             .get()
             .then((doc) => {
-                return res.status(201).json(doc.data());
+                return res.status(201).json({...doc.data(), userId: doc.id});
             })
             .catch((err) => res.status(501).json({ error: err.message }))
         })
@@ -146,9 +151,10 @@ app.get('/user/:userId', (req, res) => {
             userData.posts = []
             if(data){
                 data.forEach((doc) => {
-                    userData.posts.push(doc.data());
+                    userData.posts.push({...doc.data(), postId: doc.id });
                 })
             }
+        }).then(() => {
             return db.collection('notifications')
                     .where('reciepent','==', req.params.userId)
                     .orderBy('createdAt','desc')
@@ -169,6 +175,45 @@ app.get('/user/:userId', (req, res) => {
         })
 });
 
+// GET FOLLOWED USERS POSTS
+app.get('/user/:userId/home', async (req, res) => {
+    const userIds = [];
+    const postsArray = [];
+    db.collection('follows')
+        .where('followerId', '==', req.params.userId)
+        .get()
+        .then((items) => {
+            items.forEach((item) => {""
+                userIds.push(item.data().userId)
+            })
+        })
+        .then(() => {
+            userIds.forEach((id) => {
+                db.collection('posts')
+                    .where('userId','==', id)
+                    .get()
+                    .then((posts) => {
+                        posts.forEach((post) => {
+                            db.collection('posts')
+                            .doc(post.id)
+                            .collection('likes')
+                            .get()
+                            .then((likes) => {
+                                const likesArray = []
+                                likes.forEach((like) => likesArray.push({...like.data(), likeId: like.id}))
+                                return likesArray;
+                            })
+                            .then((likesArray) => {
+                                postsArray.push({...post.data(), postId: post.id, likes: likesArray})
+                            })
+                        })
+                    })
+            })
+        })
+        .then(() => {
+            return res.json(postsArray);
+        })
+})
 
 // FOLLOW A USER
 // FOLLOWERID
@@ -190,7 +235,6 @@ app.post('/user/:userId/follow', (req, res) => {
         })
         .catch((err) => res.json({ error: err.message }))
 })
-
 
 // POST USER IMAGE
 app.post('/user/:userId/image', (req, res) => {
@@ -246,31 +290,6 @@ app.post('/user/:userId/image', (req, res) => {
     busboy.end(req.rawBody);  
 });
 
-
-// GET ALL POSTS
-app.get('/posts', (req, res) => {
-
-    db.collection('posts')
-    .orderBy('createdAt', 'desc')
-    .get()
-    .then((data) => {
-        let posts = [];
-        data.forEach((doc) => {
-            posts.push({
-                postId: doc.id,
-                content: doc.data().content,
-                userId: doc.data().userId,
-                createdAt: doc.data().createdAt,
-                likeCount: doc.data().likeCount,
-                commentCount: doc.data().commentCount
-            });
-        });
-        return res.json(posts);
-    })
-    .catch((err) => console.error(err));
-});
-
-
 // CREATE A POST
 // USERID, CONTENT
 app.post('/post', (req, res) => {
@@ -278,21 +297,21 @@ app.post('/post', (req, res) => {
     if(req.method !== "POST"){
         return res.status(400).json({ error: "Method not allowed." });
     } else {
-
         db.collection('users')
             .doc(req.body.userId)
             .get()
-            .then((doc) => doc.data().imageUrl)
-            .then((imageUrl) => {
-
+            .then((doc) => {
                 const newPost = {
                     content: req.body.content,
                     userId: req.body.userId,
-                    createdAt: new Date().toISOString(),
+                    createdAt: new Date().toLocaleString(),
                     likesCount: 0,
                     commentsCount: 0,
-                    imageUrl
+                    imageUrl: doc.data().imageUrl,
+                    name: doc.data().name,
+                    surname: doc.data().surname,
                 };
+                console.log(newPost);
                 db.collection('posts')
                 .add(newPost)
                 .then(() => res.json({ message: "Post Succesfully Created." }));
@@ -303,215 +322,174 @@ app.post('/post', (req, res) => {
     }
 });
 
-
 // GET A POST
 app.get('/post/:postId', (req, res ) => {
 
     let postData = {};
-    db.collection('posts')
-        .doc(req.params.postId)
-        .get()
-        .then((doc) => {
-            if(!doc.exists) return res.status(404).json({ error: "Post not found." });
-            postData = doc.data();
-            postData.id = doc.id;
-            return db.collection('comments')
-                .where('postId', '==', req.params.postId)
-                .orderBy('createdAt', 'asc')
-                .get();
-                
-        })
-        .then((data) => {
-            postData.comments = [];
-            if(data){
-                data.forEach((doc) => {
-                    postData.comments.push(doc.data());
-                });
-            }            
-            return res.json(postData);
-        })
-        .catch((err) => {
-            return res.status(500).json({ message: err.message});
-        })
-});
+    const selectedPost = db.collection('posts').doc(req.params.postId);
 
+    selectedPost
+    .get()
+    .then((doc) => {
+        if(!doc.exists) return res.status(404).json({ error: "Post not found." });
+        
+        postData = doc.data();
+        postData.id = doc.id;
 
-// DELETE A POST
-// USERID
-app.delete('/post/:postId', (req, res) => {
-    db.collection('posts')
-        .doc(req.params.postId)
+        selectedPost
+        .collection('likes')
         .get()
-        .then((doc) => {
-            if(!doc.exists) return res.status(404).json({ error: "Post Not Found" });
-            if(doc.data().userId === req.body.userId) return res.status(403).json({ error: "You Can't Delete This Post!" });
-            else {
-                db.collection('posts')
-                .doc(req.params.postId)
-                .delete()
-                .then(() => {
-                    db.collection('comments')
-                    .where('postId', '==', req.params.postId)
-                    .get()
-                    .then((docs) => {
-                        if(docs.empty) return
-                        docs.forEach((doc) => {
-                            db.doc(`/comments/${doc.id}`).delete()
-                        })
-                    })
-                })
-                .then(() => {
-                    db.collection('likes')
-                    .where('postId', '==', req.params.postId)
-                    .get()
-                    .then((docs) => {
-                        if(docs.empty) return
-                        docs.forEach((doc) => {
-                            db.doc(`/likes/${doc.id}`).delete()
-                        })
-                    })
-                })                
-                .then(() => res.json({ message: "Post Deleted Successfully!" }));
+        .then((items) => {
+            if(!items.empty){
+                const likes = [];
+                items.forEach((like) => likes.push({...like.data(), likeId: like.id}))
+                postData.likes = likes;
             }
         })
-        .catch((err) => res.json({ error: err.message }));
+        .then(() => {
+            selectedPost
+            .collection('comments')
+            .get()
+            .then((items) => {
+                if(!items.empty){
+                    const comments = [];
+                    items.forEach((comment) => comments.push({...comment.data(), commentId: comment.id}))
+                    postData.comments = comments;
+                    console.log(comments);
+                }
+            })
+            .then(() => res.json(postData))      
+        })      
+    })
+    .catch((err) => {
+        return res.status(500).json({ message: err.message});
+    })
+});
+
+// DELETE A POST
+app.delete('/post/:postId', (req, res) => {
+    db.collection('posts')
+    .doc(req.params.postId)
+    .delete()
+    .then(() => res.json({ message: "Post Deleted!" }))
+    .catch((err) => res.json({ error: err.message }));
         
 })
 
-
-// POST A COMMENT TO A POST
-// USERID, CONTENT
-app.post('/post/:postId/comment', (req, res) => {
-
-    let commentsCount = 0;
-    db.collection('posts')
-        .doc(req.params.postId)
-        .get()
-        .then((doc) => {
-            if(!doc) return res.json({ error: "Post Not Found!" });
-            commentsCount = doc.data().commentsCount + 1;
-            return commentsCount
-        })
-        .then((commentsCount) => {
-            db.collection('posts')
-                .doc(req.params.postId)
-                .update({ commentsCount })
-        })
-        .then(() => {
-            return db.collection('users')
-                .doc(req.body.userId)
-                .get()
-                .then((doc) => doc.data().imageUrl)
-        })
-        .then((imageUrl) => {
-            const newComment = {
-                content: req.body.content,
-                createdAt: new Date().toISOString(),
-                postId: req.params.postId,
-                userId: req.body.userId,
-                imageUrl
-            };
-            db.collection('comments')
-                .add(newComment)
-                .then(() => res.json({ message: "Comment Posted Successfully! "}));
-        })
-        .catch((err) => res.status(500).json({ error: err.message }));      
-});
-
-
 // LIKE A POST
-// USERID
+// userId
 app.post('/post/:postId/like', (req, res) => {
-    db.collection('likes')
-        .where('userId','==', req.body.userId)
-        .where('postId','==',req.params.postId)
-        .get()
-        .then((doc) => {
-            if(doc._size) return res.status(404).json({ error: 'This Post Already Liked' }); 
-            else {
-                db.collection('posts')
-                    .doc(req.params.postId)
-                    .get()
-                    .then((doc) => doc.data().likesCount + 1)
-                    .then((likesCount) => {
-                        db.collection('posts')
-                            .doc(req.params.postId)
-                            .update({ likesCount })
-                    })
-                    .then(() => {
-                        const newLike = {
-                            userId: req.body.userId,
-                            postId: req.params.postId,
-                            createdAt: new Date().toISOString()
-                        };
-                        db.collection('likes')
-                            .add(newLike)
-                            .then(() => res.json({ message: "Post Liked Successfully!" }));
-                    })
-            }
-        })
-        .catch((err) => res.status(500).json({ error: err.message }));
-});
 
+    const selectedPost = db.collection('posts').doc(req.params.postId);
+
+    selectedPost
+    .collection('likes')
+    .where('userId','==', req.body.userId)
+    .get()
+    .then((items) => {
+        if(!items.empty) res.status(400).json({ message: "Post Already Liked!" })
+        else {
+            const newLike = {
+                createdAt: new Date().toLocaleString(),
+                userId: req.body.userId
+            }
+            selectedPost
+            .collection('likes')
+            .add(newLike)
+            .then(() => {
+                selectedPost.get()
+                .then((doc) => doc.data().likesCount + 1)
+                .then((likesCount) => {
+                    selectedPost.update({ likesCount })
+                })
+                .then(() => res.json({ message: "Post Liked!" }))
+            })
+            .catch((err) => res.json({ error: err.message }));
+        }
+    })
+});
 
 // UNLIKE A POST
-// USERID
+// userId
 app.post('/post/:postId/unlike', (req, res) => {
-    db.collection('likes')
-        .where('userId','==', req.body.userId)
-        .where('postId','==', req.params.postId)
-        .get()
-        .then((results) => {
-            if(!results.size) return res.status(404).json({ error: 'This Post Have Not Liked Before'})
-            else {
-                let id;
-                results.forEach((doc) => {
-                    id = doc.id;
+    const selectedPost = db.collection('posts').doc(req.params.postId);
+
+    selectedPost
+    .collection('likes')
+    .where('userId','==', req.body.userId)
+    .get()
+    .then((items) => {
+        if(items.empty) res.status(400).json({ message: "Post Already Not Liked!" })
+        else {
+            let id;
+            items.forEach((item) => {
+                id = item.id;
+            })
+            selectedPost
+            .collection('likes')
+            .doc(id)
+            .delete()
+            .then(
+                selectedPost.get().then((doc) => doc.data().likesCount -1)
+                .then((likesCount) => {
+                    selectedPost.update({ likesCount })
                 })
-               
-                db.collection('likes')
-                    .doc(id)
-                    .delete()   
-                    .then(() => {
-                        db.collection('posts')
-                            .doc(req.params.postId)
-                            .get()
-                            .then((doc) => doc.data().likesCount - 1)
-                            .then((likesCount) => {
-                                db.collection('posts')
-                                .doc(req.params.postId)
-                                .update({ likesCount })
-                                return res.json({ message: 'This Post Unliked Successfully!' });
-                            })
-                    })
-            }
-        })
-        .catch((err) => res.json({ error: err.message }));
-    
+                .then(() => res.status(201).json({ message: "Post Unliked!" }))
+                .catch((err) => res.status(400).json({ err: err.message }))
+            )
+        }
+    })
+    .catch((err) => res.json({ err: err.message }))
 });
 
+// POST A COMMENT TO A POST
+// userId, content
+app.post('/post/:postId/comment', (req, res) => {
+
+    const newComment = {
+        userId: req.body.userId,
+        createdAt: new Date().toLocaleString(),
+        content: req.body.content
+    };
+
+    const selectedPost = db.collection('posts').doc(req.params.postId);
+
+    selectedPost
+    .collection('comments')
+    .add(newComment)
+    .then(() => {
+        selectedPost.get()
+        .then((doc) => doc.data().commentsCount + 1)
+        .then((commentsCount) => {
+            selectedPost.update({ commentsCount })
+        })
+        .then(() => res.json({ message: "Comment Posted!" }))
+        .catch((err) => res.status(400).json({ error: err.message }));
+    })
+    .catch((err) => res.json({ error: err.message }));
+
+});
 
 // DELETE A COMMENT
-// COMMENTID
+// commentId
 app.delete('/post/:postId/comment', (req, res) => {
-    db.collection('comments')
-        .doc(req.body.commentId)
-        .delete()
-        .then(() => {
-            db.collection('posts')
-                .doc(req.params.postId)
-                .get()
-                .then((doc) => doc.data().commentsCount - 1)
-                .then((commentsCount) => {
-                    db.collection('posts')
-                        .doc(req.params.postId)
-                        .update({ commentsCount })
-                        .then(() => res.json({ message: "Comment Deleted Successfully! "}));
-                })
-        })
-        .catch((err) => res.json({ error: err.message }));
-})
 
+    const selectedPost = db.collection('posts').doc(req.params.postId);
+
+    selectedPost
+    .collection('comments')
+    .doc(req.body.commentId)
+    .delete()
+    .then(() => {
+        selectedPost.get().then((doc) => doc.data().commentsCount -1)
+        .then((commentsCount) => {
+            selectedPost.update({ commentsCount })
+        })
+        .then(() => res.status(201).json({ message: "Comment Deleted!" }))
+        .catch((err) => res.status(400).json({ err: err.message }))
+    })
+    .catch((err) => res.json({ err: err.message }))
+})
 
 // MARK NOTIFICATION READ
 app.post('/notifications', (req, res) => {

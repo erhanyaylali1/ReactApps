@@ -10,7 +10,7 @@ import { Grid } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIsNavbarOpen, toggleNavbar } from '../features/status';
 import './styles.css';
-import { getIsLogged } from '../features/userSlice';
+import { getIsLogged, logout as signOut, getUser } from '../features/userSlice';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
@@ -18,7 +18,8 @@ const Navbar = (props) => {
 
 	const classes = useStyles();
 	const isLogged = useSelector(getIsLogged);
-    const isOpen = useSelector(getIsNavbarOpen);
+	const isOpen = useSelector(getIsNavbarOpen);
+	const user = useSelector(getUser);
     const dispatch = useDispatch();
 	const [width, setWindowWidth] = useState(0);
 
@@ -40,8 +41,11 @@ const Navbar = (props) => {
             method: 'POST',
             url: "https://us-central1-socialony.cloudfunctions.net/api/logout",
         })
-        .then(() => props.history.push("/login"))
-        .catch((error) => console.log("hata aldık"));
+        .then(() => {
+			dispatch(signOut());
+			props.history.push("/login")
+		})
+        .catch((error) => console.log(error));
     }
 	
 	return (
@@ -78,7 +82,7 @@ const Navbar = (props) => {
 									</Link>	
 								</Grid>
 								<Grid item style={{ padding: width < 450 ? '5px 0':'5px 10px' }}>
-									<Link to="/user" >
+									<Link to={`/user/${user.userId}`} >
                                         <p className={classes.link3}>Profile</p>
 									</Link>	
 								</Grid>

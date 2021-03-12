@@ -4,17 +4,39 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Button } from '@material-ui/core';
 import { Form, Input } from 'antd';
 import { Divider } from 'semantic-ui-react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import 'antd/dist/antd.css';
 import 'semantic-ui-css/semantic.min.css';
+import axios from 'axios';
 
-const Register = () => {
+const Register = ({ history }) => {
 	const classes = useStyle();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [username, setUsername] = useState('');
 	const [name, setName] = useState('');
-	const [lastname, setLastname] = useState('');
+	const [surname, setSurname] = useState('');
+	const [phone, setPhone] = useState(0);
+
+	const RegisterHandle = () => {
+		axios({
+            method: 'post',
+            url: "https://us-central1-socialony.cloudfunctions.net/api/signup",
+            data: {
+                email,
+				password,
+				username,
+				name,
+				surname,
+				phone				
+            },headers: {
+				"Content-Type": "application/json"
+			}
+		}).then((a) => console.log(a))
+		.then(() => history.push('/'))
+		.catch((err) => console.log("error aldık abi",err));
+	}
+
 	return (
 		<div>
 			<Grid container className={classes.root}>
@@ -24,14 +46,14 @@ const Register = () => {
 						Register
 					</Typography>
 					<Divider />
-					<Form className={classes.form}>
+					<Form className={classes.form} onFinish={RegisterHandle}>
 						<Form.Item
 							className={classes.formInput}
 							label="Email"
 							rules={[
 								{
 									required: true,
-									message: 'Please input your email!',
+									message: 'Please Input Your Email!',
 								},
 							]}
 						>
@@ -48,7 +70,7 @@ const Register = () => {
 							rules={[
 								{
 									required: true,
-									message: 'Please input your password!',
+									message: 'Please Input Your Password!',
 								},
 							]}
 						>
@@ -64,7 +86,7 @@ const Register = () => {
 							rules={[
 								{
 									required: true,
-									message: 'Please input your username!',
+									message: 'Please Input Your Username!',
 								},
 							]}
 						>
@@ -81,7 +103,7 @@ const Register = () => {
 							rules={[
 								{
 									required: true,
-									message: 'Please input your First Name!',
+									message: 'Please Input Your First Name!',
 								},
 							]}
 						>
@@ -98,19 +120,36 @@ const Register = () => {
 							rules={[
 								{
 									required: true,
-									message: 'Please input your Last Name!',
+									message: 'Please Input Your Last Name!',
 								},
 							]}
 						>
 							<Input 
 								type="text"
-								value={lastname}
-								onChange={(e) => setLastname(e.target.value)}
+								value={surname}
+								onChange={(e) => setSurname(e.target.value)}
+							/>
+						</Form.Item>
+
+						<Form.Item
+							className={classes.formInput}
+							label="Phone"
+							rules={[
+								{
+									required: true,
+									message: 'Please Input Your Phone Number!',
+								},
+							]}
+						>
+							<Input 
+								type="text"
+								value={phone}
+								onChange={(e) => setPhone(e.target.value)}
 							/>
 						</Form.Item>
 
 						<Form.Item className={classes.button}>						
-							<Button variant="contained" size="medium" color="primary" htmlType="submit">
+							<Button variant="contained" size="medium" color="primary" type="submit">
 								Login
 							</Button>
 						</Form.Item>
@@ -128,7 +167,7 @@ const Register = () => {
 	)
 }
 
-export default Register
+export default withRouter(Register)
 
 const useStyle = makeStyles((themes) => ({
 	root: {

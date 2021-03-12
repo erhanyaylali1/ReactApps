@@ -1,36 +1,44 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 import { Form, Input, Button } from 'antd';
 import { Divider } from 'semantic-ui-react';
 import { Link, withRouter } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { login } from '../features/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { login, getIsLogged } from '../features/userSlice';
 import 'antd/dist/antd.css';
 import 'semantic-ui-css/semantic.min.css';
 import axios from 'axios';
 
-const Login = (props) => {
+const Login = ({history}) => {
 	const classes = useStyles();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
     const dispatch = useDispatch();
-    
-    const onFinish = ({email, password}) => {
-        axios({
+	const isLogged = useSelector(getIsLogged);
+
+    useEffect(() => {
+        if(isLogged) history.push('/');
+    },[isLogged, history])
+
+	const onFinish = () => {
+		axios({
             method: 'post',
             url: "https://us-central1-socialony.cloudfunctions.net/api/login",
-            headers: {}, 
             data: {
                 email,
                 password
-            }
+            },headers: {
+				"Content-Type": "application/json"
+			}
         })
         .then((user) => {
-            dispatch(login(user.data));
-            props.history.push("/");
-        })
+			dispatch(login(user.data));
+		})
+		.then(() => {
+			history.push('/');
+		})
         .catch((e) => console.log(e));
     };
 
@@ -46,9 +54,6 @@ const Login = (props) => {
 					<Divider />
 					<Form
                         name="basic"
-                        initialValues={{
-                            remember: true,
-                        }}
                         className={classes.form}
                         onFinish={onFinish}
                     >
