@@ -46,7 +46,7 @@ const Login = ({history}) => {
             if(loginTry < 2) onFinish()
             else {
                 loginTry = 0;
-                console.log(e)
+                message.error({ content: 'Email or Password is Wrong!', key, duration: 2 });
             }
         });
     };

@@ -79,15 +79,19 @@ const Post = ({ post, history }) => {
             return (
                 <Grid item container xs={12} className={classes.eachcomment} key={index}>
                     <Grid item xs={2} md={1}>
-                        <Avatar 
-                            src={comment.imageUrl}
-                            className={classes.commentimg} 
-                        />
+                        <Link to={`/user/${comment.userId}`}>
+                            <Avatar 
+                                src={comment.imageUrl}
+                                className={classes.commentimg} 
+                            />
+                        </Link>
                     </Grid>
                     <Grid item container direction="column" xs={10} md={11} className={classes.eachcommentbody}>
-                        <Typography variant="h6">
-                            {`${comment.name} ${comment.surname}`}
-                        </Typography>
+                        <Link to={`/user/${comment.userId}`}>
+                            <Typography variant="h6">
+                                {`${comment.name} ${comment.surname}`}
+                            </Typography>
+                        </Link>
                         <Typography variant="body2">
                             {comment.content}   
                         </Typography>
