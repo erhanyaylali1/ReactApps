@@ -19,28 +19,8 @@ const app = express();
 firebase.initializeApp(firebaseConfig);
 const db = admin.firestore();
 app.use(cors());
-
-app.use((req, res, next) => {
-    res.setHeader('Acces-Control-Allow-Origin','*');
-    res.setHeader('Acces-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE');
-    res.setHeader('Acces-Contorl-Allow-Methods','Content-Type','Authorization');
-    next(); 
-});
   
-//GET IS LOGGED IN
-app.get('/islogged', (req, res) => {
-    firebase.auth().onAuthStateChanged((user) => {
-        if(user) {
-            db.collection('users')
-                .doc(user.uid)
-                .get()
-                .then((doc) => res.status(201).json({ ...doc.data(), userId: user.uid }))
-                .catch((err) => res.status(500).json({ error: err.message }))
-        } else {
-            return res.json({ error: "User Not Signed In! "});
-        }
-    })
-})
+
 
 // SIGN UP
 // EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
@@ -90,8 +70,7 @@ app.post('/signup', (req, res) => {
 // LOGIN
 // EMAIL, PASSWORD
 app.post('/login', cors(), (req, res) => {
-    res.setHeader('Access-Control-Allow-Headers', '*');
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    const userData = {};
     firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password)
     .then((data) => {
         return data.user.uid;
@@ -101,7 +80,35 @@ app.post('/login', cors(), (req, res) => {
         .doc(userId)
         .get()
         .then((doc) => {
-            return res.status(201).json({...doc.data(), userId: doc.id});
+            userData.credentials = doc.data();
+            userData.userId = doc.id;
+            return (doc.id)
+        })
+        .then((userId) => {
+            db.collection('follows')
+            .where('followerId','==',userId)
+            .get()
+            .then(async(docs) =>{
+                const ids = []
+                for await(let doc of docs.docs){
+                    ids.push(doc.data().userId)
+                };
+                userData.follows = ids;
+            })
+            .then(async() => {
+                db.collection('follows')
+                .where('userId','==',userId)
+                .get()
+                .then(async(docs) =>{
+                    const ids = []
+                    for await(let doc of docs.docs){
+                        ids.push(doc.data().followerId)
+                    };
+                    userData.followers = ids;
+                })
+                .then(() => res.status(201).json(userData));
+            })
+            
         })
         .catch((err) => res.status(501).json({ error: err.message }))
     })
@@ -137,6 +144,43 @@ app.post('/user/:userId/add-detail', (req, res) => {
     })
 });
 
+// GET CURRENT USER DETAIL
+// USERID
+app.get('/currentuser', (req, res) => {
+    const userData = {};
+    db.collection('users').doc(req.body.userId).get()
+    .then((doc) => {
+        userData.credentials = doc.data();
+        userData.userId = doc.id
+    })
+    .then(() => {
+        db.collection('follows')
+        .where('followerId','==',req.body.userId)
+        .get()
+        .then(async(docs) =>{
+            const ids = []
+            for await(let doc of docs.docs){
+                ids.push(doc.data().userId)
+            };
+            userData.follows = ids;
+        })
+        .then(async() => {
+            db.collection('follows')
+            .where('userId','==',req.body.userId)
+            .get()
+            .then(async(docs) =>{
+                const ids = []
+                for await(let doc of docs.docs){
+                    ids.push(doc.data().followerId)
+                };
+                userData.followers = ids;
+            })
+            .then(() => res.status(201).json(userData));
+        })
+        .catch((err) => res.status(501).json({ error: err.message }))
+    })
+    .catch((err) => res.status(501).json({ error: err.message }))
+})
 
 // GET USER DETAILS
 app.get('/user/:userId', async(req, res) => {
@@ -265,6 +309,26 @@ app.post('/user/:userId/follow', (req, res) => {
                 .then(() => res.json({ message: "User Successfully Followed!" }));
         })
         .catch((err) => res.json({ error: err.message }))
+})
+
+// UNFOLLOW A USER
+// FOLLOWERID
+app.post('/user/:userId/unfollow', (req, res) => {
+    db.collection('follows')
+    .where('followerId','==',req.body.followerId)
+    .where('userId','==', req.params.userId)
+    .get()
+    .then((docs) => {
+        if(docs.empty) return res.status(500).json({ error: "This User Not Following!" })
+        let id;
+        docs.forEach((doc) => id = doc.id);
+        db.collection('follows')
+        .doc(id)
+        .delete()
+        .then(() => res.status(201).json({ message: "User Unfollowed!" }))
+        .catch((err) => res.status(500).json({ error: err.message }))
+    })
+    .catch((err) => res.status(500).json({ error: err.message }))
 })
 
 // POST USER IMAGE
@@ -483,21 +547,33 @@ app.post('/post/:postId/comment', (req, res) => {
         content: req.body.content
     };
 
-    const selectedPost = db.collection('posts').doc(req.params.postId);
 
-    selectedPost
-    .collection('comments')
-    .add(newComment)
-    .then(() => {
-        selectedPost.get()
-        .then((doc) => doc.data().commentsCount + 1)
-        .then((commentsCount) => {
-            selectedPost.update({ commentsCount })
+    db.collection('users').doc(req.body.userId).get()
+    .then((doc) => {
+        newComment.name = doc.data().name;
+        newComment.surname = doc.data().surname;
+        newComment.imageUrl = doc.data().imageUrl
+    }).then(() => {
+
+        const selectedPost = db.collection('posts').doc(req.params.postId);
+
+        selectedPost
+        .collection('comments')
+        .add(newComment)
+        .then(() => {
+            selectedPost.get()
+            .then((doc) => doc.data().commentsCount + 1)
+            .then((commentsCount) => {
+                selectedPost.update({ commentsCount })
+            })
+            .then(() => res.json({ message: "Comment Posted!" }))
+            .catch((err) => res.status(400).json({ error: err.message }));
         })
-        .then(() => res.json({ message: "Comment Posted!" }))
-        .catch((err) => res.status(400).json({ error: err.message }));
+        .catch((err) => res.json({ error: err.message }));
     })
-    .catch((err) => res.json({ error: err.message }));
+    
+
+    
 
 });
 

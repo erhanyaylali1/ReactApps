@@ -1,23 +1,26 @@
 import React,{ useState, useEffect } from 'react';
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
 import Post from './Post';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { getIsLogged, getUser } from '../features/userSlice';
 import { getRefresh } from '../features/status';
+import { message } from 'antd';
 
 
 const User = (props) => {
 
+    const dispatch = useDispatch();
     const classes = useStyle();
     const [user, setUser] = useState(null);
     const isLogged = useSelector(getIsLogged);
     const profileId = props.match.params.userId
     const loggedUser = useSelector(getUser);
     const refresh = useSelector(getRefresh);
+    const isUserFollow = loggedUser?.follows?.includes(profileId) ? true:false;
+    const isFollowBack = loggedUser?.followers?.includes(profileId) ? true:false;
 
     useEffect(() => {
         axios({
@@ -26,7 +29,7 @@ const User = (props) => {
         }).then((res) => setUser(res.data))
         .catch((err) => console.log(err));
     },[profileId, refresh])
-
+    
     const RenderPosts = () => {
         if(user) {
             return user.posts.map((post, index) => (
@@ -40,32 +43,51 @@ const User = (props) => {
     }
 
     const followUser = () => {
+        
+        const key = 'updatable';
+        message.loading({ content: 'Following...', key });
+        const url = `https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}/${isUserFollow ? 'unfollow':'follow'}`;
         axios({
             method: 'post',
-            url: `https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}/follow`,
+            url,
             data: {
                 followerId: loggedUser.userId
             }
+        })
+        .then(() => {
+            message.success({ content: `User ${!isUserFollow ? 'Followed!':'Unfollowed!'}`, key, duration: 2 });
+        })
+        .then(() => {
+            axios({
+                method: 'post',
+                url: 'https://us-central1-socialony.cloudfunctions.net/api/currentUser',
+                data: {
+                    userId: loggedUser.userId
+                }
+            })
+            .then((newUser) => dispatch(setUser(newUser.data)))
         })
         .catch((err) => console.log(err));
     }
 
     const renderButtons = () => {
-        if(isLogged){
+        if(!isLogged){
+            
+        } else {
             if(loggedUser.userId === profileId) {
                 return <React.Fragment></React.Fragment>
             }
-        }
-        return (
-            <React.Fragment>
-                <Grid item xs={6} className={classes.buttongrid} onClick={followUser}>
-                    <Button inverted color="violet">Follow</Button>
-                </Grid>
-                <Grid item xs={6} className={classes.buttongrid}>
-                    <Button inverted color="violet">Message</Button>
-                </Grid>	
-            </React.Fragment>
-        )
+            return (
+                <React.Fragment>
+                    <Grid item xs={6} className={classes.buttongrid} onClick={followUser}>
+                        <Button variant="contained" color="primary">{!isUserFollow ? 'Follow':'Unfollow'}</Button>
+                    </Grid>
+                    <Grid item xs={6} className={classes.buttongrid}>
+                        <Button variant="contained" color="primary">Message</Button>
+                    </Grid>	
+                </React.Fragment>
+            )
+        } 
     }
 
     return (
@@ -80,10 +102,13 @@ const User = (props) => {
                             alt="pp"
                         />
                     </Grid>
-                    <Grid item container xs={12} lg={3} justify="center" alignItems="center">
+                    <Grid item container xs={12} lg={3} justify="center" alignItems="center" direction="column">
                         <Typography variant="body1" align="center" className={classes.name}>
                             {user?.credentials.name} {user?.credentials.surname}
                         </Typography> 
+                        <Typography variant="subtitle1" className={classes.isFollows}>
+                            {isFollowBack && 'Follows You'}
+                        </Typography>
                     </Grid>
                     <Grid item container justify="center" alignItems="center" xs={12} lg={7} spacing={2}>
                         <Grid item xs={1} lg={2} />
@@ -171,5 +196,8 @@ const useStyle = makeStyles((theme) => ({
     buttongrid: {
         display: "grid"
     },
+    isFollows: {
+        color: "whitesmoke"
+    }
     
 }))

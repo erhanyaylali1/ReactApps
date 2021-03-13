@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Button } from '@material-ui/core';
-import { Form, Input } from 'antd';
+import { Form, Input, message } from 'antd';
 import { Divider } from 'semantic-ui-react';
 import { Link, withRouter } from 'react-router-dom';
 import 'antd/dist/antd.css';
@@ -19,6 +19,10 @@ const Register = ({ history }) => {
 	const [phone, setPhone] = useState(0);
 
 	const RegisterHandle = () => {
+        
+        const key = 'updatable';
+        message.loading({ content: 'Registering...', key });
+
 		axios({
             method: 'post',
             url: "https://us-central1-socialony.cloudfunctions.net/api/signup",
@@ -34,8 +38,14 @@ const Register = ({ history }) => {
 				"Content-Type": "application/json"
 			}
 		}).then((a) => console.log(a))
-		.then(() => history.push('/login'))
-		.catch((err) => console.log("error aldık abi",err));
+		.then(() => {
+            history.push('/login')
+            message.success({ content: 'Registered!', key, duration: 2 });
+        })
+		.catch((err) => {
+            console.log("error aldık abi",err)
+            message.error({ content: `Error! ${err.message}`, key, duration: 2 });
+        });
 	}
 
 	return (

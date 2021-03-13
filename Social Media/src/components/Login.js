@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography } from '@material-ui/core';
-import { Form, Input, Button } from 'antd';
+import { Typography, Button } from '@material-ui/core';
+import { Form, Input, message } from 'antd';
 import { Divider } from 'semantic-ui-react';
 import { Link, withRouter } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,6 +24,8 @@ const Login = ({history}) => {
     },[isLogged, history])
 
 	const onFinish = () => {
+        const key = 'updatable';
+        message.loading({ content: 'Logging In...', key });
         loginTry += 1;
 		axios({
             method: 'post',
@@ -38,6 +40,7 @@ const Login = ({history}) => {
 		})
 		.then(() => {
 			history.push('/');
+            message.success({ content: 'Logged In!', key, duration: 2 });
 		})
         .catch((e) => {
             if(loginTry < 2) onFinish()
@@ -99,8 +102,8 @@ const Login = ({history}) => {
                         </Form.Item>
 
                         <Form.Item className={classes.button}>
-                            <Button type="primary" htmlType="submit">
-                                Submit
+                            <Button color="primary" variant="contained" type="submit">
+                                Login
                             </Button>
                         </Form.Item>
                     </Form>

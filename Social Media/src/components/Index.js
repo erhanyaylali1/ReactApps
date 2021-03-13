@@ -4,10 +4,11 @@ import { getUser, getIsLogged } from '../features/userSlice';
 import { Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
-import { Input } from 'antd';
+import { Input, message } from 'antd';
 import { Button } from 'semantic-ui-react';
 import Post from './Post';
 import { getRefresh } from '../features/status';
+import { Link } from 'react-router-dom';
 
 
 const { TextArea } = Input;
@@ -20,43 +21,45 @@ const Index = () => {
     const refresh = useSelector(getRefresh);
 	const [posts, setPosts] = useState(null);
 	const [newPost, setNewPost] = useState('');
-    let getTry = 0;
 
 	useEffect(() => {
 		if(isLogged){
-            getPosts()
+            axios({
+                method: 'get',
+                url: `https://us-central1-socialony.cloudfunctions.net/api/user/${user.userId}/home`,
+            }).then((res) => setPosts(res.data))
+            .catch((err) => {
+                console.log(err)}
+            );
 		}
 	},[newPost, isLogged, user.userId, refresh]);
 
-    const getPosts = async() => {
-        getTry += 1;
-        await axios({
-            method: 'get',
-            url: `https://us-central1-socialony.cloudfunctions.net/api/user/${user.userId}/home`,
-        }).then((res) => setPosts(res.data))
-        .catch((err) => {
-            if(getTry < 2) getPosts()
-            else console.log(err)}
-        );
-    }
 
 	const SubmitNewPost = (e) => {
+        
+        const key = 'updatable';
+        message.loading({ content: 'Sending New Post...', key });
 		e.preventDefault();
-        if(isLogged){
-            axios({
-                method: 'post',
-                url: "https://us-central1-socialony.cloudfunctions.net/api/post",
-                data: {
-                    userId: user.userId,
-                    content: newPost
-                },
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }).then((e) => {
-                setNewPost('');
-            })
-            .catch((err) => console.log(err));
+        if(newPost === ''){
+            message.error({ content: 'Empty Post Can Not Be Shared!', key, duration: 2 });
+        } else {
+            if(isLogged){
+                axios({
+                    method: 'post',
+                    url: "https://us-central1-socialony.cloudfunctions.net/api/post",
+                    data: {
+                        userId: user.userId,
+                        content: newPost
+                    },
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then((e) => {
+                    setNewPost('');
+                    message.success({ content: 'New Post Sent!', key, duration: 2 });
+                })
+                .catch((err) => console.log(err));
+            }
         }		
 	}
 
@@ -70,7 +73,7 @@ const Index = () => {
 			))
 		}
 	}
-
+    
     return (
 		<div>
 			<Grid container >
@@ -78,7 +81,7 @@ const Index = () => {
 				<Grid item container xs={10} lg={6} className={classes.root}>
 					<Grid item xs={12} className={classes.salude}>
 						<Typography variant="h4" align="center">
-							{isLogged ? `Welcome ${user.name}` : 'LOGIN PLEASE'}
+							{isLogged ? `Welcome ${user.credentials.name}` : 'LOGIN PLEASE'}
 						</Typography>
 					</Grid>
 					<Grid item container xs={12} spacing={2} className={classes.newpostdiv}>
@@ -98,12 +101,16 @@ const Index = () => {
 									<Button fluid color="red">Cancel</Button>
 								</Grid>
 							</React.Fragment>
-						):(
-							<p>LOGIN</p>
-						)}
+						):(<React.Fragment></React.Fragment>)}
 					</Grid>
 					<Grid item container xs={12} className={classes.posts}>
-						{RenderPosts()}		
+                        {isLogged ? RenderPosts():(
+                            <Grid item container xs={12} justify="center">
+                                <Link to="/login">
+                                    <Button variant="contained" color="facebook">LOGIN</Button>
+                                </Link>
+                            </Grid>
+                        )}		
 					</Grid>
 					
 				</Grid>

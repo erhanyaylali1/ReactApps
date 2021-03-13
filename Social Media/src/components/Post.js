@@ -17,7 +17,10 @@ const Post = ({ post, history }) => {
 	const loggedUser = useSelector(getUser);
     const [comment, setComment] = useState('');
     const dispatch = useDispatch();
+    const [showComment, setShowComment] = useState(false);
+
     let isLiked = false;
+
     post.likes.map((like) => {
         if(like.userId === loggedUser.userId) {
             isLiked = true;
@@ -71,6 +74,30 @@ const Post = ({ post, history }) => {
         }
 	}
 
+    const RenderComments = () => {
+        return post?.comments?.map((comment, index) => {
+            return (
+                <Grid item container xs={12} className={classes.eachcomment} key={index}>
+                    <Grid item xs={2} md={1}>
+                        <Avatar 
+                            src={comment.imageUrl}
+                            className={classes.commentimg} 
+                        />
+                    </Grid>
+                    <Grid item container direction="column" xs={10} md={11} className={classes.eachcommentbody}>
+                        <Typography variant="h6">
+                            {`${comment.name} ${comment.surname}`}
+                        </Typography>
+                        <Typography variant="body2">
+                            {comment.content}   
+                        </Typography>
+
+                    </Grid>
+                </Grid>
+            )
+        })
+    }
+
 	return (
 		<Card className={classes.card}>
             <Link to={`/user/${post?.userId}`}>
@@ -105,7 +132,7 @@ const Post = ({ post, history }) => {
 							{post?.likesCount}
 						</span>
 						<span>
-                            <IconButton aria-label="comment" style={{ padding: "10px"}}>
+                            <IconButton aria-label="comment" style={{ padding: "10px"}} onClick={() => setShowComment(!showComment)}>
                                 <CommentIcon />
                             </IconButton>								
 							{post?.commentsCount}
@@ -127,18 +154,19 @@ const Post = ({ post, history }) => {
 							onChange={(e) => setComment(e.target.value)} 
 							placeholder='Comment...' />
 					</Grid>
-
-				</Grid>
-				
-
+				</Grid>			
 			</CardActions>
+                            
+            <Grid item container xs={12} className={classes.commentwindow} style={{display: showComment ? 'flex':'none'}}>
+                {RenderComments()}
+            </Grid>
 		</Card>
 	)
 }
 
 export default withRouter(Post)
 
-const useStyle = makeStyles((theme) => ({
+const useStyle = makeStyles(() => ({
 	card: {
 		width: "100%",
 		marginBottom: "25px"
@@ -157,5 +185,24 @@ const useStyle = makeStyles((theme) => ({
 	},
 	cardbutton: {
 		marginRight: "10px"
-	}
+	},
+    commentwindow: {
+        padding: "5px 10px",
+        position: "relative"
+    },
+    commentimg: {
+        marginTop: "15px",
+        marginLeft: "auto",
+        marginRight: "auto",
+        height: "30px",
+        width: "30px"
+    },
+    eachcomment: {
+        borderRadius: "10px",
+        backgroundColor: "whitesmoke",
+        marginBottom: "10px"
+    },
+    eachcommentbody: {
+        padding: "10px",
+    }
 }))
