@@ -30,8 +30,8 @@ app.post('/signup', (req, res) => {
         email: req.body.email,
         password: req.body.password,
         username: req.body.username,
-        name: req.body.name,
-        surname: req.body.surname,
+        name: req.body.name.toUpperCase(),
+        surname: req.body.surname.toUpperCase(),
         phone: req.body.phone,
         followersCount: 0,
         followsCount: 0,
@@ -609,6 +609,26 @@ app.post('/notifications', (req, res) => {
         .then(() => res.json({ message: "Notifications marked read!" }))
         .catch((err) => res.status(500).json({ error: err.message })); 
 })
+
+// Search user
+// KEY
+app.get('/search', (req, res) => {
+
+    const results = [];
+    db
+    .collection('users')
+    .where('name','>=', req.body.key[0].toUpperCase() + req.body.key.substr(1))
+    .where('name', '<=', req.body.key[0].toUpperCase() + req.body.key.substr(1) + '\uf8ff')
+    .limit(5)
+    .get()
+    .then((docs) => {
+        docs.forEach((doc) => {
+            results.push({id: doc.id, name: doc.data().name, surname: doc.data().surname, imageUrl: doc.data().imageUrl });
+        })
+    })
+    .then(() => res.json(results))
+})
+
 
 
 exports.api = functions.https.onRequest(app);

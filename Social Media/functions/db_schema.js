@@ -49,7 +49,11 @@ export const db = {
             read: 'true | false',
             postId: '',
             type: 'like | comment | follow',
-            createdAt: ''
+            createdAt: '',
+            userId: '',
+            name: '',
+            surname: '',
+            imageUrl: ''
         }
     ]
 
