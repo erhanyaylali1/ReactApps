@@ -25,7 +25,7 @@ function App() {
             if(!user.data.error) dispatch(login(user.data))
         })
         .catch(() => dispatch(logout));
-    },[]);
+    },[dispatch]);
 
     return (
       <Router>

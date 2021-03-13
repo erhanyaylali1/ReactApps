@@ -17,14 +17,27 @@ const Post = ({ post, history }) => {
 	const loggedUser = useSelector(getUser);
     const [comment, setComment] = useState('');
     const dispatch = useDispatch();
+    let isLiked = false;
+    post.likes.map((like) => {
+        if(like.userId === loggedUser.userId) {
+            isLiked = true;
+        }
+        return isLiked
+    })
 
 	const likeHandler = () => {
         if(!isLogged){
             history.push('/login')
         } else {
+            let url;
+            if(isLiked){
+                url = `https://us-central1-socialony.cloudfunctions.net/api/post/${post.postId}/unlike`
+            } else {
+                url = `https://us-central1-socialony.cloudfunctions.net/api/post/${post.postId}/like`
+            }
             axios({
                 method: 'post',
-                url: `https://us-central1-socialony.cloudfunctions.net/api/post/${post.postId}/like`,
+                url,
                 data: {
                     userId: loggedUser.userId
                 },headers: {
@@ -86,13 +99,13 @@ const Post = ({ post, history }) => {
 				<Grid container>
 					<Grid item xs={12} lg={"auto"} className={classes.cardbutton}>
 						<span>
-                        <IconButton aria-label="like" style={{ padding: "10px"}} onClick={likeHandler}>
-									<FavoriteIcon />
-								</IconButton>					
+                            <IconButton aria-label="like" style={{ padding: "10px"}} onClick={likeHandler}>
+                                <FavoriteIcon style={{color: isLiked ? "red":"rgba(0, 0, 0, 0.54)"}} />
+                            </IconButton>					
 							{post?.likesCount}
 						</span>
 						<span>
-                            <IconButton aria-label="comment" style={{ padding: "10px"}} onClick={commentHandler}>
+                            <IconButton aria-label="comment" style={{ padding: "10px"}}>
                                 <CommentIcon />
                             </IconButton>								
 							{post?.commentsCount}

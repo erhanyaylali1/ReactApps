@@ -29,11 +29,12 @@ const Register = ({ history }) => {
 				name,
 				surname,
 				phone				
-            },headers: {
+            },
+            headers: {
 				"Content-Type": "application/json"
 			}
 		}).then((a) => console.log(a))
-		.then(() => history.push('/'))
+		.then(() => history.push('/login'))
 		.catch((err) => console.log("error aldık abi",err));
 	}
 
@@ -150,7 +151,7 @@ const Register = ({ history }) => {
 
 						<Form.Item className={classes.button}>						
 							<Button variant="contained" size="medium" color="primary" type="submit">
-								Login
+								Register
 							</Button>
 						</Form.Item>
 					</Form>

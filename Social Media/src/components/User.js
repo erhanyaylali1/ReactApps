@@ -38,6 +38,18 @@ const User = (props) => {
             ))
         }
     }
+
+    const followUser = () => {
+        axios({
+            method: 'post',
+            url: `https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}/follow`,
+            data: {
+                followerId: loggedUser.userId
+            }
+        })
+        .catch((err) => console.log(err));
+    }
+
     const renderButtons = () => {
         if(isLogged){
             if(loggedUser.userId === profileId) {
@@ -46,7 +58,7 @@ const User = (props) => {
         }
         return (
             <React.Fragment>
-                <Grid item xs={6} className={classes.buttongrid}>
+                <Grid item xs={6} className={classes.buttongrid} onClick={followUser}>
                     <Button inverted color="violet">Follow</Button>
                 </Grid>
                 <Grid item xs={6} className={classes.buttongrid}>

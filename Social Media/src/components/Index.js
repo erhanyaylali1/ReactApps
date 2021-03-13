@@ -20,16 +20,25 @@ const Index = () => {
     const refresh = useSelector(getRefresh);
 	const [posts, setPosts] = useState(null);
 	const [newPost, setNewPost] = useState('');
+    let getTry = 0;
 
 	useEffect(() => {
 		if(isLogged){
-            axios({
-				method: 'get',
-				url: `https://us-central1-socialony.cloudfunctions.net/api/user/${user.userId}/home`,
-			}).then((res) => setPosts(res.data))
-			.catch((err) => console.log(err));
+            getPosts()
 		}
 	},[newPost, isLogged, user.userId, refresh]);
+
+    const getPosts = async() => {
+        getTry += 1;
+        await axios({
+            method: 'get',
+            url: `https://us-central1-socialony.cloudfunctions.net/api/user/${user.userId}/home`,
+        }).then((res) => setPosts(res.data))
+        .catch((err) => {
+            if(getTry < 2) getPosts()
+            else console.log(err)}
+        );
+    }
 
 	const SubmitNewPost = (e) => {
 		e.preventDefault();
@@ -40,7 +49,8 @@ const Index = () => {
                 data: {
                     userId: user.userId,
                     content: newPost
-                },headers: {
+                },
+                headers: {
                     "Content-Type": "application/json"
                 }
             }).then((e) => {
@@ -60,7 +70,6 @@ const Index = () => {
 			))
 		}
 	}
-
 
     return (
 		<div>
@@ -120,7 +129,7 @@ const useStyles = makeStyles({
 	newpost: {
 		border: "none !important",	
 		padding: "20px",
-		backgroundColor: "ghostwhite",
+		backgroundColor: "white",
 		boxShadow: "1px 1px 5px 0px rgb(0 0 0 / 75%)"
 		
 	},

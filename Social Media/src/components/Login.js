@@ -17,21 +17,21 @@ const Login = ({history}) => {
 	const [password, setPassword] = useState('');
     const dispatch = useDispatch();
 	const isLogged = useSelector(getIsLogged);
+    let loginTry = 0;
 
     useEffect(() => {
         if(isLogged) history.push('/');
     },[isLogged, history])
 
 	const onFinish = () => {
+        loginTry += 1;
 		axios({
             method: 'post',
             url: "https://us-central1-socialony.cloudfunctions.net/api/login",
             data: {
                 email,
                 password
-            },headers: {
-				"Content-Type": "application/json"
-			}
+            }
         })
         .then((user) => {
 			dispatch(login(user.data));
@@ -39,7 +39,13 @@ const Login = ({history}) => {
 		.then(() => {
 			history.push('/');
 		})
-        .catch((e) => console.log(e));
+        .catch((e) => {
+            if(loginTry < 2) onFinish()
+            else {
+                loginTry = 0;
+                console.log(e)
+            }
+        });
     };
 
 

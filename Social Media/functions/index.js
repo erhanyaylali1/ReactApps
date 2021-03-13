@@ -16,10 +16,17 @@ const firebaseConfig = {
 
 admin.initializeApp();
 const app = express();
-app.use(cors());
 firebase.initializeApp(firebaseConfig);
 const db = admin.firestore();
+app.use(cors());
 
+app.use((req, res, next) => {
+    res.setHeader('Acces-Control-Allow-Origin','*');
+    res.setHeader('Acces-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE');
+    res.setHeader('Acces-Contorl-Allow-Methods','Content-Type','Authorization');
+    next(); 
+});
+  
 //GET IS LOGGED IN
 app.get('/islogged', (req, res) => {
     firebase.auth().onAuthStateChanged((user) => {
@@ -35,7 +42,6 @@ app.get('/islogged', (req, res) => {
     })
 })
 
-
 // SIGN UP
 // EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
 app.post('/signup', (req, res) => {    
@@ -49,7 +55,7 @@ app.post('/signup', (req, res) => {
         phone: req.body.phone,
         followersCount: 0,
         followsCount: 0,
-        createdAt: new Date().toLocaleDateString(),
+        createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
         imageUrl: `https://firebasestorage.googleapis.com/v0/b/socialony.appspot.com/o/no-img.png?alt=media&token=d7d666ee-60dd-4487-ba4b-ef76e961fe4b`
     };
 
@@ -81,28 +87,27 @@ app.post('/signup', (req, res) => {
    
 });
 
-
 // LOGIN
 // EMAIL, PASSWORD
-app.post('/login', (req, res) => {
-
+app.post('/login', cors(), (req, res) => {
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader("Access-Control-Allow-Origin", "*");
     firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password)
-        .then((data) => {
-            return data.user.uid;
+    .then((data) => {
+        return data.user.uid;
+    })
+    .then((userId) => {
+        db.collection("users")
+        .doc(userId)
+        .get()
+        .then((doc) => {
+            return res.status(201).json({...doc.data(), userId: doc.id});
         })
-        .then((userId) => {
-            db.collection("users")
-            .doc(userId)
-            .get()
-            .then((doc) => {
-                return res.status(201).json({...doc.data(), userId: doc.id});
-            })
-            .catch((err) => res.status(501).json({ error: err.message }))
-        })
-        .catch((err) => {
-            return res.status(501).json({ error: err.message });    
-        }
-    )
+        .catch((err) => res.status(501).json({ error: err.message }))
+    })
+    .catch((err) => {
+        return res.status(501).json({ error: err.message });    
+    })
 });
 
 
@@ -134,85 +139,111 @@ app.post('/user/:userId/add-detail', (req, res) => {
 
 
 // GET USER DETAILS
-app.get('/user/:userId', (req, res) => {
+app.get('/user/:userId', async(req, res) => {
 
     let userData = {};
-    db.collection('users')
-        .doc(req.params.userId)
-        .get()
-        .then((doc) => {
-            userData.credentials = doc.data();
-            return db.collection('posts')
-                    .where('userId', '==', req.params.userId)
-                    .orderBy('createdAt', 'desc')
-                    .get();
-        })
-        .then((data) => {
-            userData.posts = []
-            if(data){
-                data.forEach((doc) => {
-                    userData.posts.push({...doc.data(), postId: doc.id });
+
+    const asyncForEach = async (array, callback) => {
+        for (let index = 0; index < array.length; index++) {
+            await callback(array[index], index, array);
+        }
+    }
+
+    db.collection('users').doc(req.params.userId).get()
+    .then((user) => {
+        userData.credentials = user.data();
+        userData.userId = user.id;
+    })
+    .then(async() => {
+        let UserPosts = [];
+        await db.collection('posts').where('userId', '==', req.params.userId).get()
+        .then(async(posts) => {
+            await asyncForEach(posts.docs, async (post) => {
+                const likesArr = [];
+                const commentsArr = [];
+                await db.collection('posts').doc(post.id).collection('likes').get()
+                .then(async(likes) => {
+                    await asyncForEach(likes.docs, async(like) => {
+                        likesArr.push({...like.data(), likeId: like.id});
+                    })
                 })
-            }
-        }).then(() => {
-            return db.collection('notifications')
-                    .where('reciepent','==', req.params.userId)
-                    .orderBy('createdAt','desc')
-                    .limit(10)
-                    .get();
+                await db.collection('posts').doc(post.id).collection('comments').get()
+                .then(async(comments) => {
+                    await asyncForEach(comments.docs, async(comment) => {
+                        commentsArr.push({...comment.data(), commentId: comment.id});
+                    })
+                })                    
+                UserPosts.push({...post.data(),postId: post.id,likes: likesArr, comments: commentsArr})
+            })
+            userData.posts = UserPosts;
         })
-        .then((data) => {
-            userData.notifications = []
-            if(data){
-                data.forEach((doc) => {
-                    userData.notifications.push(doc.data())
+        .then(() => {
+            function sortByKey(array, key) {
+                return array.sort(function(a, b) {
+                    var x = a[key]; var y = b[key];
+                    return ((x > y) ? -1 : ((x < y) ? 1 : 0));
                 });
             }
-            return res.json(userData);
+            userData.posts = sortByKey(userData.posts, "createdAt");
         })
-        .catch((err) => {
-            return res.status(500).json({ error: err.message })
-        })
+        .then(() => res.status(201).json(userData))
+    })
 });
 
+
 // GET FOLLOWED USERS POSTS
-app.get('/user/:userId/home', async (req, res) => {
+app.get('/user/:userId/home', cors(), async (req, res) => {
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader("Access-Control-Allow-Origin", "*");
     const userIds = [];
-    const postsArray = [];
+    const UserPosts = [];
+    userIds.push(req.params.userId);
+
+    const asyncForEach = async (array, callback) => {
+        for (let index = 0; index < array.length; index++) {
+            await callback(array[index], index, array);
+        }
+    }
+
     db.collection('follows')
-        .where('followerId', '==', req.params.userId)
-        .get()
-        .then((items) => {
-            items.forEach((item) => {""
-                userIds.push(item.data().userId)
-            })
-        })
-        .then(() => {
-            userIds.forEach((id) => {
-                db.collection('posts')
-                    .where('userId','==', id)
-                    .get()
-                    .then((posts) => {
-                        posts.forEach((post) => {
-                            db.collection('posts')
-                            .doc(post.id)
-                            .collection('likes')
-                            .get()
-                            .then((likes) => {
-                                const likesArray = []
-                                likes.forEach((like) => likesArray.push({...like.data(), likeId: like.id}))
-                                return likesArray;
-                            })
-                            .then((likesArray) => {
-                                postsArray.push({...post.data(), postId: post.id, likes: likesArray})
-                            })
+    .where('followerId','==', req.params.userId)
+    .get()
+    .then((users) => users.forEach((user) => userIds.push(user.data().userId)))
+    .then(async() => {
+        await asyncForEach(userIds, async(userId) => {
+            await db.collection('posts').where('userId','==',userId).get()
+            .then(async(posts) => {
+                await asyncForEach(posts.docs, async (post) => {
+                    const likesArr = [];
+                    const commentsArr = [];
+                    await db.collection('posts').doc(post.id).collection('likes').get()
+                    .then(async(likes) => {
+                        await asyncForEach(likes.docs, async(like) => {
+                            likesArr.push({...like.data(), likeId: like.id});
                         })
                     })
+                    await db.collection('posts').doc(post.id).collection('comments').get()
+                    .then(async(comments) => {
+                        await asyncForEach(comments.docs, async(comment) => {
+                            commentsArr.push({...comment.data(), commentId: comment.id});
+                        })
+                    })                    
+                    UserPosts.push({...post.data(),postId: post.id,likes: likesArr, comments: commentsArr})
+                })
             })
         })
-        .then(() => {
-            return res.json(postsArray);
-        })
+    })
+    .then(() => {
+        function sortByKey(array, key) {
+            return array.sort(function(a, b) {
+                var x = a[key]; var y = b[key];
+                return ((x > y) ? -1 : ((x < y) ? 1 : 0));
+            });
+        }
+        res.status(201).json(sortByKey(UserPosts, 'createdAt'));
+    })
+    .catch((err) => res.status(400).json({ error: err.message }));
+
 })
 
 // FOLLOW A USER
@@ -227,7 +258,7 @@ app.post('/user/:userId/follow', (req, res) => {
             const newFollowing = {
                 followerId: req.body.followerId,
                 userId: req.params.userId,
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
             }
             db.collection('follows')
                 .add(newFollowing)
@@ -304,7 +335,7 @@ app.post('/post', (req, res) => {
                 const newPost = {
                     content: req.body.content,
                     userId: req.body.userId,
-                    createdAt: new Date().toLocaleString(),
+                    createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
                     likesCount: 0,
                     commentsCount: 0,
                     imageUrl: doc.data().imageUrl,
@@ -390,7 +421,7 @@ app.post('/post/:postId/like', (req, res) => {
         if(!items.empty) res.status(400).json({ message: "Post Already Liked!" })
         else {
             const newLike = {
-                createdAt: new Date().toLocaleString(),
+                createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
                 userId: req.body.userId
             }
             selectedPost
@@ -448,7 +479,7 @@ app.post('/post/:postId/comment', (req, res) => {
 
     const newComment = {
         userId: req.body.userId,
-        createdAt: new Date().toLocaleString(),
+        createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
         content: req.body.content
     };
 
@@ -513,7 +544,7 @@ exports.createLikeNotification = functions.firestore.document('likes/{id}')
       .get()
       .then((doc) => {
           return db.doc(`/notifications/${snapshot.id}`).set({
-            createdAt: new Date().toISOString(),
+            createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
             recipient: doc.data().userId,
             sender: snapshot.data().userId,
             type: 'like',
@@ -545,7 +576,7 @@ exports.createCommentNotification = functions.firestore.document('comments/{id}'
             return db.collection('notifications')
                     .doc(snapshot.id)
                     .set({
-                        createdAt: new Date().toISOString(),
+                        createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
                         reciepent: doc.data().userId,
                         sender: snapshot.data().userId,
                         type: 'comment',
@@ -572,7 +603,7 @@ exports.createFollowNotification = functions.firestore.document('follows/{id}')
     db.collection('notifications')
         .doc(snapshot.id)
         .set({
-            createdAt: new Date().toISOString(),
+            createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
             reciepent: snapshot.data().userId,
             sender: snapshot.data().followerId,
             type: 'follow',
