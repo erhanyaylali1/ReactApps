@@ -19,8 +19,7 @@ const app = express();
 firebase.initializeApp(firebaseConfig);
 const db = admin.firestore();
 app.use(cors());
-  
-
+app.use(express.json());
 
 // SIGN UP
 // EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
@@ -30,8 +29,8 @@ app.post('/signup', (req, res) => {
         email: req.body.email,
         password: req.body.password,
         username: req.body.username,
-        name: req.body.name.toUpperCase(),
-        surname: req.body.surname.toUpperCase(),
+        name: req.body.name[0].toUpperCase() + req.body.name.substr(1),
+        surname: req.body.surname[0].toUpperCase() + req.body.surname.substr(1),
         phone: req.body.phone,
         followersCount: 0,
         followsCount: 0,
@@ -59,8 +58,7 @@ app.post('/signup', (req, res) => {
                 return res.status(201).json({ message: `User ${data.user.uid} signed up successfully.` });
             })
             .catch((err) => {
-                console.error(err);
-                return res.status(500).json({ error: err.code });
+                return res.status(404).json(err);
             });
         })
 
@@ -124,7 +122,6 @@ app.post('/logout', (req, res) => {
     return res.status(201).json({ message: "Signed Out Succesfully!" });
 })
 
-
 // ADD USER DETAIL
 // BIO, WEBSITE, LOCATION
 app.post('/user/:userId/add-detail', (req, res) => {
@@ -143,44 +140,6 @@ app.post('/user/:userId/add-detail', (req, res) => {
         return res.status(500).json({ error: err.message })
     })
 });
-
-// GET CURRENT USER DETAIL
-// USERID
-app.get('/currentuser', (req, res) => {
-    const userData = {};
-    db.collection('users').doc(req.body.userId).get()
-    .then((doc) => {
-        userData.credentials = doc.data();
-        userData.userId = doc.id
-    })
-    .then(() => {
-        db.collection('follows')
-        .where('followerId','==',req.body.userId)
-        .get()
-        .then(async(docs) =>{
-            const ids = []
-            for await(let doc of docs.docs){
-                ids.push(doc.data().userId)
-            };
-            userData.follows = ids;
-        })
-        .then(async() => {
-            db.collection('follows')
-            .where('userId','==',req.body.userId)
-            .get()
-            .then(async(docs) =>{
-                const ids = []
-                for await(let doc of docs.docs){
-                    ids.push(doc.data().followerId)
-                };
-                userData.followers = ids;
-            })
-            .then(() => res.status(201).json(userData));
-        })
-        .catch((err) => res.status(501).json({ error: err.message }))
-    })
-    .catch((err) => res.status(501).json({ error: err.message }))
-})
 
 // GET USER DETAILS
 app.get('/user/:userId', async(req, res) => {
@@ -234,6 +193,47 @@ app.get('/user/:userId', async(req, res) => {
     })
 });
 
+// GET USER FOLLOWS
+app.get('/user/:userId/follows', (req, res) => {
+    const userData = {}
+    const userId = req.params.userId;
+
+    db.collection("users")
+    .doc(userId)
+    .get()
+    .then((doc) => {
+        userData.credentials = doc.data();
+        userData.userId = doc.id;
+        return (doc.id)
+    })
+    .then((userId) => {
+        db.collection('follows')
+        .where('followerId','==',userId)
+        .get()
+        .then(async(docs) =>{
+            const ids = []
+            for await(let doc of docs.docs){
+                ids.push(doc.data().userId)
+            };
+            userData.follows = ids;
+        })
+        .then(async() => {
+            db.collection('follows')
+            .where('userId','==',userId)
+            .get()
+            .then(async(docs) =>{
+                const ids = []
+                for await(let doc of docs.docs){
+                    ids.push(doc.data().followerId)
+                };
+                userData.followers = ids;
+            })
+            .then(() => res.status(201).json(userData));
+        })
+        
+    })
+    .catch((err) => res.status(501).json({ error: err.message }))
+})
 
 // GET FOLLOWED USERS POSTS
 app.get('/user/:userId/home', cors(), async (req, res) => {
@@ -611,14 +611,13 @@ app.post('/notifications', (req, res) => {
 })
 
 // Search user
-// KEY
-app.get('/search', (req, res) => {
+app.get('/search/:key', (req, res) => {
 
     const results = [];
     db
     .collection('users')
-    .where('name','>=', req.body.key[0].toUpperCase() + req.body.key.substr(1))
-    .where('name', '<=', req.body.key[0].toUpperCase() + req.body.key.substr(1) + '\uf8ff')
+    .where('name','>=', req.params.key[0].toUpperCase() + req.params.key.substr(1))
+    .where('name', '<=', req.params.key[0].toUpperCase() + req.params.key.substr(1) + '\uf8ff')
     .limit(5)
     .get()
     .then((docs) => {
@@ -627,6 +626,129 @@ app.get('/search', (req, res) => {
         })
     })
     .then(() => res.json(results))
+    .catch((err) => res.status(500).json({ error: err.message }))
+})
+
+// GET MESSAGEBOX
+app.get('/chat/:userId', (req, res) => {
+
+    const asyncForEach = async (array, callback) => {
+        for (let index = 0; index < array.length; index++) {
+            await callback(array[index], index, array);
+        }
+    }
+    const messagesArr = [];
+    db.collection('chat')
+    .where('users','array-contains', req.params.userId)
+    .orderBy('lastMessageTime','desc')
+    .get()
+    .then(async(docs) => {
+        await asyncForEach(docs.docs, async(doc) => {
+            const chatArr = {};
+            chatArr.messages = []
+            await db.collection(`chat/${doc.id}/messages`)
+            .orderBy('createdAt','asc')
+            .get()
+            .then((messages) => {
+                asyncForEach(messages.docs, (message) => {
+                    chatArr.messages.push(message.data())
+                })
+            })
+            let otherId;
+            await db.collection('chat').doc(doc.id).get()
+            .then((doc) => otherId = doc.data().users.filter((id) => id !== req.params.userId))
+            .then(async () => {
+                await db.collection('users').doc(otherId[0]).get()
+                .then((doc) => {
+                    chatArr.name = doc.data().name;
+                    chatArr.imageUrl = doc.data().imageUrl;
+                    chatArr.id = doc.id;
+                })
+            })
+            .then(() => messagesArr.push(chatArr))
+            
+        })
+    })
+    .then(() => res.json(messagesArr))
+})
+
+// SEND A MESSAGE
+// SENDERID, RECIEVERID, CONTENT
+app.post('/chat/message', (req, res) => {
+    const list = [[req.body.senderId, req.body.recieverId],[req.body.recieverId, req.body.senderId]]
+    db.collection('chat')
+    .where('users', '==', list[1])
+    .get()
+    .then((chats) => {
+        if(chats.empty) {   
+            db.collection('chat')
+            .where('users', '==', list[0])
+            .get()
+            .then((chats2) => {
+                if(chats2.empty) {
+                    const newChat = {
+                        lastMessageTime: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
+                        users: [req.body.senderId, req.body.recieverId]
+                    }
+                    let id;
+                    db.collection('chat').add(newChat).then((doc) => id = doc.id);
+                    db.collection('users').doc(req.body.senderId).get()
+                    .then((doc) => {
+                        const newMessage = {
+                            name: doc.data().name,
+                            imageUrl: doc.data().imageUrl,
+                            content: req.body.content,
+                            sender: doc.id,
+                            createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
+                        }
+                        return newMessage
+                    })
+                    .then((newMessage) => {
+                        db.collection('chat').doc(id).collection('messages').add(newMessage);
+                    })
+                    .then(() => res.json({ message: "Message Sent!" }))
+                } else {
+                    chats2.forEach((chat) => {
+                        db.collection('users').doc(req.body.senderId).get()
+                        .then((doc) => {
+                            const newMessage = {
+                                name: doc.data().name,
+                                imageUrl: doc.data().imageUrl,
+                                content: req.body.content,
+                                sender: doc.id,
+                                createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
+                            }
+                            return newMessage;
+                        })
+                        .then((newMessage) => {
+                            db.collection('chat').doc(chat.id.toString()).collection('messages').add(newMessage);
+                            db.collection('chat').doc(chat.id.toString()).update({ lastMessageTime: newMessage.createdAt })
+                        })
+                        .then(() => res.json({ message: "Message Sent!" }))
+                    })
+                }
+            })
+        } else {
+            chats.forEach((chat) => {
+                db.collection('users').doc(req.body.senderId).get()
+                .then((doc) => {
+                    const newMessage = {
+                        name: doc.data().name,
+                        imageUrl: doc.data().imageUrl,
+                        content: req.body.content,
+                        sender: doc.id,
+                        createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
+                    }
+                    return newMessage;
+                })
+                .then((newMessage) => {
+                    db.collection('chat').doc(chat.id.toString()).collection('messages').add(newMessage);
+                    db.collection('chat').doc(chat.id.toString()).update({ lastMessageTime: newMessage.createdAt })
+                })
+                .then(() => res.json({ message: "Message Sent!" }))
+            })
+        }
+    })
 })
 
 

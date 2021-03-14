@@ -5,6 +5,7 @@ export const statusSlice = createSlice({
     initialState: {
         isNavbarOpen: false,
         refresh: false,
+        activeChatIndex: null,
     },
     reducers: {
         toggleNavbar: (state) => {
@@ -12,11 +13,15 @@ export const statusSlice = createSlice({
         },
         refresh: (state) => {
             state.refresh = !state.refresh;
+        },
+        setActiveChatIndex: (state, action) => {
+            state.activeChatIndex = action.payload;
         }
     },
 });
 
-export const { toggleNavbar, refresh } = statusSlice.actions;
+export const { toggleNavbar, refresh, setActiveChatIndex } = statusSlice.actions;
 export const getRefresh = (state) =>  state.status.refresh;
 export const getIsNavbarOpen = (state) =>  state.status.isNavbarOpen;
+export const getActiveIndex = (state) => state.status.activeChatIndex;
 export default statusSlice.reducer;

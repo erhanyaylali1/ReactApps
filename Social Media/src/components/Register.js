@@ -22,30 +22,34 @@ const Register = ({ history }) => {
         
         const key = 'updatable';
         message.loading({ content: 'Registering...', key });
+        if(password.length < 6) {
+            message.error({ content: `Password must be minimum 6 characters!`, key, duration: 2 });
+        } else {
+            axios({
+                method: 'post',
+                url: "https://us-central1-socialony.cloudfunctions.net/api/signup",
+                data: {
+                    email,
+                    password,
+                    username,
+                    name,
+                    surname,
+                    phone				
+                },
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(() => {
+                history.push('/login')
+                message.success({ content: 'Registered!', key, duration: 2 });
+            })
+            .catch((error) => {
+                console.log(error)
+                message.error({ content: `This Email, Username or Phone may be taken!`, key, duration: 2 });
+            });
+        }
 
-		axios({
-            method: 'post',
-            url: "https://us-central1-socialony.cloudfunctions.net/api/signup",
-            data: {
-                email,
-				password,
-				username,
-				name,
-				surname,
-				phone				
-            },
-            headers: {
-				"Content-Type": "application/json"
-			}
-		}).then((a) => console.log(a))
-		.then(() => {
-            history.push('/login')
-            message.success({ content: 'Registered!', key, duration: 2 });
-        })
-		.catch((err) => {
-            console.log("error aldık abi",err)
-            message.error({ content: `Error! ${err.message}`, key, duration: 2 });
-        });
 	}
 
 	return (
@@ -82,7 +86,7 @@ const Register = ({ history }) => {
 								{
 									required: true,
 									message: 'Please Input Your Password!',
-								},
+								}
 							]}
 						>
 							<Input.Password 

@@ -4,18 +4,26 @@ import { Grid, Avatar, Typography, IconButton } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { Icon, Input } from 'semantic-ui-react';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { useSelector } from 'react-redux';
-import { getIsNavbarOpen } from '../features/status';
+import { useDispatch, useSelector } from 'react-redux';
+import { getIsNavbarOpen, setActiveChatIndex, getActiveIndex } from '../features/status';
 import './styles.css';
+import { getUser, getIsLogged } from '../features/userSlice';
+import axios from 'axios';
 
 const Messages = () => {
 	const classes = useStyle();
 	const [width, setWindowWidth] = useState(0);
 	const left = useRef();
 	const right = useRef();
-
+    const user = useSelector(getUser);
+    const isLogged = useSelector(getIsLogged);
     const isOpen = useSelector(getIsNavbarOpen);
+    const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const activeIndex = useSelector(getActiveIndex);
+    const [refresh, setRefresh] = useState(false);
+    const messagesEndRef = useRef();
+    const dispatch = useDispatch();
 
 	useEffect(() => {
 		if(width < 450){			
@@ -26,6 +34,22 @@ const Messages = () => {
 			right.current.style.display = "flex";
 		}
 	},[width])
+
+
+    useEffect(() => {
+        if(isLogged){
+            axios({
+                method: 'get',
+                url: `https://us-central1-socialony.cloudfunctions.net/api/chat/${user.userId}`,
+            }).then((res) => {
+                setMessages(res.data);
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })                
+            })
+            .catch((err) => console.log(err));
+        }
+    });
+
+
 
 	useEffect(() => { 
 		updateDimensions();
@@ -39,9 +63,15 @@ const Messages = () => {
 		setWindowWidth(width);
 	}
 
-	const openChat = (e) => {
-        [...e.target.parentElement.children].forEach(sib => sib.classList.remove('activeMessageUser'))
-        e.target.classList.add('activeMessageUser')
+	const openChat = async(rank) => {
+        const parent = document.getElementById("chatHeader");
+        parent.childNodes.forEach((node, index) => {
+            if(index !== activeIndex) {
+                node.classList.remove('activeMessageUser');
+            } else {
+                node.classList.add('activeMessageUser');
+            }
+        })
 		if(width < 450) {
 			left.current.style.display = "none";
 			right.current.style.display = "flex";
@@ -51,12 +81,67 @@ const Messages = () => {
 	const back = () => {
 		left.current.style.display = "flex";
 		right.current.style.display = "none";
-	}
+	};
+
     const sentMessage = (e) => {
         e.preventDefault();
-        console.log(newMessage);
-        setNewMessage('');
+         axios({
+            method: 'post',
+            url: `https://us-central1-socialony.cloudfunctions.net/api/chat/message`,
+            data: {
+                senderId: user.userId,
+                recieverId: messages[activeIndex].id,
+                content: newMessage
+            }
+        }).then(() => setRefresh(!refresh))
+        .then(() => dispatch(setActiveChatIndex(0)))
+        .catch((err) => console.log(err));
+        setNewMessage('');  
     };
+
+    const renderHeaders = () => {
+        return messages.map((message, index) => {
+            return (
+                <Grid key={index} container item alignItems="center" 
+                    className={`${classes.each} ${activeIndex === index ? 'activeMessageUser':''}`} 
+                    onClick={()=>{
+                        dispatch(setActiveChatIndex(index));
+                        openChat();
+                    }}
+                >
+                    <Avatar
+                        className={classes.chatavatar}
+                        src={message.imageUrl}
+                        alt="user pp"
+                    />
+                    <Typography variant="h6">{message.name}</Typography>
+                </Grid>
+            )
+        })
+    }
+
+
+    const renderMessages = () => {
+        if(activeIndex !== null){
+            return messages[activeIndex]?.messages.map((message, index) => {
+                return (
+                    <Grid item container lg={12} className={classes.message} key={index}
+                        style={{ justifyContent: message.sender === user.userId ? 'flex-end':'flex-start' }}
+                    >
+                        <div style={{ 
+                            borderTopLeftRadius: message.sender === user.userId ? '15px':'0',
+                            borderTopRightRadius: message.sender === user.userId ? '0':'15px',
+                        }}>
+                            <Typography variant="body1">
+                                {message.content}
+                            </Typography>
+                            <Typography variant="button" align="right">{message.createdAt}</Typography>
+                        </div>
+                    </Grid>		
+                )
+            })
+        }        
+    }
 
 	return (
 		<Grid container className={classes.root} style={{ height: isOpen ? "79vh":"92vh" }}>
@@ -65,11 +150,11 @@ const Messages = () => {
 					<Grid container item className={classes.header}>
 						<Avatar
 							className={classes.headeravatar}
-							src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-							alt="user pp"
+							src={user?.credentials?.imageUrl}
+                            alt="user pp"
 						/>
 						<Grid>
-							<Typography variant="h5" style={{ fontWeight: "bolder" }}>Erhan Yaylalı </Typography>
+							<Typography variant="h5" style={{ fontWeight: "bolder" }}>{`${user.credentials?.name} ${user.credentials?.surname}`}</Typography>
 							<Typography variant="body1">
 								Online
 							</Typography>
@@ -78,98 +163,19 @@ const Messages = () => {
 					<Grid container item className={classes.title}>
 						<Typography variant="h5" style={{ fontWeight: "bolder" }}>Conversations</Typography>					
 					</Grid>
-					<Grid container item direction="column" className={classes.chats}>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
-						<Grid container item alignItems="center" className={classes.each} onClick={openChat}>
-							<Avatar
-								className={classes.chatavatar}
-								src="https://media-exp1.licdn.com/dms/image/C4D03AQE-dMTNZd32Mw/profile-displayphoto-shrink_800_800/0/1571955234521?e=1620864000&v=beta&t=HiC9p81AlLhU793ushlpvn-d8HvleZu2LU4xPfXo0jQ"
-								alt="user pp"
-							/>
-							<Typography variant="h6">Erhan Yaylalı</Typography>
-						</Grid>
+					<Grid container item direction="column" className={classes.chats} id="chatHeader">
+                        {renderHeaders()}
 					</Grid>
 				</Grid>
 				<Grid item container xs={12} lg={8} className={classes.right} ref={right}>
 					<Grid item container justify="flex-start" alignItems="center" className={classes.messageheader}>
-						{width < 450 && (
+						{width < 450 && (   
 							<ArrowBackIcon 
 								className={classes.backicon} 
 								onClick={back}
 							/>
 						)}
-						<Typography variant="h5">Erhan Yaylalı</Typography>
+						<Typography variant="h5">{messages[activeIndex]?.name}</Typography>
 						<IconButton aria-label="settings" className={classes.headersettings}>
 							<MoreVertIcon />
 						</IconButton>
@@ -188,18 +194,10 @@ const Messages = () => {
                                 />
                             </form>
 						</Grid>
-						<Grid item container className={classes.messages}>
-							<Grid item container lg={12} className={classes.message}>
-								<div>
-									<Typography variant="body1">
-										This is first message, I am keeping this message as long as possible to see 
-										how it behaves when a long text comes.This is first message, I am keeping this message as long as possible to see 
-										how it behaves when a long text comes.
-									</Typography>
-									<Typography variant="button" align="right">12.46</Typography>
-								</div>
-							</Grid>											
-						</Grid>
+						<Grid item container className={classes.messages} style={{ maxHeight: isOpen ? "60vh":"72vh" }}>
+                            { activeIndex !== null && renderMessages() }		
+                            <div ref={messagesEndRef} />														
+						</Grid> 
 					</Grid>
 				</Grid>
 			</Grid>
@@ -247,7 +245,7 @@ const useStyle = makeStyles((theme) => ({
 	},
 	chats: {
 		height: "65vh",
-		flexDirection: "row",
+		flexDirection: "column",
 		overflowY: "scroll"
 	},
 	title: {
@@ -312,6 +310,7 @@ const useStyle = makeStyles((theme) => ({
 	message: {
 		height: "fit-content",
 		marginBottom: "20px",
+        display: "flex",
 		padding: "0 10px",
 		"&::-webkit-scrollbar" : {
 			display: "none"
@@ -323,7 +322,6 @@ const useStyle = makeStyles((theme) => ({
 			height: "fit-content",
 			padding: "10px 15px 2px 15px",
 			borderRadius: "15px",
-			borderTopLeftRadius: "0px"
 		}
 	},
 }))

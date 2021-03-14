@@ -121,7 +121,7 @@ const Post = ({ post, history }) => {
                 />
             </Link>
 			
-			<CardContent>
+			<CardContent className={classes.cardcontent}>
 				<Typography variant="body1" color="textSecondary" component="p" className={classes.content}>
 					{post?.content}
 				</Typography>
@@ -208,5 +208,9 @@ const useStyle = makeStyles(() => ({
     },
     eachcommentbody: {
         padding: "10px",
+    },
+    cardcontent: {
+        paddingTop: "0",
+        paddingBottom: "5px"
     }
 }))

@@ -5,10 +5,10 @@ import { withRouter } from 'react-router-dom';
 import Post from './Post';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { getIsLogged, getUser } from '../features/userSlice';
+import { getIsLogged, getUser, setUpdatedUser } from '../features/userSlice';
 import { getRefresh } from '../features/status';
-import { message } from 'antd';
-
+import { message} from 'antd';
+import EditIcon from '@material-ui/icons/Edit';
 
 const User = (props) => {
 
@@ -43,7 +43,6 @@ const User = (props) => {
     }
 
     const followUser = () => {
-        
         const key = 'updatable';
         message.loading({ content: 'Following...', key });
         const url = `https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}/${isUserFollow ? 'unfollow':'follow'}`;
@@ -59,13 +58,10 @@ const User = (props) => {
         })
         .then(() => {
             axios({
-                method: 'post',
-                url: 'https://us-central1-socialony.cloudfunctions.net/api/currentUser',
-                data: {
-                    userId: loggedUser.userId
-                }
+                method: 'get',
+                url: `https://us-central1-socialony.cloudfunctions.net/api/user/${loggedUser.userId}/follows`,
             })
-            .then((newUser) => dispatch(setUser(newUser.data)))
+            .then((newUser) => dispatch(setUpdatedUser(newUser.data)))
         })
         .catch((err) => console.log(err));
     }
@@ -90,6 +86,15 @@ const User = (props) => {
         } 
     }
 
+    const imageUpload = (e) => {
+        const image = e.target.files[0];
+        const formData = new FormData();
+        formData.append('image', image, image.name)
+        axios.post(`https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}/image`,formData)
+        .then((respond) => console.log(respond))
+        .catch((e) => console.log(e));
+    }
+
     return (
         <Grid container className={classes.root}>
             <Grid item xs={1} lg={2} />
@@ -101,8 +106,10 @@ const User = (props) => {
                             src={user?.credentials.imageUrl}
                             alt="pp"
                         />
+                        <input type="file" id="imageInput" onChange={imageUpload} hidden="hidden"/>
+                        <EditIcon className={classes.editpp} onClick={() => document.getElementById('imageInput').click()} />
                     </Grid>
-                    <Grid item container xs={12} lg={3} justify="center" alignItems="center" direction="column">
+                    <Grid item container xs={12} lg={4} justify="center" alignItems="center" direction="column">
                         <Typography variant="body1" align="center" className={classes.name}>
                             {user?.credentials.name} {user?.credentials.surname}
                         </Typography> 
@@ -110,18 +117,16 @@ const User = (props) => {
                             {isFollowBack && 'Follows You'}
                         </Typography>
                     </Grid>
-                    <Grid item container justify="center" alignItems="center" xs={12} lg={7} spacing={2}>
-                        <Grid item xs={1} lg={2} />
-                        <Grid item xs={5} lg={2}>
+                    <Grid item container justify="center" alignItems="center" xs={12} lg={6} spacing={2}>
+                        <Grid item xs={5} lg={3}>
                             <p className={classes.stats}>{user?.credentials.followsCount}</p>
                             <p className={classes.label}>FOLLOWS</p>
                         </Grid>
-                        <Grid item xs={5} lg={2}>
+                        <Grid item xs={5} lg={3}>
                             <p className={classes.stats}>{user?.credentials.followersCount}</p>
                             <p className={classes.label}>FOLLOWERS</p>
                         </Grid>
-                        <Grid item xs={1} lg={1} />
-                        <Grid item container xs={12} lg={5} spacing={2}>
+                        <Grid item container xs={12} lg={6} spacing={2}>
                             {renderButtons()}
                         </Grid>
                         
@@ -198,6 +203,12 @@ const useStyle = makeStyles((theme) => ({
     },
     isFollows: {
         color: "whitesmoke"
+    },
+    editpp: {
+        position: "absolute",
+        color: "white",
+        right: "0",
+        cursor: "pointer"
     }
     
 }))
