@@ -13,10 +13,10 @@ import axios from 'axios';
 
 const Login = ({history}) => {
 	const classes = useStyles();
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
     const dispatch = useDispatch();
 	const isLogged = useSelector(getIsLogged);
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
     let loginTry = 0;
 
     useEffect(() => {

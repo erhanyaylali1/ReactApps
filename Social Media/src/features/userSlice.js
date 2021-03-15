@@ -17,11 +17,14 @@ export const userSlice = createSlice({
         },
         setUpdatedUser: (state, action) => {
             state.user = action.payload;
+        },
+        setImageUrl : (state, action) => {
+            state.user.credentials.imageUrl = action.payload;
         }
     },
 });
 
-export const { login, logout, setUpdatedUser, setOldMessages } = userSlice.actions;
+export const { login, logout, setUpdatedUser, setOldMessages, setImageUrl } = userSlice.actions;
 export const getUser = (state) => state.user.user;
 export const getIsLogged = (state) => state.user.isLogged;
 export default userSlice.reducer;

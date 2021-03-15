@@ -9,21 +9,23 @@ import { getIsNavbarOpen, setActiveChatIndex, getActiveIndex } from '../features
 import './styles.css';
 import { getUser, getIsLogged } from '../features/userSlice';
 import axios from 'axios';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
 const Messages = () => {
 	const classes = useStyle();
-	const [width, setWindowWidth] = useState(0);
 	const left = useRef();
 	const right = useRef();
+	const messagesEndRef = useRef();
+	const chatBoxRef = useRef();
+    const dispatch = useDispatch();
     const user = useSelector(getUser);
     const isLogged = useSelector(getIsLogged);
     const isOpen = useSelector(getIsNavbarOpen);
+    const activeIndex = useSelector(getActiveIndex);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const activeIndex = useSelector(getActiveIndex);
     const [refresh, setRefresh] = useState(false);
-    const messagesEndRef = useRef();
-    const dispatch = useDispatch();
+	const [width, setWindowWidth] = useState(0);
 
 	useEffect(() => {
 		if(width < 450){			
@@ -43,12 +45,11 @@ const Messages = () => {
                 url: `https://us-central1-socialony.cloudfunctions.net/api/chat/${user.userId}`,
             }).then((res) => {
                 setMessages(res.data);
-                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })                
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });              
             })
             .catch((err) => console.log(err));
         }
-    });
-
+    },[newMessage, activeIndex, isLogged, user.userId]);
 
 
 	useEffect(() => { 
@@ -85,7 +86,7 @@ const Messages = () => {
 
     const sentMessage = (e) => {
         e.preventDefault();
-         axios({
+        axios({
             method: 'post',
             url: `https://us-central1-socialony.cloudfunctions.net/api/chat/message`,
             data: {
@@ -94,7 +95,7 @@ const Messages = () => {
                 content: newMessage
             }
         }).then(() => setRefresh(!refresh))
-        .then(() => dispatch(setActiveChatIndex(0)))
+		.then(() => dispatch(setActiveChatIndex(0)))
         .catch((err) => console.log(err));
         setNewMessage('');  
     };
@@ -141,7 +142,11 @@ const Messages = () => {
                 )
             })
         }        
-    }
+	}
+	
+	const goToBottom = () => {
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}
 
 	return (
 		<Grid container className={classes.root} style={{ height: isOpen ? "79vh":"92vh" }}>
@@ -161,7 +166,7 @@ const Messages = () => {
 						</Grid>
 					</Grid>
 					<Grid container item className={classes.title}>
-						<Typography variant="h5" style={{ fontWeight: "bolder" }}>Conversations</Typography>					
+						<Typography variant="h5" style={{ fontWeight: "bolder" }}>Conversations</Typography>	
 					</Grid>
 					<Grid container item direction="column" className={classes.chats} id="chatHeader">
                         {renderHeaders()}
@@ -194,7 +199,10 @@ const Messages = () => {
                                 />
                             </form>
 						</Grid>
-						<Grid item container className={classes.messages} style={{ maxHeight: isOpen ? "60vh":"72vh" }}>
+						<IconButton className={classes.goToBottom} onClick={goToBottom}>
+							<ArrowDownwardIcon />
+						</IconButton>
+						<Grid item container className={classes.messages} style={{ maxHeight: isOpen ? "60vh":"72vh" }} ref={chatBoxRef}>
                             { activeIndex !== null && renderMessages() }		
                             <div ref={messagesEndRef} />														
 						</Grid> 
@@ -279,6 +287,7 @@ const useStyle = makeStyles((theme) => ({
 	},
 	chatmessages: {
 		flex: "1",
+		position: "relative",
 		paddingBottom: "10px",
 		alignContent: "flex-end",
 		flexDirection: "column-reverse"
@@ -324,4 +333,9 @@ const useStyle = makeStyles((theme) => ({
 			borderRadius: "15px",
 		}
 	},
+	goToBottom: {
+		width: "fit-content",
+		position: "absolute",
+		bottom: "10vh"
+	}
 }))

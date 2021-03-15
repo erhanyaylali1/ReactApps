@@ -13,10 +13,10 @@ import axios from 'axios';
 
 const Post = ({ post, history }) => {
 	const classes = useStyle();
+    const dispatch = useDispatch();
 	const isLogged = useSelector(getIsLogged);
 	const loggedUser = useSelector(getUser);
     const [comment, setComment] = useState('');
-    const dispatch = useDispatch();
     const [showComment, setShowComment] = useState(false);
 
     let isLiked = false;
@@ -100,24 +100,24 @@ const Post = ({ post, history }) => {
                 </Grid>
             )
         })
-    }
+    };
 
 	return (
 		<Card className={classes.card}>
             <Link to={`/user/${post?.userId}`}>
                 <CardHeader
                     avatar={
-                    <Avatar 
-                        src="user?.imageUrl"
-                    />
+                        <Avatar 
+                            src={post?.imageUrl}
+                        />
                     }
                     action={
-                    <IconButton aria-label="settings">
-                        <MoreVertIcon />
-                    </IconButton>
+                        <IconButton aria-label="settings" className={classes.buttonsettings}>
+                            <MoreVertIcon />
+                        </IconButton>
                     }
-                    title={`${post?.name} ${post?.surname}`}
-                    subheader={post?.createdAt}
+                    title={<span className={classes.postowner}>{`${post?.name} ${post?.surname}`}</span>}
+                    subheader={<span className={classes.postdate}>{post?.createdAt}</span>}
                 />
             </Link>
 			
@@ -136,7 +136,7 @@ const Post = ({ post, history }) => {
 							{post?.likesCount}
 						</span>
 						<span>
-                            <IconButton aria-label="comment" style={{ padding: "10px"}} onClick={() => setShowComment(!showComment)}>
+                            <IconButton aria-label="comment" style={{ padding: "10px", color: "rgba(0, 0, 0, 0.54)"}} onClick={() => setShowComment(!showComment)}>
                                 <CommentIcon />
                             </IconButton>								
 							{post?.commentsCount}

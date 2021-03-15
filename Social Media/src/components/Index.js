@@ -4,39 +4,41 @@ import { getUser, getIsLogged } from '../features/userSlice';
 import { Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
-import { Input, message } from 'antd';
+import { Empty, Input, message } from 'antd';
 import { Button } from 'semantic-ui-react';
 import Post from './Post';
 import { getRefresh } from '../features/status';
 import { Link } from 'react-router-dom';
-
-
+import CircularProgress from '@material-ui/core/CircularProgress';
 const { TextArea } = Input;
 
 const Index = () => {
 
+	const classes = useStyles();
 	const user = useSelector(getUser);
 	const isLogged = useSelector(getIsLogged);
-	const classes = useStyles();
     const refresh = useSelector(getRefresh);
 	const [posts, setPosts] = useState(null);
 	const [newPost, setNewPost] = useState('');
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		if(isLogged){
             axios({
                 method: 'get',
                 url: `https://us-central1-socialony.cloudfunctions.net/api/user/${user.userId}/home`,
-            }).then((res) => setPosts(res.data))
+			}).then((res) => setPosts(res.data))
+			.then(() => {
+				setIsLoading(false);
+			})
             .catch((err) => {
                 console.log(err)}
-            );
+			);
 		}
 	},[newPost, isLogged, user.userId, refresh]);
 
 
 	const SubmitNewPost = (e) => {
-        
         const key = 'updatable';
         message.loading({ content: 'Sending New Post...', key });
 		e.preventDefault();
@@ -63,17 +65,38 @@ const Index = () => {
         }		
 	}
 
+
 	const RenderPosts = () => {
 		if(posts) {
-			return posts.map((post, index) => (
-				<Post 
-					key={index}
-					post={post}
-				/>
-			))
+            if(posts.length){
+                return posts.map((post, index) => (
+                    <Post 
+                        key={index}
+                        post={post}
+                    />
+                ))
+            } else {
+                return (
+                    <Grid item container justify="center" xs={12}>
+                        <Empty
+                            image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+                            imageStyle={{
+                                height: 60,
+                            }}
+                            description={
+                                <span>
+                                    Looks Like You Dont Follow Anyone.
+                                    You Can Search or Follow Users on Search Bar.
+                                </span>
+                            }
+                        />
+                    </Grid>
+                )
+            }
+			
 		}
 	}
-    
+	
     return (
 		<div>
 			<Grid container >
@@ -84,10 +107,10 @@ const Index = () => {
 							{isLogged ? `Welcome ${user.credentials.name}` : 'LOGIN PLEASE'}
 						</Typography>
 					</Grid>
-					<Grid item container xs={12} spacing={2} className={classes.newpostdiv}>
+					<Grid item container xs={12} className={classes.newpostdiv}>
 						{isLogged ? (
 							<React.Fragment>
-								<Grid item xs={12} lg={10}>
+								<Grid item xs={12} lg={12}>
 									<TextArea 
                                         placeholder="Enter Your Thoughts..."
 										className={classes.newpost}
@@ -96,14 +119,16 @@ const Index = () => {
 										rows={4} 
 									/>
 								</Grid>
-								<Grid item xs={12} lg={2} onClick={SubmitNewPost} className={classes.inputButtons}>
-									<Button fluid color="facebook">Send</Button>
-									<Button fluid color="red">Cancel</Button>
+								<Grid item container justify="flex-end" xs={12} className={classes.inputButtons}>
+									<Button color="facebook" onClick={SubmitNewPost}>Send</Button>
 								</Grid>
 							</React.Fragment>
 						):(<React.Fragment></React.Fragment>)}
 					</Grid>
 					<Grid item container xs={12} className={classes.posts}>
+						<Grid item container xs={12} justify="center" style={{ display: isLoading ? (isLogged ? 'flex' : 'none' ):'none'}}>
+							<CircularProgress />
+						</Grid>
                         {isLogged ? RenderPosts():(
                             <Grid item container xs={12} justify="center">
                                 <Link to="/login">
@@ -136,7 +161,8 @@ const useStyles = makeStyles({
 	newpost: {
 		border: "none !important",	
 		padding: "20px",
-		backgroundColor: "white",
+		backgroundColor: "transparent",
+		borderRadius: "5px",
 		boxShadow: "1px 1px 5px 0px rgb(0 0 0 / 75%)"
 		
 	},
@@ -146,7 +172,6 @@ const useStyles = makeStyles({
 		}
 	},
 	posts: {
-		borderTop: "2px solid #828282",
 		paddingTop: "35px"
 	}
 });

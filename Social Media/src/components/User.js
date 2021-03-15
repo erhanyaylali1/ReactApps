@@ -1,24 +1,28 @@
 import React,{ useState, useEffect } from 'react';
-import { Grid, Typography, Button } from '@material-ui/core';
+import { Grid, Typography, Button, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import Post from './Post';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { getIsLogged, getUser, setUpdatedUser } from '../features/userSlice';
-import { getRefresh } from '../features/status';
-import { message} from 'antd';
+import { getIsLogged, getUser, setImageUrl, setUpdatedUser } from '../features/userSlice';
+import { getRefresh, setActiveChatIndex, refresh as setRefresh } from '../features/status';
+import { message, Input } from 'antd';
 import EditIcon from '@material-ui/icons/Edit';
-
+import { Modal, Button as Btn } from 'semantic-ui-react';
 const User = (props) => {
 
-    const dispatch = useDispatch();
     const classes = useStyle();
-    const [user, setUser] = useState(null);
+    const dispatch = useDispatch();
     const isLogged = useSelector(getIsLogged);
-    const profileId = props.match.params.userId
     const loggedUser = useSelector(getUser);
     const refresh = useSelector(getRefresh);
+    const [user, setUser] = useState(null);
+    const [newMessage, setNewMessage] = useState('');
+    const [open, setOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); 
+    
+    const profileId = props.match.params.userId
     const isUserFollow = loggedUser?.follows?.includes(profileId) ? true:false;
     const isFollowBack = loggedUser?.followers?.includes(profileId) ? true:false;
 
@@ -27,6 +31,7 @@ const User = (props) => {
             method: 'get',
             url: `https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}`,
         }).then((res) => setUser(res.data))
+        .then(() => setIsLoading(false))
         .catch((err) => console.log(err));
     },[profileId, refresh])
     
@@ -62,9 +67,52 @@ const User = (props) => {
                 url: `https://us-central1-socialony.cloudfunctions.net/api/user/${loggedUser.userId}/follows`,
             })
             .then((newUser) => dispatch(setUpdatedUser(newUser.data)))
+            .then(() => dispatch(setRefresh()))
         })
         .catch((err) => console.log(err));
     }
+
+    const sendNewMessage = () => {
+        const key = 'updatable';
+        message.loading({ content: 'Sending...', key });
+        setOpen(false);
+        axios({
+            method: 'post',
+            url: `https://us-central1-socialony.cloudfunctions.net/api/chat/message`,
+            data: {
+                senderId: loggedUser.userId,
+                recieverId: profileId,
+                content: newMessage
+            }
+        }).then((res) => {
+            message.success({ content: `Message Sent!'`, key, duration: 2 });
+            dispatch(setActiveChatIndex(0));
+            setNewMessage('');  
+        })
+        .then((() => {
+            props.history.push('/messages');
+        }))
+        .catch((err) => console.log(err));
+    }
+
+    const imageUpload = (e) => {
+        const key = 'updatable';
+        message.loading({ content: 'Image Uploading...', key });
+        const image = e.target.files[0];
+        const formData = new FormData();
+        formData.append('image', image, image.name)
+        axios.post(`https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}/image`,formData)
+        .then((respond) => {
+            message.success({ content: 'Image Uploaded!', key, duration: 2 });
+            dispatch(setImageUrl(respond.data.imageUrl));
+            dispatch(setRefresh());
+        })
+        .catch((e) => {
+            console.log(e);
+            message.error({ content: 'Image Could Not Uploaded!', key, duration: 2 });
+        });
+    }
+
 
     const renderButtons = () => {
         if(!isLogged){
@@ -79,20 +127,36 @@ const User = (props) => {
                         <Button variant="contained" color="primary">{!isUserFollow ? 'Follow':'Unfollow'}</Button>
                     </Grid>
                     <Grid item xs={6} className={classes.buttongrid}>
-                        <Button variant="contained" color="primary">Message</Button>
+                        <Modal
+                            onClose={() => setOpen(false)}
+                            onOpen={() => setOpen(true)}
+                            open={open}
+                            trigger={<Button variant="contained" color="primary">Message</Button>}
+                        >
+                            <Modal.Header>Send a new Message</Modal.Header>
+                            <Modal.Content image>
+                                <Input 
+                                    placeholder="New Message"
+                                    value={newMessage}
+                                    onInput={(e) => setNewMessage(e.target.value)}
+                                />
+                            </Modal.Content>
+                            <Modal.Actions>
+                                <Btn color='black' onClick={() => setOpen(false)}>
+                                    Back
+                                </Btn>
+                                <Btn
+                                    onClick={sendNewMessage}
+                                    positive
+                                >
+                                    Send
+                                </Btn>
+                            </Modal.Actions>
+                        </Modal>
                     </Grid>	
                 </React.Fragment>
             )
         } 
-    }
-
-    const imageUpload = (e) => {
-        const image = e.target.files[0];
-        const formData = new FormData();
-        formData.append('image', image, image.name)
-        axios.post(`https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}/image`,formData)
-        .then((respond) => console.log(respond))
-        .catch((e) => console.log(e));
     }
 
     return (
@@ -134,6 +198,9 @@ const User = (props) => {
                 </Grid>
                 <Grid container justify="center">
                     <Grid item container lg={8}>
+                        <Grid item container xs={12} justify="center" style={{ display: isLoading ? 'flex':'none'}}>
+							<CircularProgress />
+						</Grid>
                         {RenderPosts()}
                     </Grid>					
                 </Grid>

@@ -16,6 +16,7 @@ import axios from 'axios';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import PersonIcon from '@material-ui/icons/Person';
+import HomeIcon from '@material-ui/icons/Home';
 
 const Navbar = (props) => {
 
@@ -112,7 +113,7 @@ const Navbar = (props) => {
 					
 					<Grid item container xs={12} lg={6} style={{ display: (width < 450) ? (isOpen ? 'flex':'none'):'flex' }} className={classes.navbarsearch}>
                         <Grid item container xs={12} ref={searchBar}>  
-                            <Input placeholder="Search..." suffix={<SearchOutlined />} 
+                            <Input placeholder="Search User..." suffix={<SearchOutlined />} 
                                 className={classes.searchdiv}
                                 value={key}
                                 onInput={(e) => {
@@ -135,6 +136,11 @@ const Navbar = (props) => {
 					 }}>
 						{isLogged ? (
 							<React.Fragment>
+                                <Grid item style={{ padding: width < 450 ? '5px 0':'5px 10px' }}>
+									<Link to="/" >
+										<Grid className={classes.link3}><HomeIcon /></Grid>
+									</Link>	
+								</Grid>
 								<Grid item style={{ padding: width < 450 ? '5px 0':'5px 10px' }}>
 									<Link to="/messages" >
 										<Grid className={classes.link3}><MailOutlineIcon /></Grid>

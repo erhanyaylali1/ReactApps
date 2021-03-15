@@ -21,6 +21,13 @@ const db = admin.firestore();
 app.use(cors());
 app.use(express.json());
 
+// ASYNC FOREACH FUNCTION 
+const asyncForEach = async (array, callback) => {
+    for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+    }
+}
+
 // SIGN UP
 // EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
 app.post('/signup', (req, res) => {    
@@ -115,7 +122,6 @@ app.post('/login', cors(), (req, res) => {
     })
 });
 
-
 // LOGOUT
 app.post('/logout', (req, res) => {
     firebase.auth().signOut();
@@ -146,12 +152,6 @@ app.get('/user/:userId', async(req, res) => {
 
     let userData = {};
 
-    const asyncForEach = async (array, callback) => {
-        for (let index = 0; index < array.length; index++) {
-            await callback(array[index], index, array);
-        }
-    }
-
     db.collection('users').doc(req.params.userId).get()
     .then((user) => {
         userData.credentials = user.data();
@@ -179,6 +179,12 @@ app.get('/user/:userId', async(req, res) => {
                 UserPosts.push({...post.data(),postId: post.id,likes: likesArr, comments: commentsArr})
             })
             userData.posts = UserPosts;
+        })
+        .then(async() => {
+            await db.collection('follows').where('followerId', '==', req.params.userId).get()
+            .then((follows) => userData.credentials.followsCount = follows.size)
+            await db.collection('follows').where('userId', '==', req.params.userId).get()
+            .then((followers) => userData.credentials.followersCount = followers.size)
         })
         .then(() => {
             function sortByKey(array, key) {
@@ -242,12 +248,6 @@ app.get('/user/:userId/home', cors(), async (req, res) => {
     const userIds = [];
     const UserPosts = [];
     userIds.push(req.params.userId);
-
-    const asyncForEach = async (array, callback) => {
-        for (let index = 0; index < array.length; index++) {
-            await callback(array[index], index, array);
-        }
-    }
 
     db.collection('follows')
     .where('followerId','==', req.params.userId)
@@ -334,17 +334,19 @@ app.post('/user/:userId/unfollow', (req, res) => {
 // POST USER IMAGE
 app.post('/user/:userId/image', (req, res) => {
 
+    
     const BusBoy = require("busboy");
     const path = require("path");
     const os = require("os");
     const fs = require("fs");
-    const { uuid } = require("uuidv4");
+    const { v4: uuidV4 } = require('uuid');
+
   
     const busboy = new BusBoy({ headers: req.headers });
 
     let imageFileName;
     let imageToBeUploaded = {};
-    let generatedToken = uuid();
+    let generatedToken = uuidV4();
 
     busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
         if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
@@ -372,10 +374,33 @@ app.post('/user/:userId/image', (req, res) => {
         .then(() => {
             const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${imageFileName}?alt=media&token=${generatedToken}`;
             db.collection('users').doc(req.params.userId).update({ imageUrl });
-            return;
+            return imageUrl;
         })
-        .then(() => {
-            return res.json({ message: "Image Uploaded Succesfully." });
+        .then(async(imageUrl) => {
+            await db.collection('posts').where('userId','==', req.params.userId).get()
+            .then(async(posts) => {
+                await asyncForEach(posts.docs, async(post) => {
+                    db.collection('posts').doc(post.id).update({ imageUrl })
+                })
+            })
+            return imageUrl;
+        })
+        .then(async(imageUrl) => {
+            await db.collection('posts').get()
+            .then(async(posts) => {
+                await asyncForEach(posts.docs, async(post) => {
+                    await db.collection('posts').doc(post.id).collection('comments').where('userId','==',req.params.userId).get()
+                    .then(async(comments) => {
+                        await asyncForEach(comments.docs,(comment) => {
+                            db.collection('posts').doc(post.id).collection('comments').doc(comment.id).update({ imageUrl })
+                        })
+                    })
+                })
+            })
+            return imageUrl
+        })
+        .then((imageUrl) => {
+            return res.json({ message: "Image Uploaded Succesfully.", imageUrl });
         })
         .catch((err) => {
             return res.status(500).json({ error: err.message });
@@ -406,7 +431,6 @@ app.post('/post', (req, res) => {
                     name: doc.data().name,
                     surname: doc.data().surname,
                 };
-                console.log(newPost);
                 db.collection('posts')
                 .add(newPost)
                 .then(() => res.json({ message: "Post Succesfully Created." }));
@@ -450,7 +474,6 @@ app.get('/post/:postId', (req, res ) => {
                     const comments = [];
                     items.forEach((comment) => comments.push({...comment.data(), commentId: comment.id}))
                     postData.comments = comments;
-                    console.log(comments);
                 }
             })
             .then(() => res.json(postData))      
