@@ -4,7 +4,8 @@ import { getUser, getIsLogged } from '../features/userSlice';
 import { Grid, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
-import { Empty, Input, message } from 'antd';
+import { Empty, Input, message, BackTop, Button as Btn } from 'antd';
+import { ArrowUpOutlined } from '@ant-design/icons';
 import { Button } from 'semantic-ui-react';
 import Post from './Post';
 import { getRefresh } from '../features/status';
@@ -129,7 +130,14 @@ const Index = () => {
 						<Grid item container xs={12} justify="center" style={{ display: isLoading ? (isLogged ? 'flex' : 'none' ):'none'}}>
 							<CircularProgress />
 						</Grid>
-                        {isLogged ? RenderPosts():(
+						{isLogged ? 
+							<React.Fragment>
+								{RenderPosts()}
+								<BackTop>
+									<Btn shape="circle" icon={<ArrowUpOutlined />}></Btn>
+								</BackTop>
+							</React.Fragment>
+						:(
                             <Grid item container xs={12} justify="center">
                                 <Link to="/login">
                                     <Button variant="contained" color="facebook">LOGIN</Button>

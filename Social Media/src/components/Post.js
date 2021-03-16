@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Grid, Typography, Card, CardActions, CardHeader, CardContent, Avatar, IconButton, } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import DeleteIcon from '@material-ui/icons/Delete';
 import CommentIcon from '@material-ui/icons/Comment';
 import { makeStyles } from '@material-ui/core/styles';
 import { Icon, Input } from 'semantic-ui-react';
@@ -9,6 +10,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getIsLogged, getUser } from '../features/userSlice';
 import { refresh } from '../features/status';
 import { Link, withRouter } from 'react-router-dom';
+import { Menu, Dropdown, message } from 'antd';
 import axios from 'axios';
 
 const Post = ({ post, history }) => {
@@ -18,12 +20,16 @@ const Post = ({ post, history }) => {
 	const loggedUser = useSelector(getUser);
     const [comment, setComment] = useState('');
     const [showComment, setShowComment] = useState(false);
-
     let isLiked = false;
+    let isOwner = false;
+
+    if(loggedUser && post) {
+        isOwner = post.userId === loggedUser.userId ? true:false;
+    }
 
     post.likes.map((like) => {
         if(like.userId === loggedUser.userId) {
-            isLiked = true;
+            isLiked = true; 
         }
         return isLiked
     })
@@ -46,33 +52,60 @@ const Post = ({ post, history }) => {
                 },headers: {
                     "Content-Type": "application/json"
                 }
-            }).then((a) => {
+            }).then(() => {
                 dispatch(refresh());
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                console.log(err)
+                dispatch(refresh());
+            });
         }
 	}
 
 	const commentHandler = () => {
+        const key = 'updatable';
+        message.loading({ content: 'Comment Posting...', key });
         if(!isLogged){
             history.push('/login')
         } else {
-            axios({
-                method: 'post',
-                url: `https://us-central1-socialony.cloudfunctions.net/api/post/${post.postId}/comment`,
-                data: {
-                    userId: loggedUser.userId,
-                    content: comment
-                },headers: {
-                    "Content-Type": "application/json"
-                }
-            }).then(() => {
-                setComment('');
-                dispatch(refresh());
-            })
-            .catch((err) => console.log(err));
+            if(comment) {
+                axios({
+                    method: 'post',
+                    url: `https://us-central1-socialony.cloudfunctions.net/api/post/${post.postId}/comment`,
+                    data: {
+                        userId: loggedUser.userId,
+                        content: comment
+                    },headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then(() => {
+                    message.success({ content: 'Comment Posted!', key, duration: 2 });
+                    setComment('');
+                    dispatch(refresh());
+                })
+                .catch((err) => console.log(err));
+            } else {
+                message.error({ content: 'Empty Comment Cant Be Posted!', key, duration: 2 });
+            }
         }
-	}
+    }
+    
+    const deletePost = () => {
+        const key = 'updatable';
+        message.loading({ content: 'Post Deleting...', key });
+        axios({
+            method: 'delete',
+            url: `https://us-central1-socialony.cloudfunctions.net/api/post/${post.postId}`,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then((e) => {
+            dispatch(refresh())
+            message.success({ content: 'Post Deleted', key, duration: 2 });
+        })
+        .catch((e) => console.log(e));
+    };
 
     const RenderComments = () => {
         return post?.comments?.map((comment, index) => {
@@ -102,24 +135,46 @@ const Post = ({ post, history }) => {
         })
     };
 
+    const cardAction = () => {
+        if(isOwner) {
+            return (
+                <IconButton aria-label="settings" className={classes.buttonsettings}>
+                    <Dropdown overlay={
+                        <Menu>
+                            <Menu.Item>
+                                <div rel="noopener noreferrer" className={classes.deleteicon} onClick={deletePost}>
+                                    <DeleteIcon /> Delete This Post 
+                                </div>
+                            </Menu.Item>
+                        </Menu>
+                    } placement="bottomLeft">
+                        <MoreVertIcon />
+                    </Dropdown>
+                </IconButton>
+            )
+        }
+    }
+
 	return (
 		<Card className={classes.card}>
-            <Link to={`/user/${post?.userId}`}>
-                <CardHeader
-                    avatar={
+            <CardHeader
+                avatar={
+                    <Link to={`/user/${post?.userId}`}>
                         <Avatar 
                             src={post?.imageUrl}
                         />
-                    }
-                    action={
-                        <IconButton aria-label="settings" className={classes.buttonsettings}>
-                            <MoreVertIcon />
-                        </IconButton>
-                    }
-                    title={<span className={classes.postowner}>{`${post?.name} ${post?.surname}`}</span>}
-                    subheader={<span className={classes.postdate}>{post?.createdAt}</span>}
-                />
-            </Link>
+                    </Link>
+                }
+                action={cardAction()}
+                title={
+                    <Link to={`/user/${post?.userId}`}>
+                        <span className={classes.postowner}>    
+                            {`${post?.name} ${post?.surname}`}
+                        </span>
+                    </Link>
+                }
+                subheader={<span className={classes.postdate}>{post?.createdAt}</span>}
+            />
 			
 			<CardContent className={classes.cardcontent}>
 				<Typography variant="body1" color="textSecondary" component="p" className={classes.content}>
@@ -131,9 +186,9 @@ const Post = ({ post, history }) => {
 					<Grid item xs={12} lg={"auto"} className={classes.cardbutton}>
 						<span>
                             <IconButton aria-label="like" style={{ padding: "10px"}} onClick={likeHandler}>
-                                <FavoriteIcon style={{color: isLiked ? "red":"rgba(0, 0, 0, 0.54)"}} />
+                                <FavoriteIcon style={{color: isLiked ? "red":"rgba(0, 0, 0, 0.54)"}}/>
                             </IconButton>					
-							{post?.likesCount}
+							<span>{post?.likesCount}</span>
 						</span>
 						<span>
                             <IconButton aria-label="comment" style={{ padding: "10px", color: "rgba(0, 0, 0, 0.54)"}} onClick={() => setShowComment(!showComment)}>
@@ -212,5 +267,13 @@ const useStyle = makeStyles(() => ({
     cardcontent: {
         paddingTop: "0",
         paddingBottom: "5px"
+    },
+    deleteicon: {
+        display: "flex",
+        alignItems: "center",
+        padding: "2px 5px",
+        "& svg": {
+            marginRight: "10px"
+        }
     }
 }))

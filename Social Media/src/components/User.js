@@ -10,6 +10,8 @@ import { getRefresh, setActiveChatIndex, refresh as setRefresh } from '../featur
 import { message, Input } from 'antd';
 import EditIcon from '@material-ui/icons/Edit';
 import { Modal, Button as Btn } from 'semantic-ui-react';
+
+
 const User = (props) => {
 
     const classes = useStyle();
@@ -25,6 +27,7 @@ const User = (props) => {
     const profileId = props.match.params.userId
     const isUserFollow = loggedUser?.follows?.includes(profileId) ? true:false;
     const isFollowBack = loggedUser?.followers?.includes(profileId) ? true:false;
+    const isOwn = loggedUser?.userId === profileId ? true:false;
 
     useEffect(() => {
         axios({
@@ -170,8 +173,13 @@ const User = (props) => {
                             src={user?.credentials.imageUrl}
                             alt="pp"
                         />
-                        <input type="file" id="imageInput" onChange={imageUpload} hidden="hidden"/>
-                        <EditIcon className={classes.editpp} onClick={() => document.getElementById('imageInput').click()} />
+                        {isOwn && (
+                            <React.Fragment>
+                                <input type="file" id="imageInput" onChange={imageUpload} hidden="hidden"/>
+                                <EditIcon className={classes.editpp} onClick={() => document.getElementById('imageInput').click()} />
+                            </React.Fragment>
+                        )}
+                        
                     </Grid>
                     <Grid item container xs={12} lg={4} justify="center" alignItems="center" direction="column">
                         <Typography variant="body1" align="center" className={classes.name}>
@@ -182,13 +190,17 @@ const User = (props) => {
                         </Typography>
                     </Grid>
                     <Grid item container justify="center" alignItems="center" xs={12} lg={6} spacing={2}>
-                        <Grid item xs={5} lg={3}>
+                        <Grid item xs={4} lg={2}>
                             <p className={classes.stats}>{user?.credentials.followsCount}</p>
-                            <p className={classes.label}>FOLLOWS</p>
+                            <p className={classes.label}>Follows</p>
                         </Grid>
-                        <Grid item xs={5} lg={3}>
+                        <Grid item xs={4} lg={2}>
                             <p className={classes.stats}>{user?.credentials.followersCount}</p>
-                            <p className={classes.label}>FOLLOWERS</p>
+                            <p className={classes.label}>Followers</p>
+                        </Grid>
+                        <Grid item xs={4} lg={2}>
+                            <p className={classes.stats}>{user?.posts.length}</p>
+                            <p className={classes.label}>Posts</p>
                         </Grid>
                         <Grid item container xs={12} lg={6} spacing={2}>
                             {renderButtons()}
@@ -251,7 +263,7 @@ const useStyle = makeStyles((theme) => ({
         marginLeft: '10px'
     },
     stats: {
-        fontSize: "2rem !important",
+        fontSize: "1.5rem !important",
         fontFamily: "Lato,'Helvetica Neue',Arial,Helvetica,sans-serif",
         fontWeight: "400",
         marginBottom: "0 !important",

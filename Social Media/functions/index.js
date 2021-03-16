@@ -12,7 +12,7 @@ const firebaseConfig = {
     messagingSenderId: "12629594156",
     appId: "1:12629594156:web:e8fca32ef819721e608189",
     measurementId: "G-TR03GHN2HR"
-  };
+};
 
 admin.initializeApp();
 const app = express();
@@ -21,12 +21,14 @@ const db = admin.firestore();
 app.use(cors());
 app.use(express.json());
 
+
 // ASYNC FOREACH FUNCTION 
 const asyncForEach = async (array, callback) => {
     for (let index = 0; index < array.length; index++) {
         await callback(array[index], index, array);
     }
 }
+
 
 // SIGN UP
 // EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
@@ -399,6 +401,12 @@ app.post('/user/:userId/image', (req, res) => {
             })
             return imageUrl
         })
+        .then(async(imageUrl) => {
+            await db.collection('notifications').where('senderId','==',req.params.userId).get()
+            .then(async(items) => {
+                asyncForEach(items.docs, (item) => db.collection('notifications').doc(item.id).update({ imageUrl }))
+            })
+        })
         .then((imageUrl) => {
             return res.json({ message: "Image Uploaded Succesfully.", imageUrl });
         })
@@ -621,16 +629,25 @@ app.delete('/post/:postId/comment', (req, res) => {
     .catch((err) => res.json({ err: err.message }))
 })
 
-// MARK NOTIFICATION READ
-app.post('/notifications', (req, res) => {
-    let batch = db.batch();
-    req.body.forEach((notificationId) => {
-        const notification = db.doc(`/notifications/${notificationId}`);
-        batch.update(notification, { read: true });
-    });
-    batch.commit()
-        .then(() => res.json({ message: "Notifications marked read!" }))
-        .catch((err) => res.status(500).json({ error: err.message })); 
+// GET NOTIFICATION
+// userId
+app.get('/notifications/:userId', (req, res) => {
+    const notificationsArr = [];
+    db.collection('notifications').where('recieverId','==',req.params.userId).orderBy('createdAt','desc').get()
+    .then((notifications) => {
+        notifications.forEach((notification) => notificationsArr.push(notification.data()))
+    })
+    .then(() => res.status(201).json(notificationsArr))
+    .catch((err) => res.status(400).json({ error: err.message }));    
+})
+
+// MARK NOTIFICATION AS READ
+// notifications[]
+app.post('/notifications', async(req, res) => {
+    await req.body.triggerIds.forEach((id) => {
+        db.collection('notifications').doc(id).update({ read: "True"})
+    })
+    return res.status(201).json({ message: "Notifications Are Marked as Read!" });
 })
 
 // Search user
@@ -655,11 +672,6 @@ app.get('/search/:key', (req, res) => {
 // GET MESSAGEBOX
 app.get('/chat/:userId', (req, res) => {
 
-    const asyncForEach = async (array, callback) => {
-        for (let index = 0; index < array.length; index++) {
-            await callback(array[index], index, array);
-        }
-    }
     const messagesArr = [];
     db.collection('chat')
     .where('users','array-contains', req.params.userId)
@@ -778,27 +790,33 @@ app.post('/chat/message', (req, res) => {
 
 exports.api = functions.https.onRequest(app);
 
-exports.createLikeNotification = functions.firestore.document('likes/{id}')
-  .onCreate((snapshot) => {
-    return db
-      .doc(`/posts/${snapshot.data().postId}`)
-      .get()
-      .then((doc) => {
-          return db.doc(`/notifications/${snapshot.id}`).set({
-            createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
-            recipient: doc.data().userId,
-            sender: snapshot.data().userId,
-            type: 'like',
-            read: false,
-            screamId: doc.id
-          });
-        }
-      )
-      .catch((err) => console.error(err));
-  });
 
+// DATABASE TRIGGERS FOR NOTIFICATIONS
 
-exports.deleteLikeNotification = functions.firestore.document('likes/{id}')
+exports.createLikeNotifications = functions.firestore.document('posts/{postId}/likes/{likeId}')
+.onCreate(async (snapshot, context) => {
+    let likeNotification = {};
+    likeNotification.type = "Like";
+    likeNotification.createdAt = new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
+    likeNotification.read = "False";
+    likeNotification.triggerId = snapshot.id
+    
+    await db.collection('posts').doc(context.params.postId).get()
+    .then((post) => likeNotification.recieverId = post.data().userId);
+    await db.collection('posts').doc(context.params.postId).collection('likes').doc(context.params.likeId).get()
+    .then((like) => likeNotification.senderId = like.data().userId );
+    await db.collection('users').doc(likeNotification.senderId).get()
+    .then((user) => {
+        likeNotification.name = user.data().name;
+        likeNotification.surname = user.data().surname;
+        likeNotification.imageUrl = user.data().imageUrl;    
+    })
+    
+    return db.doc(`/notifications/${snapshot.id}`).set(likeNotification)
+    .catch((err) => console.log(err));
+})
+
+exports.deleteLikeNotification = functions.firestore.document('posts/{postId}/likes/{likeId}')
 .onDelete((snapshot) => {
     db.collection('notifications')
         .doc(snapshot.id)
@@ -807,30 +825,30 @@ exports.deleteLikeNotification = functions.firestore.document('likes/{id}')
         .catch((err) => console.log(err));
 })
 
+exports.createCommentNotifications = functions.firestore.document('posts/{postId}/comments/{commentId}')
+.onCreate(async (snapshot, context) => {
+    let commentNotification = {};
+    commentNotification.type = "Comment";
+    commentNotification.createdAt = new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
+    commentNotification.read = "False";
+    commentNotification.triggerId = snapshot.id
 
-exports.createCommentNotification = functions.firestore.document('comments/{id}')
-.onCreate((snapshot) => {
-    db.collection('posts')
-        .doc(snapshot.data().postId)
-        .get()
-        .then((doc) => {
-            return db.collection('notifications')
-                    .doc(snapshot.id)
-                    .set({
-                        createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
-                        reciepent: doc.data().userId,
-                        sender: snapshot.data().userId,
-                        type: 'comment',
-                        read: false,
-                        postId: doc.id
-                    })
-        })
-        .then(() => { return; })
-        .catch((err) => console.log(err));
-}) 
+    await db.collection('posts').doc(context.params.postId).get()
+    .then((post) => commentNotification.recieverId = post.data().userId);  
+    await db.collection('posts').doc(context.params.postId).collection('comments').doc(context.params.commentId).get()
+    .then((comment) => commentNotification.senderId = comment.data().userId );
+    await db.collection('users').doc(commentNotification.senderId).get()
+    .then((user) => {
+        commentNotification.name = user.data().name;
+        commentNotification.surname = user.data().surname;
+        commentNotification.imageUrl = user.data().imageUrl;    
+    })
+    
+    return db.doc(`/notifications/${snapshot.id}`).set(commentNotification)
+    .catch((err) => console.log(err));
+})
 
-
-exports.deleteCommentNotification = functions.firestore.document('comments/{id}')
+exports.deleteCommentNotification = functions.firestore.document('posts/{postId}/comments/{commentId}')
 .onDelete((snapshot) => {
     db.collection('notifications')
         .doc(snapshot.id)
@@ -840,17 +858,27 @@ exports.deleteCommentNotification = functions.firestore.document('comments/{id}'
 })
 
 exports.createFollowNotification = functions.firestore.document('follows/{id}')
-.onCreate((snapshot) => {
-    db.collection('notifications')
-        .doc(snapshot.id)
-        .set({
-            createdAt: new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'}),
-            reciepent: snapshot.data().userId,
-            sender: snapshot.data().followerId,
-            type: 'follow',
-            read: false,
-            postId: snapshot.id
-        })
+.onCreate(async (snapshot) => {
+    let followNotification = {};
+    followNotification.type = "Follow";
+    followNotification.createdAt = new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
+    followNotification.read = "False";
+    followNotification.triggerId = snapshot.id
+
+    await db.collection('follows').doc(snapshot.id).get()
+    .then((follow) => {
+        followNotification.recieverId = follow.data().userId;
+        followNotification.senderId = follow.data().followerId;
+    })
+    await db.collection('users').doc(followNotification.senderId).get()
+    .then((user) => {
+        followNotification.name = user.data().name;
+        followNotification.surname = user.data().surname;
+        followNotification.imageUrl = user.data().imageUrl;    
+    })
+
+    return db.doc(`/notifications/${snapshot.id}`).set(followNotification)
+    .catch((err) => console.log(err))
 })
 
 exports.deleteFollowNotification = functions.firestore.document('follows/{id}')

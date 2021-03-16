@@ -1,17 +1,20 @@
 import React,{ useRef, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Avatar, Typography, IconButton } from '@material-ui/core';
+import { Grid, Avatar, Typography, IconButton, CircularProgress } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { Icon, Input } from 'semantic-ui-react';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIsNavbarOpen, setActiveChatIndex, getActiveIndex } from '../features/status';
-import './styles.css';
 import { getUser, getIsLogged } from '../features/userSlice';
+import { Link, withRouter } from 'react-router-dom';
+import { message, Menu, Dropdown, Empty } from 'antd';
 import axios from 'axios';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import './styles.css';
 
-const Messages = () => {
+const Messages = (props) => {
+
 	const classes = useStyle();
 	const left = useRef();
 	const right = useRef();
@@ -27,6 +30,9 @@ const Messages = () => {
     const [refresh, setRefresh] = useState(false);
 	const [width, setWindowWidth] = useState(0);
 
+
+	if(!isLogged) props.history.push('/');
+
 	useEffect(() => {
 		if(width < 450){			
 			left.current.style.display = "flex";
@@ -35,8 +41,7 @@ const Messages = () => {
 			left.current.style.display = "flex";
 			right.current.style.display = "flex";
 		}
-	},[width])
-
+	},[width]);
 
     useEffect(() => {
         if(isLogged){
@@ -57,12 +62,14 @@ const Messages = () => {
 		window.addEventListener("resize", updateDimensions);
 		return () => 
 		  window.removeEventListener("resize",updateDimensions);
-	}, [])
+	}, []);
+
 
 	const updateDimensions = () => {
 		const width = window.innerWidth;
 		setWindowWidth(width);
-	}
+	};
+
 
 	const openChat = async(rank) => {
         const parent = document.getElementById("chatHeader");
@@ -77,7 +84,7 @@ const Messages = () => {
 			left.current.style.display = "none";
 			right.current.style.display = "flex";
 		}
-	}
+	};
 
 	const back = () => {
 		left.current.style.display = "flex";
@@ -85,41 +92,65 @@ const Messages = () => {
 	};
 
     const sentMessage = (e) => {
-        e.preventDefault();
-        axios({
-            method: 'post',
-            url: `https://us-central1-socialony.cloudfunctions.net/api/chat/message`,
-            data: {
-                senderId: user.userId,
-                recieverId: messages[activeIndex].id,
-                content: newMessage
-            }
-        }).then(() => setRefresh(!refresh))
-		.then(() => dispatch(setActiveChatIndex(0)))
-        .catch((err) => console.log(err));
-        setNewMessage('');  
+		e.preventDefault();
+		if(newMessage) {
+			axios({
+				method: 'post',
+				url: `https://us-central1-socialony.cloudfunctions.net/api/chat/message`,
+				data: {
+					senderId: user.userId,
+					recieverId: messages[activeIndex].id,
+					content: newMessage
+				}
+			}).then(() => setRefresh(!refresh))
+			.then(() => dispatch(setActiveChatIndex(0)))
+			.catch((err) => console.log(err));
+			setNewMessage('');  
+		} else {
+			message.error({ content: 'Empty Message Cant Be Sent!', duration: 2 });
+		}
     };
 
     const renderHeaders = () => {
-        return messages.map((message, index) => {
+        if(messages.length) {
+            return  messages.map((message, index) => {
+                return (
+                    <Grid key={index} container item alignItems="center" 
+                        className={`${classes.each} ${activeIndex === index ? 'activeMessageUser':''}`} 
+                        onClick={()=>{
+                            dispatch(setActiveChatIndex(index));
+                            openChat();
+                        }}
+                    >
+                        <Link to={`/user/${message.id}`}>
+                            <Avatar
+                                className={classes.chatavatar}
+                                src={message.imageUrl}
+                                alt="user pp"
+                            />
+                        </Link>
+                        <Typography variant="h6">{message.name}</Typography>
+                    </Grid>
+                )
+            })
+        } else {
             return (
-                <Grid key={index} container item alignItems="center" 
-                    className={`${classes.each} ${activeIndex === index ? 'activeMessageUser':''}`} 
-                    onClick={()=>{
-                        dispatch(setActiveChatIndex(index));
-                        openChat();
-                    }}
-                >
-                    <Avatar
-                        className={classes.chatavatar}
-                        src={message.imageUrl}
-                        alt="user pp"
+                <Grid container item justify="center">
+                    <Empty
+                        image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+                        imageStyle={{
+                            height: 60,
+                        }}
+                        description={
+                            <span>
+                                No Message 
+                            </span>
+                        }
                     />
-                    <Typography variant="h6">{message.name}</Typography>
                 </Grid>
             )
-        })
-    }
+        }
+    };
 
 
     const renderMessages = () => {
@@ -142,7 +173,7 @@ const Messages = () => {
                 )
             })
         }        
-	}
+	};
 	
 	const goToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -182,7 +213,17 @@ const Messages = () => {
 						)}
 						<Typography variant="h5">{messages[activeIndex]?.name}</Typography>
 						<IconButton aria-label="settings" className={classes.headersettings}>
-							<MoreVertIcon />
+							<Dropdown overlay={
+								<Menu>
+									<Menu.Item>
+										<Link to={`/user/${messages[activeIndex]?.id}`} rel="noopener noreferrer" className={classes.deleteicon}>
+											See {messages[activeIndex]?.name}'s Profile 
+										</Link>
+									</Menu.Item>
+								</Menu>
+							} placement="bottomLeft">
+								<MoreVertIcon />
+							</Dropdown>
 						</IconButton>
 					</Grid>
 					<Grid item container className={classes.chatmessages}>
@@ -214,7 +255,7 @@ const Messages = () => {
 	)
 }
 
-export default Messages
+export default withRouter(Messages)
 
 
 const useStyle = makeStyles((theme) => ({
@@ -240,11 +281,10 @@ const useStyle = makeStyles((theme) => ({
 		marginRight: "20px"
 	},
 	header: {
-		height: "fit-content",
 		flexDirection: "row",
 		alignItems: "center",
 		padding: "30px 30px 10px 30px",
-		heigh: "15vh"
+		height: "15vh"
 	},
 	chatavatar: {
 		height: "40px",
@@ -252,8 +292,8 @@ const useStyle = makeStyles((theme) => ({
 		marginRight: "5px"
 	},
 	chats: {
-		height: "65vh",
-		flexDirection: "column",
+		height: "67vh",
+		flexDirection: "row",
 		overflowY: "scroll"
 	},
 	title: {
@@ -266,6 +306,8 @@ const useStyle = makeStyles((theme) => ({
 		cursor: "pointer",
 		padding: "10px 30px",
         borderBottom: "1px solid #efefef",
+        height: "fit-content",
+        justifyContent: "flex-start",
 		"& h6": {
 			marginLeft: "15px",
 			fontSize: "1.5rem !important"
@@ -288,13 +330,13 @@ const useStyle = makeStyles((theme) => ({
 	chatmessages: {
 		flex: "1",
 		position: "relative",
-		paddingBottom: "10px",
 		alignContent: "flex-end",
 		flexDirection: "column-reverse"
 	},
 	input: {
 		padding: "5px 10px 5px 10px",
 		flex: 0.1,
+		alignItems: "center",
 		"& form": {
 			width: "100%",
 		},
@@ -314,7 +356,11 @@ const useStyle = makeStyles((theme) => ({
 	},
 	messages: {
 		maxHeight: "60vh",
-		overflowY: "scroll"
+		overflowY: "scroll",
+		
+        "&::-webkit-scrollbar": {
+			display: "none !important"
+		}
 	},
 	message: {
 		height: "fit-content",
@@ -337,5 +383,13 @@ const useStyle = makeStyles((theme) => ({
 		width: "fit-content",
 		position: "absolute",
 		bottom: "10vh"
-	}
+	},
+    deleteicon: {
+        display: "flex",
+        alignItems: "center",
+        padding: "2px 5px",
+        "& svg": {
+            marginRight: "10px"
+        }
+    }
 }))
