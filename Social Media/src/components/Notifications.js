@@ -21,7 +21,7 @@ const Notifications = (props) => {
         setTimeout(function () {
             const triggerIds = [];
             if(notifications){
-                notifications.map((item) => {
+                notifications.forEach((item) => {
                     if(item.read === "False") {
                         triggerIds.push(item.triggerId)
                     }

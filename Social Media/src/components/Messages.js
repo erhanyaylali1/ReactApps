@@ -60,7 +60,6 @@ const Messages = (props) => {
         }
     },[newMessage, activeIndex, isLogged, user.userId]);
 
-
 	useEffect(() => { 
 		updateDimensions();
 		window.addEventListener("resize", updateDimensions);
@@ -190,7 +189,6 @@ const Messages = (props) => {
 			)
 		}
     };
-
 
     const renderMessages = () => {
         if(activeIndex !== null){
@@ -333,9 +331,10 @@ const useStyle = makeStyles((theme) => ({
 		marginRight: "5px"
 	},
 	chats: {
-		height: "67vh",
+		maxHeight: "67vh",
 		flexDirection: "row",
-		overflowY: "scroll"
+		overflowY: "scroll",
+        alignItems: "flex-start",
 	},
 	title: {
 		padding: "20px",
