@@ -45,7 +45,7 @@ const Messages = (props) => {
 				right.current.style.display = "flex";
 			}
 		}
-	},[width]);
+	},[width, left.current, right.current]);
 
     useEffect(() => {
         if(isLogged){
