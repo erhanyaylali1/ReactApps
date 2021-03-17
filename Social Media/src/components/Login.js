@@ -17,7 +17,6 @@ const Login = ({history}) => {
 	const isLogged = useSelector(getIsLogged);
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
-    let loginTry = 0;
 
     useEffect(() => {
         if(isLogged) history.push('/');
@@ -26,7 +25,6 @@ const Login = ({history}) => {
 	const onFinish = () => {
         const key = 'updatable';
         message.loading({ content: 'Logging In...', key });
-        loginTry += 1;
 		axios({
             method: 'post',
             url: "https://us-central1-socialony.cloudfunctions.net/api/login",
@@ -42,12 +40,8 @@ const Login = ({history}) => {
 			history.push('/');
             message.success({ content: 'Logged In!', key, duration: 2 });
 		})
-        .catch((e) => {
-            if(loginTry < 2) onFinish()
-            else {
-                loginTry = 0;
-                message.error({ content: 'Email or Password is Wrong!', key, duration: 2 });
-            }
+        .catch((err) => {
+            console.log(err);
         });
     };
 

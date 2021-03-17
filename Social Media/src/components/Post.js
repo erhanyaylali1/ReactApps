@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Grid, Typography, Card, CardActions, CardHeader, CardContent, Avatar, IconButton, } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -13,13 +13,16 @@ import { Link, withRouter } from 'react-router-dom';
 import { Menu, Dropdown, message } from 'antd';
 import axios from 'axios';
 
-const Post = ({ post, history }) => {
+const Post = ({ post, history, showCommentProp }) => {
 	const classes = useStyle();
     const dispatch = useDispatch();
 	const isLogged = useSelector(getIsLogged);
 	const loggedUser = useSelector(getUser);
     const [comment, setComment] = useState('');
     const [showComment, setShowComment] = useState(false);
+    const [showLikes, setShowLikes] = useState(false);
+    const likesCountRef = useRef();
+    const likeRef = useRef();
     let isLiked = false;
     let isOwner = false;
 
@@ -33,6 +36,14 @@ const Post = ({ post, history }) => {
         }
         return isLiked
     })
+
+    useEffect(() => {
+        document.addEventListener('click', (e) => {
+            if(!likeRef.current?.contains(e.target) && !likesCountRef.current?.contains(e.target)) {
+                setShowLikes(false);
+            }
+        });
+    }, [])
 
 	const likeHandler = () => {
         if(!isLogged){
@@ -49,7 +60,8 @@ const Post = ({ post, history }) => {
                 url,
                 data: {
                     userId: loggedUser.userId
-                },headers: {
+                },
+                headers: {
                     "Content-Type": "application/json"
                 }
             }).then(() => {
@@ -125,15 +137,32 @@ const Post = ({ post, history }) => {
                                 {`${comment.name} ${comment.surname}`}
                             </Typography>
                         </Link>
-                        <Typography variant="body2">
+                        <Typography variant="body1">
                             {comment.content}   
                         </Typography>
-
                     </Grid>
                 </Grid>
             )
         })
     };
+
+    const RenderLikes = () => {
+        return post?.likes?.map((like, index) => {
+            return (
+                <Link to={`/user/${like.userId}`} className={classes.likecontainer} key={index}>
+                    <Grid item container alignItems="center">
+                        <Avatar 
+                            src={like.userData?.imageUrl}
+                            className={classes.likeimg}
+                        />
+                        <Typography variant="body1">
+                            {like.userData?.name} {like.userData?.surname}
+                        </Typography>
+                    </Grid>
+                </Link> 
+            )
+        })
+    }
 
     const cardAction = () => {
         if(isOwner) {
@@ -188,37 +217,60 @@ const Post = ({ post, history }) => {
                             <IconButton aria-label="like" style={{ padding: "10px"}} onClick={likeHandler}>
                                 <FavoriteIcon style={{color: isLiked ? "red":"rgba(0, 0, 0, 0.54)"}}/>
                             </IconButton>					
-							<span>{post?.likesCount}</span>
+                            <span 
+                                onClick={() => setShowLikes(!showLikes)} 
+                                ref={likesCountRef}
+                                className={classes.likescountspan}                            
+                            >
+                                {post?.likesCount}
+                            </span>
 						</span>
 						<span>
-                            <IconButton aria-label="comment" style={{ padding: "10px", color: "rgba(0, 0, 0, 0.54)"}} onClick={() => setShowComment(!showComment)}>
+                            <IconButton aria-label="comment" style={{ padding: "10px", color: "rgba(0, 0, 0, 0.54)"}} 
+                                onClick={() => setShowComment(!showComment)}
+                            >
                                 <CommentIcon />
                             </IconButton>								
 							{post?.commentsCount}
 						</span>
 					</Grid>
 					<Grid item xs={12} lg={true}>
-						<Input 
-							className={classes.comment} 
-							icon={
-								<Icon 
-									onClick={commentHandler}
-									name='paper plane' 
-									inverted 
-									circular 
-									link 
-								/>
-							} 
-							value={comment}
-							onChange={(e) => setComment(e.target.value)} 
-							placeholder='Comment...' />
+                        {isLogged && (
+                            <Input 
+                                className={classes.comment} 
+                                icon={
+                                    <Icon 
+                                        onClick={commentHandler}
+                                        name='paper plane' 
+                                        inverted 
+                                        circular 
+                                        link 
+                                    />
+                                } 
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)} 
+                                placeholder='Comment...' 
+                            />
+                        )}
 					</Grid>
 				</Grid>			
 			</CardActions>
-                            
-            <Grid item container xs={12} className={classes.commentwindow} style={{display: showComment ? 'flex':'none'}}>
-                {RenderComments()}
-            </Grid>
+            {showCommentProp ? (
+                <React.Fragment>
+                    <Grid item container xs={12} className={classes.commentwindow} style={{display: !showComment ? 'flex':'none'}}>
+                        {RenderComments()}
+                    </Grid>
+                </React.Fragment>
+            ):(
+                <Grid item container xs={12} className={classes.commentwindow} style={{display: showComment ? 'flex':'none'}}>
+                    {RenderComments()}
+                </Grid>
+            )}
+
+            <Grid container item xs={10} lg={6} className={classes.postlikes} style={{ display: showLikes ? 'block':'none' }} ref={likeRef}>
+                <Typography variant="h6" className={classes.liketitle}>Users that liked this post</Typography>
+                {RenderLikes()}
+            </Grid>            
 		</Card>
 	)
 }
@@ -227,9 +279,14 @@ export default withRouter(Post)
 
 const useStyle = makeStyles(() => ({
 	card: {
+        overflow: "inherit",
+        position: "relative",
 		width: "100%",
 		marginBottom: "25px"
-	},
+    },
+    likeimg: {
+        marginRight: "15px"
+    },
 	comment: {
         width: "100%",
         "& input:focus" : {
@@ -256,6 +313,10 @@ const useStyle = makeStyles(() => ({
         height: "30px",
         width: "30px"
     },
+    commenttime: {
+        width: "max-content",
+        marginLeft: "auto",
+    },
     eachcomment: {
         borderRadius: "10px",
         backgroundColor: "whitesmoke",
@@ -275,5 +336,31 @@ const useStyle = makeStyles(() => ({
         "& svg": {
             marginRight: "10px"
         }
+    },
+    postlikes: {
+        overflowY: "auto",
+        maxHeight: "400px",
+        bottom: "50%",
+        left: "10%",
+        backgroundColor: "white",
+        boxShadow: "0px 0px 3px 0.5px rgba(0,0,0,0.75)",
+        borderRadius: "5px",
+        zIndex: "55",
+        position: "absolute"
+    },
+    likecontainer: {
+        display: "flex",
+        padding: "10px 15px",
+        width: "100%",
+        "&:hover": {
+            backgroundColor: "#efefef"
+        }
+    },
+    likescountspan: {
+        cursor: "pointer",
+    },
+    liketitle: {
+        padding: "10px 15px",
+        borderBottom: "2px solid #ededed"
     }
 }))

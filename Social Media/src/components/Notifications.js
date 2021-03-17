@@ -38,9 +38,8 @@ const Notifications = (props) => {
                     })
                 }
             }
-        }, 5000)
+        }, 2000)
     },[notifications]);
-
 
     const renderNotifications = () => {
         if(notifications.length) {
@@ -48,6 +47,7 @@ const Notifications = (props) => {
                 return (
                     <Grid item container xs={12} justify="center" 
                         className={classes.each} key={index} 
+                        
                     >
                         <Grid item container xs={2} lg={1}>
                             <Link to={`/user/${item.senderId}`}>
@@ -58,11 +58,19 @@ const Notifications = (props) => {
                         </Grid>
                         <Grid item container xs={10} lg={11}>
                             <Typography variant="body1" className={classes.sender}>
-                                <Link to='' component="span">
-                                    {`${item.name} ${item.surname}`} 
-                                    {renderAction(item.type)}
-                                    <small className={classes.time}>{item.createdAt}</small>
-                                </Link>
+                                {item.type === "Follow" ? (
+                                    <Link to={`/user/${item.senderId}`}>
+                                        {`${item.name} ${item.surname}`} 
+                                        {renderAction(item.type)}
+                                        <small className={classes.time}>{item.createdAt}</small>
+                                    </Link>
+                                ):(
+                                    <Link to={`/post/${item.postId}`}>
+                                        {`${item.name} ${item.surname}`} 
+                                        {renderAction(item.type)}
+                                        <small className={classes.time}>{item.createdAt}</small>
+                                    </Link>
+                                )}
                             </Typography>
                             {item.read === "False" && <Icon className={`circle ${classes.notread}`} />}
                         </Grid>

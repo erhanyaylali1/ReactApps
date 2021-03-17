@@ -14,13 +14,22 @@ const firebaseConfig = {
     measurementId: "G-TR03GHN2HR"
 };
 
+var corsOptions = {
+    origin: '*',
+    optionsSuccessStatus: 200
+}
+
 admin.initializeApp();
 const app = express();
 firebase.initializeApp(firebaseConfig);
 const db = admin.firestore();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
-
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 // ASYNC FOREACH FUNCTION 
 const asyncForEach = async (array, callback) => {
@@ -32,7 +41,7 @@ const asyncForEach = async (array, callback) => {
 
 // SIGN UP
 // EMAIL, PASSWORD, USERNAME, NAME, SURNAME, PHONE
-app.post('/signup', (req, res) => {    
+app.post('/signup', (req, res, next) => {    
 
     const newUser = {
         email: req.body.email,
@@ -52,9 +61,9 @@ app.post('/signup', (req, res) => {
         .then((data) => {
             data.forEach((doc) => { 
                 if(doc.data().username === newUser.username){
-                    return res.status(400).json({ error: "This username is already taken." });
+                    return res.status(500).send("This username is already taken.");
                 } else if(doc.data().phone === newUser.phone){
-                    return res.status(400).json({ error: "This phone is already taken." });
+                    return res.status(500).send("This phone is already taken.");
                 }
             })
         })
@@ -67,7 +76,7 @@ app.post('/signup', (req, res) => {
                 return res.status(201).json({ message: `User ${data.user.uid} signed up successfully.` });
             })
             .catch((err) => {
-                return res.status(404).json(err);
+                return res.status(500).send(err.message);
             });
         })
 
@@ -76,7 +85,7 @@ app.post('/signup', (req, res) => {
 
 // LOGIN
 // EMAIL, PASSWORD
-app.post('/login', cors(), (req, res) => {
+app.post('/login', (req, res, next) => {
     const userData = {};
     firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password)
     .then((data) => {
@@ -125,14 +134,14 @@ app.post('/login', cors(), (req, res) => {
 });
 
 // LOGOUT
-app.post('/logout', (req, res) => {
+app.post('/logout', (req, res, next) => {
     firebase.auth().signOut();
     return res.status(201).json({ message: "Signed Out Succesfully!" });
 })
 
 // ADD USER DETAIL
 // BIO, WEBSITE, LOCATION
-app.post('/user/:userId/add-detail', (req, res) => {
+app.post('/user/:userId/add-detail', (req, res, next) => {
     
     const userDetails = {
         bio: req.body.bio,
@@ -150,7 +159,7 @@ app.post('/user/:userId/add-detail', (req, res) => {
 });
 
 // GET USER DETAILS
-app.get('/user/:userId', async(req, res) => {
+app.get('/user/:userId', async(req, res, next) => {
 
     let userData = {};
 
@@ -169,7 +178,8 @@ app.get('/user/:userId', async(req, res) => {
                 await db.collection('posts').doc(post.id).collection('likes').get()
                 .then(async(likes) => {
                     await asyncForEach(likes.docs, async(like) => {
-                        likesArr.push({...like.data(), likeId: like.id});
+                        await db.collection('users').doc(like.data().userId).get()
+                        .then((user) => likesArr.push({...like.data(), likeId: like.id, userData: user.data()}))
                     })
                 })
                 await db.collection('posts').doc(post.id).collection('comments').get()
@@ -184,9 +194,23 @@ app.get('/user/:userId', async(req, res) => {
         })
         .then(async() => {
             await db.collection('follows').where('followerId', '==', req.params.userId).get()
-            .then((follows) => userData.credentials.followsCount = follows.size)
+            .then(async(follows) => {
+                userData.credentials.followsCount = follows.size;
+                userData.credentials.follows = [];
+                await asyncForEach(follows.docs, async(follow) => {
+                    await db.collection('users').doc(follow.data().userId).get()
+                    .then((user) => userData.credentials.follows.push({ ...user.data(), userId: user.id }))
+                })
+            })
             await db.collection('follows').where('userId', '==', req.params.userId).get()
-            .then((followers) => userData.credentials.followersCount = followers.size)
+            .then(async(followers) => {
+                userData.credentials.followersCount = followers.size
+                userData.credentials.followers = [];
+                await asyncForEach(followers.docs, async(follower) => {
+                    await db.collection('users').doc(follower.data().followerId).get()
+                    .then((user) => userData.credentials.followers.push({ ...user.data(), userId: user.id }))
+                })
+            })
         })
         .then(() => {
             function sortByKey(array, key) {
@@ -202,7 +226,7 @@ app.get('/user/:userId', async(req, res) => {
 });
 
 // GET USER FOLLOWS
-app.get('/user/:userId/follows', (req, res) => {
+app.get('/user/:userId/follows', (req, res, next) => {
     const userData = {}
     const userId = req.params.userId;
 
@@ -244,7 +268,7 @@ app.get('/user/:userId/follows', (req, res) => {
 })
 
 // GET FOLLOWED USERS POSTS
-app.get('/user/:userId/home', cors(), async (req, res) => {
+app.get('/user/:userId/home', async (req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', '*');
     res.setHeader("Access-Control-Allow-Origin", "*");
     const userIds = [];
@@ -264,8 +288,9 @@ app.get('/user/:userId/home', cors(), async (req, res) => {
                     const commentsArr = [];
                     await db.collection('posts').doc(post.id).collection('likes').get()
                     .then(async(likes) => {
-                        await asyncForEach(likes.docs, async(like) => {
-                            likesArr.push({...like.data(), likeId: like.id});
+                        await asyncForEach(likes.docs, async(like) => { 
+                            await db.collection('users').doc(like.data().userId).get()
+                            .then((user) => likesArr.push({...like.data(), likeId: like.id, userData: user.data()}))                         
                         })
                     })
                     await db.collection('posts').doc(post.id).collection('comments').get()
@@ -294,7 +319,7 @@ app.get('/user/:userId/home', cors(), async (req, res) => {
 
 // FOLLOW A USER
 // FOLLOWERID
-app.post('/user/:userId/follow', (req, res) => {   
+app.post('/user/:userId/follow', (req, res, next) => {   
     db.collection('follows')
         .where('followerId','==',req.body.followerId)
         .where('userId', '==', req.params.userId)
@@ -315,7 +340,7 @@ app.post('/user/:userId/follow', (req, res) => {
 
 // UNFOLLOW A USER
 // FOLLOWERID
-app.post('/user/:userId/unfollow', (req, res) => {
+app.post('/user/:userId/unfollow', (req, res, next) => {
     db.collection('follows')
     .where('followerId','==',req.body.followerId)
     .where('userId','==', req.params.userId)
@@ -334,7 +359,7 @@ app.post('/user/:userId/unfollow', (req, res) => {
 })
 
 // POST USER IMAGE
-app.post('/user/:userId/image', (req, res) => {
+app.post('/user/:userId/image', (req, res, next) => {
 
     
     const BusBoy = require("busboy");
@@ -420,7 +445,7 @@ app.post('/user/:userId/image', (req, res) => {
 
 // CREATE A POST
 // USERID, CONTENT
-app.post('/post', (req, res) => {
+app.post('/post', (req, res, next) => {
 
     if(req.method !== "POST"){
         return res.status(400).json({ error: "Method not allowed." });
@@ -450,61 +475,48 @@ app.post('/post', (req, res) => {
 });
 
 // GET A POST
-app.get('/post/:postId', (req, res ) => {
+app.get('/post/:postId', (req, res, next ) => {
 
     let postData = {};
     const selectedPost = db.collection('posts').doc(req.params.postId);
 
     selectedPost
     .get()
-    .then((doc) => {
+    .then(async (doc) => {
         if(!doc.exists) return res.status(404).json({ error: "Post not found." });
         
         postData = doc.data();
-        postData.id = doc.id;
-
-        selectedPost
-        .collection('likes')
-        .get()
-        .then((items) => {
-            if(!items.empty){
-                const likes = [];
-                items.forEach((like) => likes.push({...like.data(), likeId: like.id}))
-                postData.likes = likes;
-            }
-        })
-        .then(() => {
-            selectedPost
-            .collection('comments')
-            .get()
-            .then((items) => {
-                if(!items.empty){
-                    const comments = [];
-                    items.forEach((comment) => comments.push({...comment.data(), commentId: comment.id}))
-                    postData.comments = comments;
-                }
+        postData.postId = doc.id;
+        postData.likes = [];
+        await selectedPost.collection('likes').get()
+        .then(async(likes) => {
+            await asyncForEach(likes.docs, async(like) => {
+                await db.collection('users').doc(like.data().userId).get()
+                .then((user) => postData.likes.push({ ...like.data(), likedId: like.id, userData: user.data() }))
             })
-            .then(() => res.json(postData))      
-        })      
+        });
+        postData.comments = [];
+        await selectedPost.collection('comments').get()
+        .then(async(comments) => {
+            await asyncForEach(comments.docs, (comment) => postData.comments.push(comment.data()))
+        });      
     })
-    .catch((err) => {
-        return res.status(500).json({ message: err.message});
-    })
+    .then(() => res.status(201).json(postData))
+    .catch((err) => res.status(500).json({ message: err.message }))
 });
 
 // DELETE A POST
-app.delete('/post/:postId', (req, res) => {
+app.delete('/post/:postId', (req, res, next) => {
     db.collection('posts')
     .doc(req.params.postId)
     .delete()
     .then(() => res.json({ message: "Post Deleted!" }))
-    .catch((err) => res.json({ error: err.message }));
-        
+    .catch((err) => res.json({ error: err.message })); 
 })
 
 // LIKE A POST
 // userId
-app.post('/post/:postId/like', (req, res) => {
+app.post('/post/:postId/like', (req, res, next) => {
 
     const selectedPost = db.collection('posts').doc(req.params.postId);
 
@@ -537,7 +549,7 @@ app.post('/post/:postId/like', (req, res) => {
 
 // UNLIKE A POST
 // userId
-app.post('/post/:postId/unlike', (req, res) => {
+app.post('/post/:postId/unlike',(req, res, next) => {
     const selectedPost = db.collection('posts').doc(req.params.postId);
 
     selectedPost
@@ -570,7 +582,7 @@ app.post('/post/:postId/unlike', (req, res) => {
 
 // POST A COMMENT TO A POST
 // userId, content
-app.post('/post/:postId/comment', (req, res) => {
+app.post('/post/:postId/comment', (req, res, next) => {
 
     const newComment = {
         userId: req.body.userId,
@@ -608,30 +620,9 @@ app.post('/post/:postId/comment', (req, res) => {
 
 });
 
-// DELETE A COMMENT
-// commentId
-app.delete('/post/:postId/comment', (req, res) => {
-
-    const selectedPost = db.collection('posts').doc(req.params.postId);
-
-    selectedPost
-    .collection('comments')
-    .doc(req.body.commentId)
-    .delete()
-    .then(() => {
-        selectedPost.get().then((doc) => doc.data().commentsCount -1)
-        .then((commentsCount) => {
-            selectedPost.update({ commentsCount })
-        })
-        .then(() => res.status(201).json({ message: "Comment Deleted!" }))
-        .catch((err) => res.status(400).json({ err: err.message }))
-    })
-    .catch((err) => res.json({ err: err.message }))
-})
-
 // GET NOTIFICATION
 // userId
-app.get('/notifications/:userId', (req, res) => {
+app.get('/notifications/:userId', (req, res, next) => {
     const notificationsArr = [];
     db.collection('notifications').where('recieverId','==',req.params.userId).orderBy('createdAt','desc').get()
     .then((notifications) => {
@@ -643,7 +634,7 @@ app.get('/notifications/:userId', (req, res) => {
 
 // MARK NOTIFICATION AS READ
 // notifications[]
-app.post('/notifications', async(req, res) => {
+app.post('/notifications', async(req, res, next) => {
     await req.body.triggerIds.forEach((id) => {
         db.collection('notifications').doc(id).update({ read: "True"})
     })
@@ -651,7 +642,7 @@ app.post('/notifications', async(req, res) => {
 })
 
 // Search user
-app.get('/search/:key', (req, res) => {
+app.get('/search/:key', (req, res, next) => {
 
     const results = [];
     db
@@ -670,7 +661,7 @@ app.get('/search/:key', (req, res) => {
 })
 
 // GET MESSAGEBOX
-app.get('/chat/:userId', (req, res) => {
+app.get('/chat/:userId', (req, res, next) => {
 
     const messagesArr = [];
     db.collection('chat')
@@ -709,7 +700,7 @@ app.get('/chat/:userId', (req, res) => {
 
 // SEND A MESSAGE
 // SENDERID, RECIEVERID, CONTENT
-app.post('/chat/message', (req, res) => {
+app.post('/chat/message', (req, res, next) => {
     const list = [[req.body.senderId, req.body.recieverId],[req.body.recieverId, req.body.senderId]]
     db.collection('chat')
     .where('users', '==', list[1])
@@ -786,6 +777,32 @@ app.post('/chat/message', (req, res) => {
     })
 })
 
+//GET MESSAGE NOTIFICATIONS
+app.get('/chat/notifications/:userId', (req, res, next) => {
+    const notifications = [];
+    db.collection('chatnotifications').where('recieverId','==', req.params.userId).where('read','==','False').get()
+    .then(async (items) => {
+        await asyncForEach(items.docs, async(item) => {
+            notifications.push(item.data());
+        })
+    })
+    .then(() => res.status(201).json(notifications))
+    .catch((err) => res.status(400).json(err));
+})
+
+// MARK MESSAGE NOTIFICATIONS AS READ
+// triggerIds[]
+app.post('/chat/notifications', async(req, res, next) => {
+    console.log(req.body.triggerIds);
+    if(req.body.triggerIds){
+        await asyncForEach(req.body.triggerIds, async(id) => {
+            await db.collection('chatnotifications').doc(id).update({ read: "True"})
+        })
+        return res.status(201).send("Messages Succesfully Marked as Read");
+    }
+    return res.status(500).send("No Trigger Id");
+})
+
 
 
 exports.api = functions.https.onRequest(app);
@@ -793,13 +810,34 @@ exports.api = functions.https.onRequest(app);
 
 // DATABASE TRIGGERS FOR NOTIFICATIONS
 
+exports.createMessageNotification = functions.firestore.document('chat/{chatId}/messages/{id}')
+.onCreate(async (snapshot, context) => {
+    let chatNotification = {};
+    chatNotification.type = "Message";
+    chatNotification.createadAt = new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'});
+    chatNotification.read = "False";
+    chatNotification.triggerId = snapshot.id;
+    chatNotification.senderId = snapshot.data().sender;
+
+    await db.collection('chat').doc(context.params.chatId).get()
+    .then((chat) => {
+        if(chat.data().users[0] === chatNotification.senderId) chatNotification.recieverId = chat.data().users[1]
+        else chatNotification.recieverId = chat.data().users[0]
+        })
+    
+
+    return db.doc(`/chatnotifications/${snapshot.id}`).set(chatNotification)
+    .catch((err) => console.log(err));
+})
+
 exports.createLikeNotifications = functions.firestore.document('posts/{postId}/likes/{likeId}')
 .onCreate(async (snapshot, context) => {
     let likeNotification = {};
     likeNotification.type = "Like";
     likeNotification.createdAt = new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
     likeNotification.read = "False";
-    likeNotification.triggerId = snapshot.id
+    likeNotification.triggerId = snapshot.id;
+    likeNotification.postId = context.params.postId;
     
     await db.collection('posts').doc(context.params.postId).get()
     .then((post) => likeNotification.recieverId = post.data().userId);
@@ -811,9 +849,12 @@ exports.createLikeNotifications = functions.firestore.document('posts/{postId}/l
         likeNotification.surname = user.data().surname;
         likeNotification.imageUrl = user.data().imageUrl;    
     })
-    
-    return db.doc(`/notifications/${snapshot.id}`).set(likeNotification)
-    .catch((err) => console.log(err));
+    if(likeNotification.recieverId === likeNotification.senderId) {
+        return
+    } else {
+        return db.doc(`/notifications/${snapshot.id}`).set(likeNotification)
+        .catch((err) => console.log(err));
+    }
 })
 
 exports.deleteLikeNotification = functions.firestore.document('posts/{postId}/likes/{likeId}')
@@ -831,7 +872,8 @@ exports.createCommentNotifications = functions.firestore.document('posts/{postId
     commentNotification.type = "Comment";
     commentNotification.createdAt = new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
     commentNotification.read = "False";
-    commentNotification.triggerId = snapshot.id
+    commentNotification.triggerId = snapshot.id;
+    commentNotification.postId = context.params.postId;
 
     await db.collection('posts').doc(context.params.postId).get()
     .then((post) => commentNotification.recieverId = post.data().userId);  
@@ -844,8 +886,12 @@ exports.createCommentNotifications = functions.firestore.document('posts/{postId
         commentNotification.imageUrl = user.data().imageUrl;    
     })
     
-    return db.doc(`/notifications/${snapshot.id}`).set(commentNotification)
-    .catch((err) => console.log(err));
+    if(commentNotification.recieverId === commentNotification.senderId) {
+        return
+    } else {
+        return db.doc(`/notifications/${snapshot.id}`).set(commentNotification)
+        .catch((err) => console.log(err));
+    }    
 })
 
 exports.deleteCommentNotification = functions.firestore.document('posts/{postId}/comments/{commentId}')
@@ -861,9 +907,9 @@ exports.createFollowNotification = functions.firestore.document('follows/{id}')
 .onCreate(async (snapshot) => {
     let followNotification = {};
     followNotification.type = "Follow";
-    followNotification.createdAt = new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'})
+    followNotification.createdAt = new Date().toLocaleString('tr-TR', {timeZone:'Europe/Istanbul'});
     followNotification.read = "False";
-    followNotification.triggerId = snapshot.id
+    followNotification.triggerId = snapshot.id;
 
     await db.collection('follows').doc(snapshot.id).get()
     .then((follow) => {
@@ -877,8 +923,12 @@ exports.createFollowNotification = functions.firestore.document('follows/{id}')
         followNotification.imageUrl = user.data().imageUrl;    
     })
 
-    return db.doc(`/notifications/${snapshot.id}`).set(followNotification)
-    .catch((err) => console.log(err))
+    if(followNotification.recieverId === followNotification.senderId) {
+        return
+    } else {
+        return db.doc(`/notifications/${snapshot.id}`).set(followNotification)
+        .catch((err) => console.log(err))
+    }        
 })
 
 exports.deleteFollowNotification = functions.firestore.document('follows/{id}')

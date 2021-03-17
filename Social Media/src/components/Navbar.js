@@ -9,7 +9,7 @@ import { SearchOutlined, DownCircleOutlined } from '@ant-design/icons';
 import { Avatar, Grid, BottomNavigation, BottomNavigationAction, Badge  } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIsNavbarOpen, toggleNavbar } from '../features/status';
-import { getIsLogged, logout as signOut, getUser, getNotifications } from '../features/userSlice';
+import { getIsLogged, logout as signOut, getUser, getNotifications, getMessages } from '../features/userSlice';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import NotificationsIcon from '@material-ui/icons/Notifications';
@@ -26,6 +26,7 @@ const Navbar = (props) => {
 	const classes = useStyles();
 	const isLogged = useSelector(getIsLogged);
 	const isOpen = useSelector(getIsNavbarOpen);
+    const messagesNotification = useSelector(getMessages);
     const notificationsCount = useSelector(getNotifications).filter((item) => item.read === "False").length;
 	const user = useSelector(getUser);
     const dispatch = useDispatch();
@@ -166,7 +167,11 @@ const Navbar = (props) => {
                                     showLabels
                                 >
                                     <BottomNavigationAction label="Home" icon={<HomeIcon />} />
-                                    <BottomNavigationAction label="Messages" icon={<MailOutlineIcon />} />
+                                    <BottomNavigationAction label="Messages" icon={
+                                        <Badge color="secondary" variant="dot" invisible={!messagesNotification.length}>
+                                           <MailOutlineIcon />
+                                        </Badge>
+                                    }/>
                                     <BottomNavigationAction label="Notifications" icon={
                                         <Badge badgeContent={notificationsCount} color="primary">
                                             <NotificationsIcon />

@@ -1,7 +1,7 @@
 import React,{ useState, useEffect } from 'react';
-import { Grid, Typography, Button, CircularProgress } from '@material-ui/core';
+import { Grid, Typography, Button, CircularProgress, List, ListItem, ListItemText, Avatar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import Post from './Post';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
@@ -9,7 +9,7 @@ import { getIsLogged, getUser, setImageUrl, setUpdatedUser } from '../features/u
 import { getRefresh, setActiveChatIndex, refresh as setRefresh } from '../features/status';
 import { message, Input } from 'antd';
 import EditIcon from '@material-ui/icons/Edit';
-import { Modal, Button as Btn } from 'semantic-ui-react';
+import { Modal, Button as Btn, Icon } from 'semantic-ui-react';
 
 
 const User = (props) => {
@@ -22,6 +22,8 @@ const User = (props) => {
     const [user, setUser] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const [open, setOpen] = useState(false);
+    const [openFollowsModal, setOpenFollowsModal] = useState(false);
+    const [openFollowersModal, setOpenFollowersModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true); 
     
     const profileId = props.match.params.userId
@@ -29,15 +31,16 @@ const User = (props) => {
     const isFollowBack = loggedUser?.followers?.includes(profileId) ? true:false;
     const isOwn = loggedUser?.userId === profileId ? true:false;
 
+
     useEffect(() => {
         axios({
             method: 'get',
             url: `https://us-central1-socialony.cloudfunctions.net/api/user/${profileId}`,
         }).then((res) => setUser(res.data))
         .then(() => setIsLoading(false))
-        .catch((err) => console.log(err));
-    },[profileId, refresh])
-    
+        .catch((err) => console.log(err))
+    },[profileId, refresh]);
+
     const RenderPosts = () => {
         if(user) {
             return user.posts.map((post, index) => (
@@ -78,7 +81,6 @@ const User = (props) => {
     const sendNewMessage = () => {
         const key = 'updatable';
         message.loading({ content: 'Sending...', key });
-        setOpen(false);
         axios({
             method: 'post',
             url: `https://us-central1-socialony.cloudfunctions.net/api/chat/message`,
@@ -87,15 +89,38 @@ const User = (props) => {
                 recieverId: profileId,
                 content: newMessage
             }
-        }).then((res) => {
+        }).then(() => {     
             message.success({ content: `Message Sent!'`, key, duration: 2 });
+        })
+        .then(() => {       
             dispatch(setActiveChatIndex(0));
+            setOpen(false);
             setNewMessage('');  
         })
         .then((() => {
             props.history.push('/messages');
         }))
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            axios({
+                method: 'post',
+                url: `https://us-central1-socialony.cloudfunctions.net/api/chat/message`,
+                data: {
+                    senderId: loggedUser.userId,
+                    recieverId: profileId,
+                    content: newMessage
+                }
+            })
+            .then(() => message.success({ content: `Message Sent!'`, key, duration: 2 }))
+            .then(() => {       
+                dispatch(setActiveChatIndex(0));
+                setOpen(false);
+                setNewMessage('');  
+            })
+            .then((() => {
+                props.history.push('/messages');
+            }))
+            .catch((err) => console.log(err));
+        });
     }
 
     const imageUpload = (e) => {
@@ -115,7 +140,6 @@ const User = (props) => {
             message.error({ content: 'Image Could Not Uploaded!', key, duration: 2 });
         });
     }
-
 
     const renderButtons = () => {
         if(!isLogged){
@@ -162,6 +186,48 @@ const User = (props) => {
         } 
     }
 
+    const renderFollows = () => {
+        if(user) {
+            return user.credentials.follows.map((follow, index) => {
+                return (
+                    <Grid item container xs={12} lg={6} key={index} onClick={() => setOpenFollowsModal(false)}>
+                        <Link to={`/user/${follow.userId}`} className={classes.modalitem}>
+                            <ListItem button>
+                                <Avatar 
+                                    src={follow.imageUrl}
+                                />
+                                <ListItemText className={classes.followsName}>
+                                    {follow.name} {follow.surname}
+                                </ListItemText>
+                            </ListItem>
+                        </Link>
+                    </Grid>
+                )
+            })
+        }
+    }
+
+    const renderFollowers = () => {
+        if(user) {
+            return user.credentials.followers.map((follow, index) => {
+                return (
+                    <Grid item container xs={12} lg={6} key={index} onClick={() => setOpenFollowersModal(false)}>
+                        <Link to={`/user/${follow.userId}`} className={classes.modalitem}>
+                            <ListItem button>
+                                <Avatar 
+                                    src={follow.imageUrl}
+                                />
+                                <ListItemText className={classes.followsName}>
+                                    {follow.name} {follow.surname}
+                                </ListItemText>
+                            </ListItem>
+                        </Link>
+                    </Grid>
+                )
+            })
+        }
+    }
+
     return (
         <Grid container className={classes.root}>
             <Grid item xs={1} lg={2} />
@@ -190,12 +256,47 @@ const User = (props) => {
                         </Typography>
                     </Grid>
                     <Grid item container justify="center" alignItems="center" xs={12} lg={6} spacing={2}>
-                        <Grid item xs={4} lg={2}>
-                            <p className={classes.stats}>{user?.credentials.followsCount}</p>
+                        <Grid item xs={4} lg={2} className={classes.followdiv}>
+                            <Modal
+                                open={openFollowsModal}
+                                onClose={() => setOpenFollowsModal(false)}
+                                onOpen={() => setOpenFollowsModal(true)}
+                                trigger={<p className={classes.stats}>{user?.credentials.followsCount}</p>}
+                            >
+                                <Modal.Header className={classes.modalheader}>
+                                    {user?.credentials.name} {user?.credentials.surname}'s Follows
+                                    <Icon className="close" onClick={() => setOpenFollowsModal(false)}/>
+                                </Modal.Header>
+                                <Modal.Content image scrolling> 
+                                    <List style={{ width: "100%" }}>
+                                        <Grid container>
+                                            {renderFollows()}
+                                        </Grid>
+                                    </List>
+                                </Modal.Content>
+                            </Modal>
+                            
                             <p className={classes.label}>Follows</p>
                         </Grid>
                         <Grid item xs={4} lg={2}>
-                            <p className={classes.stats}>{user?.credentials.followersCount}</p>
+                            <Modal
+                                open={openFollowersModal}
+                                onClose={() => setOpenFollowersModal(false)}
+                                onOpen={() => setOpenFollowersModal(true)}
+                                trigger={<p className={classes.stats}>{user?.credentials.followersCount}</p>}
+                            >
+                                <Modal.Header className={classes.modalheader}>
+                                    {user?.credentials.name} {user?.credentials.surname}'s Followers
+                                    <Icon className="close" onClick={() => setOpenFollowersModal(false)}/>
+                                </Modal.Header>
+                                <Modal.Content image scrolling> 
+                                    <List style={{ width: "100%" }}>
+                                        <Grid container>
+                                            {renderFollowers()}
+                                        </Grid>
+                                    </List>
+                                </Modal.Content>
+                            </Modal>
                             <p className={classes.label}>Followers</p>
                         </Grid>
                         <Grid item xs={4} lg={2}>
@@ -268,7 +369,8 @@ const useStyle = makeStyles((theme) => ({
         fontWeight: "400",
         marginBottom: "0 !important",
         textAlign: "center",
-        color: "#fff"
+        color: "#fff",
+        cursor: "pointer"
     },
     label: {
         fontSize: "1rem",
@@ -288,6 +390,25 @@ const useStyle = makeStyles((theme) => ({
         color: "white",
         right: "0",
         cursor: "pointer"
+    },
+    followsName: {
+        marginLeft: "20px",
+        "& span" : {
+            fontSize: "1.3rem",
+        }
+    },
+    modalitem: {
+        width: "100%",
+        color: "black"
+    },
+    modalheader: {
+        padding: "15px 20px !important",
+        display: "flex !important",
+        alignItems: "center",
+        "& i": {
+            marginLeft: "auto",
+            cursor: "pointer"
+        }
     }
     
 }))

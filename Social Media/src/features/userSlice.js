@@ -5,7 +5,8 @@ export const userSlice = createSlice({
     initialState: {
         user: {},
         isLogged: false,
-        notifications: []
+        notifications: [],
+        messages: [],
     },
     reducers: {
         login: (state, action) => {
@@ -24,12 +25,16 @@ export const userSlice = createSlice({
         },
         setNotifications: (state, action) => {
             state.notifications = action.payload;
+        },
+        setMessages: (state, action) => {
+            state.messages = action.payload;
         }
     },
 });
 
-export const { login, logout, setUpdatedUser, setOldMessages, setImageUrl, setNotifications } = userSlice.actions;
+export const { login, logout, setUpdatedUser, setOldMessages, setImageUrl, setNotifications, setMessages } = userSlice.actions;
 export const getUser = (state) => state.user.user;
 export const getIsLogged = (state) => state.user.isLogged;
 export const getNotifications = (state) => state.user.notifications;
+export const getMessages = (state) => state.user.messages;
 export default userSlice.reducer;

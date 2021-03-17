@@ -6,11 +6,12 @@ import { Icon, Input } from 'semantic-ui-react';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIsNavbarOpen, setActiveChatIndex, getActiveIndex } from '../features/status';
-import { getUser, getIsLogged } from '../features/userSlice';
+import { getUser, getIsLogged, getMessages } from '../features/userSlice';
 import { Link, withRouter } from 'react-router-dom';
 import { message, Menu, Dropdown, Empty } from 'antd';
 import axios from 'axios';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import './styles.css';
 
 const Messages = (props) => {
@@ -25,7 +26,8 @@ const Messages = (props) => {
     const isLogged = useSelector(getIsLogged);
     const isOpen = useSelector(getIsNavbarOpen);
     const activeIndex = useSelector(getActiveIndex);
-    const [messages, setMessages] = useState([]);
+    const messagesNotification = useSelector(getMessages);
+    const [messages, setMessages] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const [refresh, setRefresh] = useState(false);
 	const [width, setWindowWidth] = useState(0);
@@ -34,12 +36,14 @@ const Messages = (props) => {
 	if(!isLogged) props.history.push('/');
 
 	useEffect(() => {
-		if(width < 450){			
-			left.current.style.display = "flex";
-			right.current.style.display = "none";
-		} else {
-			left.current.style.display = "flex";
-			right.current.style.display = "flex";
+		if(left.current && right.current) {
+			if(width < 450){			
+				left.current.style.display = "flex";
+				right.current.style.display = "none";
+			} else {
+				left.current.style.display = "flex";
+				right.current.style.display = "flex";
+			}
 		}
 	},[width]);
 
@@ -64,12 +68,10 @@ const Messages = (props) => {
 		  window.removeEventListener("resize",updateDimensions);
 	}, []);
 
-
 	const updateDimensions = () => {
 		const width = window.innerWidth;
 		setWindowWidth(width);
 	};
-
 
 	const openChat = async(rank) => {
         const parent = document.getElementById("chatHeader");
@@ -81,14 +83,18 @@ const Messages = (props) => {
             }
         })
 		if(width < 450) {
-			left.current.style.display = "none";
-			right.current.style.display = "flex";
+			if(left.current && right.current) {
+				left.current.style.display = "none";
+				right.current.style.display = "flex";
+			}
 		}
 	};
 
 	const back = () => {
-		left.current.style.display = "flex";
-		right.current.style.display = "none";
+		if(left.current && right.current){
+			left.current.style.display = "flex";
+			right.current.style.display = "none";
+		}
 	};
 
     const sentMessage = (e) => {
@@ -111,45 +117,78 @@ const Messages = (props) => {
 		}
     };
 
+    const MarkAsRead = (id) => {
+        axios({
+            method: "post",
+            url: `https://us-central1-socialony.cloudfunctions.net/api/chat/notifications`,
+            data: {
+                triggerIds: [id]
+            }
+        })
+        .catch((err) => console.log(err));
+    }
+
     const renderHeaders = () => {
-        if(messages.length) {
-            return  messages.map((message, index) => {
-                return (
-                    <Grid key={index} container item alignItems="center" 
-                        className={`${classes.each} ${activeIndex === index ? 'activeMessageUser':''}`} 
-                        onClick={()=>{
-                            dispatch(setActiveChatIndex(index));
-                            openChat();
-                        }}
-                    >
-                        <Link to={`/user/${message.id}`}>
-                            <Avatar
-                                className={classes.chatavatar}
-                                src={message.imageUrl}
-                                alt="user pp"
-                            />
-                        </Link>
-                        <Typography variant="h6">{message.name}</Typography>
-                    </Grid>
-                )
-            })
-        } else {
-            return (
-                <Grid container item justify="center">
-                    <Empty
-                        image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
-                        imageStyle={{
-                            height: 60,
-                        }}
-                        description={
-                            <span>
-                                No Message 
-                            </span>
-                        }
-                    />
-                </Grid>
-            )
-        }
+		if(messages){
+			if(messages.length) {
+				return  messages.map((message, index) => {
+                    let isNotRead = false;
+                    let triggerId = ''
+                    if(messagesNotification){
+                        messagesNotification.forEach((item) => {
+                            if(item.senderId === message.id) {
+                                isNotRead = true;
+                                triggerId = item.triggerId;
+                            }
+                        })
+                    }
+					return (
+						<Grid key={index} container item alignItems="center" 
+							className={`${classes.each} ${activeIndex === index ? 'activeMessageUser':''}`} 
+							onClick={()=>{
+                                if(isNotRead) MarkAsRead(triggerId);
+								dispatch(setActiveChatIndex(index));
+								openChat();
+							}}
+						>
+							<Link to={`/user/${message.id}`}>
+								<Avatar
+									className={classes.chatavatar}
+									src={message.imageUrl}
+									alt="user pp"
+								/>
+							</Link>
+							<Typography variant="h6">{message.name}</Typography>
+                            {isNotRead ? (<FiberManualRecordIcon 
+                                style={{ marginLeft: "auto", color: "#d54b4b" }}
+                            />):(<React.Fragment></React.Fragment>)}
+						</Grid>
+					)
+				})
+			} else {
+				return (
+					<Grid container item justify="center">
+						<Empty
+							image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+							imageStyle={{
+								height: 60,
+							}}
+							description={
+								<span>
+									No Message 
+								</span>
+							}
+						/>
+					</Grid>
+				)
+			}
+		} else {
+			return (
+				<Grid item container xs={12} justify="center" style={{ paddingTop: "50px" }}>
+					<CircularProgress />
+				</Grid>
+			)
+		}
     };
 
 
@@ -203,52 +242,54 @@ const Messages = (props) => {
                         {renderHeaders()}
 					</Grid>
 				</Grid>
-				<Grid item container xs={12} lg={8} className={classes.right} ref={right}>
-					<Grid item container justify="flex-start" alignItems="center" className={classes.messageheader}>
-						{width < 450 && (   
-							<ArrowBackIcon 
-								className={classes.backicon} 
-								onClick={back}
-							/>
-						)}
-						<Typography variant="h5">{messages[activeIndex]?.name}</Typography>
-						<IconButton aria-label="settings" className={classes.headersettings}>
-							<Dropdown overlay={
-								<Menu>
-									<Menu.Item>
-										<Link to={`/user/${messages[activeIndex]?.id}`} rel="noopener noreferrer" className={classes.deleteicon}>
-											See {messages[activeIndex]?.name}'s Profile 
-										</Link>
-									</Menu.Item>
-								</Menu>
-							} placement="bottomLeft">
-								<MoreVertIcon />
-							</Dropdown>
-						</IconButton>
-					</Grid>
-					<Grid item container className={classes.chatmessages}>
-						<Grid item container className={classes.input}>
-                            <form onSubmit={sentMessage}>
-                                <Input
-                                    fluid
-                                    value={newMessage}
-                                    icon={<Icon name='send' inverted circular link 
-                                        onClick={sentMessage}
-                                    />}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder='Send...'
-                                />
-                            </form>
+				{messages && (
+					<Grid item container xs={12} lg={8} className={classes.right} ref={right}>
+						<Grid item container justify="flex-start" alignItems="center" className={classes.messageheader}>
+							{width < 450 && (   
+								<ArrowBackIcon 
+									className={classes.backicon} 
+									onClick={back}
+								/>
+							)}
+							<Typography variant="h5">{messages[activeIndex]?.name}</Typography>
+							<IconButton aria-label="settings" className={classes.headersettings}>
+								<Dropdown overlay={
+									<Menu>
+										<Menu.Item>
+											<Link to={`/user/${messages[activeIndex]?.id}`} rel="noopener noreferrer" className={classes.deleteicon}>
+												See {messages[activeIndex]?.name}'s Profile 
+											</Link>
+										</Menu.Item>
+									</Menu>
+								} placement="bottomLeft">
+									<MoreVertIcon />
+								</Dropdown>
+							</IconButton>
 						</Grid>
-						<IconButton className={classes.goToBottom} onClick={goToBottom}>
-							<ArrowDownwardIcon />
-						</IconButton>
-						<Grid item container className={classes.messages} style={{ maxHeight: isOpen ? "60vh":"72vh" }} ref={chatBoxRef}>
-                            { activeIndex !== null && renderMessages() }		
-                            <div ref={messagesEndRef} />														
-						</Grid> 
+						<Grid item container className={classes.chatmessages}>
+							<Grid item container className={classes.input}>
+								<form onSubmit={sentMessage}>
+									<Input
+										fluid
+										value={newMessage}
+										icon={<Icon name='send' inverted circular link 
+											onClick={sentMessage}
+										/>}
+										onChange={(e) => setNewMessage(e.target.value)}
+										placeholder='Send...'
+									/>
+								</form>
+							</Grid>
+							<IconButton className={classes.goToBottom} onClick={goToBottom}>
+								<ArrowDownwardIcon />
+							</IconButton>
+							<Grid item container className={classes.messages} style={{ maxHeight: isOpen ? "60vh":"72vh" }} ref={chatBoxRef}>
+								{ activeIndex !== null && renderMessages() }		
+								<div ref={messagesEndRef} />														
+							</Grid> 
+						</Grid>
 					</Grid>
-				</Grid>
+				)}
 			</Grid>
 		</Grid>
 

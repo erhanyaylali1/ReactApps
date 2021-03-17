@@ -8,15 +8,15 @@ import User from './components/User';
 import Messages from './components/Messages';
 import Notifications from './components/Notifications';
 import { useSelector, useDispatch } from 'react-redux';
-import { getIsLogged, getNotifications, getUser, setNotifications } from './features/userSlice';
+import { getIsLogged, getUser, setMessages, setNotifications } from './features/userSlice';
 import axios from 'axios';
+import PostPage from './components/PostPage';
 
 function App() {
 
     const dispatch = useDispatch();
     const isLogged = useSelector(getIsLogged);
     const user = useSelector(getUser);
-    const notifications = useSelector(getNotifications);
 
     useEffect(() => {
         let fetchNotification = setInterval(() => {
@@ -31,6 +31,13 @@ function App() {
                     }
                 })
                 .catch((err) => console.log(err));
+                axios({
+                    method: 'get',
+                    url: `https://us-central1-socialony.cloudfunctions.net/api/chat/notifications/${user.userId}`
+                })
+                .then((respond) => {
+                    dispatch(setMessages(respond.data));
+                })
             }
         },5000);
         
@@ -63,6 +70,9 @@ function App() {
               </Route>
               <Route path='/notifications'>
                   <Notifications />
+              </Route>
+              <Route path='/post/:postId'>
+                  <PostPage />
               </Route>
             </Switch>
         </div>

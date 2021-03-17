@@ -45,7 +45,7 @@ const Register = ({ history }) => {
                 message.success({ content: 'Registered!', key, duration: 2 });
             })
             .catch((error) => {
-                console.log(error)
+                console.log(error);
                 message.error({ content: `This Email, Username or Phone may be taken!`, key, duration: 2 });
             });
         }
