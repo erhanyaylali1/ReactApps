@@ -1,3 +1,9 @@
+Covid-19 Tracker with React
+--------------------------------
+Inside root folder run following commands  
+### `npm install`
+### `npm start`
+
 #Screenshots
 ![image](https://user-images.githubusercontent.com/32177766/111798468-254dc080-88db-11eb-9e1c-69f11ac1f6c5.png)
 ![image](https://user-images.githubusercontent.com/32177766/111798488-2a127480-88db-11eb-84d4-84aeef1034ee.png)
