@@ -23,7 +23,7 @@ export const weatherSlice = createSlice({
 });
 
 export const fetchResults = (cityName) => async (dispatch) => {
-    const url = `http://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}`;
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}`;
     const weathers = await fetch(url)
     const respond = await weathers.json();
     if(respond.cod === "404") return;

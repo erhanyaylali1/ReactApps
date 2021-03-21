@@ -11,7 +11,7 @@ const Cards = ({ data, country }) => {
 	}
 	return (
 		<div className={styles.container}>
-			<Typography variant="h4" align="center" className={styles.country}>{country}</Typography>
+			<Typography variant="h4" align="center" className={styles.country}>{country ? country:'Global'}</Typography>
 			<Grid container spacing={3} justify="center">
 				<Grid item component={Card} xs={10} md={3} className={cx(styles.card, styles.infected)}>
 					<CardContent>
