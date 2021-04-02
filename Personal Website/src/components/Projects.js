@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Tab } from 'semantic-ui-react'
 import styled from 'styled-components'
 import Project from './Project'
 import 'swiper/swiper-bundle.css'
+import WOW from "wow.js"
 import './style.css'
 import p11 from '../assets/p1_1.png'
 import p12 from '../assets/p1_2.png'
@@ -26,11 +27,17 @@ import p218 from '../assets/p2_18.png'
 
 const Projects = () => {
 
+    useEffect(() => {
+		const wow = new WOW()
+		wow.init();
+	}, [])
+
+
 	const panes = [
 		{
 		  	menuItem: 'Socialony',
 		  	render: () => (
-				<Tab.Pane attached={false}>
+				<Tab.Pane attached={false} className="wow bounceInRight" data-wow-duration="1s" data-wow-delay="0.5s">
 					<Project 
 						title="Socialony - Social Media"
 						images={[p11,p12,p13,p14,p15,p16,p17,p18,p19]}
@@ -44,7 +51,7 @@ const Projects = () => {
 		{
 		  menuItem: 'Media Read',
 		  render: () => (
-			<Tab.Pane attached={false}>
+			<Tab.Pane attached={false} className="wow bounceInRight" data-wow-duration="1s" data-wow-delay="0.5s">
 				<Project 
 						title="Media Read"
 						images={[p210,p211,p212,p213,p214,p215,p216,p217,p218]}
@@ -66,5 +73,5 @@ const Projects = () => {
 export default Projects
 
 const Container = styled.div`
-	background-color: #438ca2
+	background-color: #1aa39c;
 `

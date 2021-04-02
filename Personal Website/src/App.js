@@ -9,8 +9,8 @@ import 'semantic-ui-css/semantic.min.css'
 
 function App() {
     return (
-		<Grid container>
-			<Grid container item xs={12}>
+		<Grid container style={{ position: 'relative' }}> 
+			<Grid container item xs={12} style={{ position: 'sticky', top: '0px', zIndex: 99999  }}>
 				<Navbar />
 			</Grid>
 			<Grid item xs={12}>

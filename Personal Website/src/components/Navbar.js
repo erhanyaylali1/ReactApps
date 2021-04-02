@@ -71,7 +71,8 @@ export default Navbar
 
 const Container = styled(Grid)`
 	position: absolute;
-	z-index: 99;
+    top: 0;
+    background-color: #1aa39c;
 `
 const Menu = styled(Grid)`
 	display: flex;
