@@ -57,7 +57,7 @@ const Projects = () => {
 	  ]
 
 	return (
-		<Container>
+		<Container id="Projects">
 			<Tab menu={{ secondary: true, pointing: true }} panes={panes} />
 		</Container>
 	)

@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { Divider, Header as Hdr, Icon } from 'semantic-ui-react'
-import { Grid } from '@material-ui/core'
+import { Grid, Typography } from '@material-ui/core'
+import PermContactCalendarIcon from '@material-ui/icons/PermContactCalendar';
 import WOW from "wow.js"
 import './style.css'
+import Me from '../assets/me.jpg'
 
 const Credentials = () => {
 
@@ -15,11 +17,37 @@ const Credentials = () => {
 	}, [])
 
 	return (
-		<Container style={{ padding: width < 450 ? '10px':'20px 100px' }}>
-			<Header style={{ margin: width < 450 ? '20px':'50px'}} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
-				<Name style={{ fontSize: width < 450 ? '30px':'60px' }}>
-					Erhan Yaylalı
-				</Name>
+		<Container style={{ padding: width < 450 ? '10px':'20px 100px' }} id="About">
+            <Main>
+                <PermContactCalendarIcon fontSize="large" />
+                <Typography variant="h4" style={{ marginLeft: '20px '}}>
+                    About Me
+                </Typography>
+            </Main>
+			<Header style={{ margin: width < 450 ? '35px 20px':'50px'}} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                <Grid container direction="row">
+                    <Grid item container xs={4} lg={5} justify="flex-end">
+                        <img src={Me} alt="Erhan Yaylalı" style={{ 
+                            borderRadius: '100%',
+                            width: width < 450 ? '80px':'200px', 
+                            height: width < 450 ? '80px':'200px', 
+                            objectFit: 'cover',
+                            objectPosition: 'top',
+                        }}/>
+                    </Grid>
+                    <Grid item xs={1} />
+                    <Grid item container xs={7} lg={6} direction="column" justify="center">
+                        <Name style={{ fontSize: width < 450 ? '25px':'35px' }}>
+                            Erhan Yaylalı
+                        </Name>
+                        <Name style={{ fontSize: width < 450 ? '15px':'25px' }}>
+                            22 Years Old
+                        </Name>
+                        <Name style={{ fontSize: width < 450 ? '15px':'25px' }}>
+                            Born at İzmir, 27.03.1998
+                        </Name>
+                    </Grid>
+                </Grid>
 			</Header>
 			<EachPart>
 				<Divider horizontal className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s">
@@ -93,17 +121,27 @@ const Credentials = () => {
 
 export default Credentials
 
+const Main = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+`
+
 const Container = styled.div`
 	background-color: white;
 	display: flex;
 	flex-direction: column;
+    margin-top: 30px;
 `
 const Header = styled.div`
 	display: flex;
 	justify-content: center;
+    align-items: center;
 `
 const Name = styled.p`
 	font-family: initial;
+    margin-bottom: 0;
 `
 const EachPart = styled(Grid)`
 	margin-bottom: 90px;

@@ -7,7 +7,7 @@ import { Grid } from '@material-ui/core';
 const Home = () => {
 	const width = window.innerWidth
 	return (
-		<Container item xs={12}>
+		<Container item xs={12} id="Home">
 			<ImageBanner
 				src={width < 450 ? Banner2:Banner}
 				alt="Home Banner"

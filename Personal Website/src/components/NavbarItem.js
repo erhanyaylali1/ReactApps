@@ -6,11 +6,15 @@ const NavbarItem = ({ active, title, callBack }) => {
 
 	return active ? (
 		<ActiveItem item xs={12} onClick={() => callBack(title)}>
-			<p>{ title }</p>
+            <a href={`#${title}`}>
+			    <p style={{ color: 'white' }}>{ title }</p>
+            </a>
 		</ActiveItem>
 	):(
 		<NotActiveItem item xs={12} onClick={() => callBack(title)}>
-			<p>{ title }</p>
+			<a href={`#${title}`}>
+			    <p style={{ color: '#ddd' }}>{ title }</p>
+            </a>
 		</NotActiveItem>
 	)
 }
@@ -23,7 +27,6 @@ const ActiveItem = styled(Grid)`
 	align-items: center;
 	font-weight: 500;
 	font-size: 16px;
-	padding: 1rem;
 	color: white;
 	font-size: 18px;
 `
@@ -34,7 +37,6 @@ const NotActiveItem = styled(Grid)`
 	font-weight: 500;
 	font-size: 16px;
 	padding: 1rem;
-	color: #ddd;
 	font-size: 16px;
 	:hover{
 		transform: scale(1.1) !important;
