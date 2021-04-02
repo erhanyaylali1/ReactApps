@@ -25,19 +25,18 @@ import p217 from '../assets/p2_17.png'
 import p218 from '../assets/p2_18.png'
 
 
-const Projects = () => {
+const Projects = (props) => {
 
     useEffect(() => {
 		const wow = new WOW()
 		wow.init();
 	}, [])
 
-
 	const panes = [
 		{
 		  	menuItem: 'Socialony',
 		  	render: () => (
-				<Tab.Pane attached={false} className="wow bounceInRight" data-wow-duration="1s" data-wow-delay="0.5s">
+				<Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
 					<Project 
 						title="Socialony - Social Media"
 						images={[p11,p12,p13,p14,p15,p16,p17,p18,p19]}
@@ -51,7 +50,7 @@ const Projects = () => {
 		{
 		  menuItem: 'Media Read',
 		  render: () => (
-			<Tab.Pane attached={false} className="wow bounceInRight" data-wow-duration="1s" data-wow-delay="0.5s">
+			<Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
 				<Project 
 						title="Media Read"
 						images={[p210,p211,p212,p213,p214,p215,p216,p217,p218]}
@@ -69,6 +68,7 @@ const Projects = () => {
 		</Container>
 	)
 }
+
 
 export default Projects
 

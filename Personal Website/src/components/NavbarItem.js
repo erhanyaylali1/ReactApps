@@ -6,15 +6,11 @@ const NavbarItem = ({ active, title, callBack }) => {
 
 	return active ? (
 		<ActiveItem item xs={12} onClick={() => callBack(title)}>
-            <a href={`#${title}`}>
-			    <p style={{ color: 'white' }}>{ title }</p>
-            </a>
+            <p style={{ color: 'white' }}>{ title }</p>
 		</ActiveItem>
 	):(
 		<NotActiveItem item xs={12} onClick={() => callBack(title)}>
-			<a href={`#${title}`}>
-			    <p style={{ color: '#ddd' }}>{ title }</p>
-            </a>
+            <p style={{ color: '#ddd' }}>{ title }</p>
 		</NotActiveItem>
 	)
 }

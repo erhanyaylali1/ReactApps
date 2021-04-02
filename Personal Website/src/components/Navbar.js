@@ -3,8 +3,7 @@ import styled from 'styled-components'
 import { Grid } from '@material-ui/core'
 import NavbarItem from './NavbarItem'
 
-const Navbar = () => {
-	const [activeItem, setActiveItem] = useState('Home')
+const Navbar = ({ activeItem, setActiveItem }) => {
 	const [width, setWidth] = useState(0)
 	const navs = ["Home","About","Projects","Contact"]
 	const navRef = useRef(null);
@@ -15,6 +14,12 @@ const Navbar = () => {
 		}
 	},[])
 
+    const Scroll = (name) => {
+        document.getElementById(name)?.scrollIntoView({
+            behavior: 'smooth'
+        })
+    }
+
 	return (
 		<Container 
 			container
@@ -22,41 +27,41 @@ const Navbar = () => {
 			<Menu container justify="center">
 				<Grid item container xs={0} lg={7} />
 				<Grid item container xs={11} lg={5} style={{ position: 'relative' }} ref={navRef}>
-					<Grid item container xs={3} justify="center" alignItems="center">
-                        <a href="#Home">
-                            <NavbarItem 
-                                title={navs[0]}
-                                active={activeItem === navs[0]}
-                                callBack={setActiveItem}
-                            />
-                        </a>
+					<Grid item container xs={3} justify="center" alignItems="center"
+                        onClick={() => Scroll('Home')}
+                    >
+                        <NavbarItem 
+                            title={navs[0]}
+                            active={activeItem === navs[0]}
+                            callBack={setActiveItem}
+                        />
 					</Grid>
-					<Grid item container xs={3} justify="center" alignItems="center">
-                        <a href="#About">
-                            <NavbarItem 
-                                title={navs[1]}
-                                active={activeItem === navs[1]}
-                                callBack={setActiveItem}
-                            />
-                        </a>
+					<Grid item container xs={3} justify="center" alignItems="center"
+                        onClick={() => Scroll('About')}
+                    >
+                        <NavbarItem 
+                            title={navs[1]}
+                            active={activeItem === navs[1]}
+                            callBack={setActiveItem}
+                        />
 					</Grid>
-					<Grid item container xs={3} justify="center" alignItems="center">
-                        <a href="#Projects">
-                            <NavbarItem 
-                                title={navs[2]}
-                                active={activeItem === navs[2]}
-                                callBack={setActiveItem}
-                            />
-                        </a>
+					<Grid item container xs={3} justify="center" alignItems="center"
+                        onClick={() => Scroll('Projects')}
+                    >
+                        <NavbarItem 
+                            title={navs[2]}
+                            active={activeItem === navs[2]}
+                            callBack={setActiveItem}
+                        />
 					</Grid>
-					<Grid item container xs={3} justify="center" alignItems="center">
-                        <a href="#Contact">
-                            <NavbarItem 
-                                title={navs[3]}
-                                active={activeItem === navs[3]}
-                                callBack={setActiveItem}
-                            />
-                        </a>
+					<Grid item container xs={3} justify="center" alignItems="center"
+                        onClick={() => Scroll('Contact')}
+                    >
+                        <NavbarItem 
+                            title={navs[3]}
+                            active={activeItem === navs[3]}
+                            callBack={setActiveItem}
+                        />
 					</Grid>
 					<Line 
 						style={{ left: width * navs.indexOf(activeItem) / 4, width: width / 4 }}
