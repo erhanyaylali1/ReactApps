@@ -1,0 +1,133 @@
+import React, { useEffect } from 'react'
+import styled from 'styled-components'
+import { Divider, Header as Hdr, Icon } from 'semantic-ui-react'
+import { Grid } from '@material-ui/core'
+import WOW from "wow.js"
+import './style.css'
+
+const Credentials = () => {
+
+	const width = window.innerWidth
+
+	useEffect(() => {
+		const wow = new WOW()
+		wow.init();
+	}, [])
+
+	return (
+		<Container style={{ padding: width < 450 ? '10px':'20px 100px' }}>
+			<Header style={{ margin: width < 450 ? '20px':'50px'}} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+				<Name style={{ fontSize: width < 450 ? '30px':'60px' }}>
+					Erhan Yaylalı
+				</Name>
+			</Header>
+			<EachPart>
+				<Divider horizontal className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s">
+					<Hdr as='h3'>
+						<Icon name='university' />
+						Education
+					</Hdr>
+				</Divider>
+				<Education container>
+					<Grid container item xs={12} className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s" style={{ marginTop: '70px'}}>
+						<Grid item container xs={12} md={4} alignItems="center" justify="center">
+							<Description style={{ textAlign: width < 450 ? 'center':'right', marginBottom: width < 450 ? '25px':'0' }}>University</Description>
+						</Grid>
+						<Grid item container xs={12} md={8} direction="column" justify="center">
+							<Title>Istanbul Technical University</Title>
+							<SubTitle>Computer Engineering</SubTitle>
+							<Date>2016-2021</Date>
+						</Grid>
+					</Grid>
+					<Grid container item xs={12} className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s" style={{ marginTop: '80px'}}>
+						<Grid item container xs={12} md={4} alignItems="center" justify="center">
+							<Description style={{ textAlign: width < 450 ? 'center':'right', marginBottom: width < 450 ? '25px':'0' }}>High School</Description>
+						</Grid>
+						<Grid item container xs={12} md={8} direction="column" justify="center">
+							<Title>Çiğli Science High Scool</Title>
+							<SubTitle>2012-2016</SubTitle>
+						</Grid>
+					</Grid>
+				</Education>
+			</EachPart>
+			<EachPart>
+				<Divider horizontal className={width < 450 ? 'wow bounceInUp':'wow bounceInRight'} data-wow-duration="1s" data-wow-delay="0.5s">
+					<Hdr as='h3'>
+						<Icon name='briefcase' />
+						Experiences
+					</Hdr>
+				</Divider>
+				<Education>
+					<Grid container className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s" style={{ marginTop: '70px'}}>
+						<Grid item container xs={12} md={4} alignItems="center" justify="center">
+							<Description style={{ textAlign: width < 450 ? 'center':'right', marginBottom: width < 450 ? '25px':'0' }}>Ibtech</Description>
+						</Grid>
+						<Grid item container xs={12} md={8} direction="column" justify="center">
+							<SubTitle>Front End Developer</SubTitle>
+							<Date>02.2021 - Now</Date>
+						</Grid>
+					</Grid>
+					<Grid container className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'}data-wow-duration="1s" data-wow-delay="0.5s" style={{ marginTop: '80px'}}>
+						<Grid item container xs={12} md={4} alignItems="center"  justify="center" >
+							<Description style={{ textAlign: width < 450 ? 'center':'right', marginBottom: width < 450 ? '25px':'0' }}>Exhibin</Description>
+						</Grid>
+						<Grid item container xs={12} md={8} direction="column" justify="center">
+						<SubTitle>Front End Developer</SubTitle>
+							<Date>09.2020 - 12.2020</Date>
+						</Grid>
+					</Grid>
+					<Grid container className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s" style={{ marginTop: '80px'}}>
+						<Grid item container xs={12} md={4} alignItems="center" justify="center">
+							<Description style={{ textAlign: width < 450 ? 'center':'right', marginBottom: width < 450 ? '25px':'0' }}>IBM</Description>
+						</Grid>
+						<Grid item container xs={12} md={8} direction="column" justify="center">
+						<SubTitle>Intern</SubTitle>
+							<Date>07.2020 - 08.2020</Date>
+						</Grid>
+					</Grid>
+				</Education>
+			</EachPart>
+		</Container>
+	)
+}
+
+export default Credentials
+
+const Container = styled.div`
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+`
+const Header = styled.div`
+	display: flex;
+	justify-content: center;
+`
+const Name = styled.p`
+	font-family: initial;
+`
+const EachPart = styled(Grid)`
+	margin-bottom: 90px;
+`
+const Description = styled.div`
+	font-size: 30px;
+	width: 100%;
+`
+const Title = styled.div`
+	font-size: 25px;
+	text-align: center;
+	margin-bottom: 15px;
+`
+const SubTitle = styled.div`
+	font-size: 18px;
+	text-align: center;
+`
+const Date = styled.div`
+	font-size: 15px;
+	margin-top: 10px;
+	text-align: center;
+`
+const Education = styled(Grid)`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+`

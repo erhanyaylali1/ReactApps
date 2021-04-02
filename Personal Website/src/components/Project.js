@@ -1,0 +1,137 @@
+import React, { useState }from 'react'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import SwiperCore, { EffectCoverflow, Navigation, Pagination } from 'swiper'
+import { IconButton } from '@material-ui/core'
+import { Modal, List } from 'semantic-ui-react'
+import styled from 'styled-components'
+import 'swiper/swiper-bundle.css'
+import GitHubIcon from '@material-ui/icons/GitHub'
+import LinkOutlinedIcon from '@material-ui/icons/LinkOutlined'
+
+SwiperCore.use([EffectCoverflow, Navigation, Pagination]);
+
+const Project = ({ title, images, features, url, github, color }) => {
+	
+	const [open, setOpen] = useState(false);
+	const [active, setActive] = useState(0);
+	const width = window.innerWidth
+
+	return (
+		<Container style={{ background: color }}>
+			<Modal
+				onClose={() => setOpen(false)}
+				onOpen={() => setOpen(true)}
+				open={open}
+				>
+				<ZoomImage 
+					src={images[active]}
+				/>
+			</Modal>
+			<Title style={{ fontSize: width < 450 ? '25px':'40px' }}>{ title }</Title>
+			<Swiper
+				style={{ overflow: 'visible' }}
+				centeredSlides
+				slidesPerView="auto"
+				navigation
+				pagination
+				autoplay				
+				effect="coverflow"
+				loop
+				initialSlide={0}
+				coverflowEffect={{
+					rotate: 40,
+					stretch: 0,
+					depth: 100,
+					modifier: 1,
+					slideShadows: false
+				}}
+			>
+				{images.map((img, index) => (
+					<SwiperSlide style={{ width: 'max-content' }} key={index}>
+							<ProjectImage 
+								src={img}
+								style={{ height: width < 450 ? 'auto':'400px', width: width < 450 ? '300px':'auto'}}
+								onClick={async() => {
+									await setActive(index)
+									setOpen(true)
+								}}
+							/>
+					</SwiperSlide>
+				))}
+			</Swiper>	
+			
+			<Details>
+				<More>Specifications</More>
+				<Detail>
+					<List selection horizontal verticalAlign='middle'>
+						{features.map((feature, index) => (
+							<List.Item key={index}>
+								<List.Content>
+									<Detail>{feature}</Detail>
+								</List.Content>
+							</List.Item>
+						))}
+					</List>
+				</Detail>
+				{(url || github) && (
+					<Visit>
+						{url && (
+							<a href={url}>
+								<IconButton>
+									<LinkOutlinedIcon style={{ color: '#faebd0' }} />
+								</IconButton>
+							</a>
+						)}
+						{github && (
+							<a href={github}>
+								<IconButton>
+									<GitHubIcon style={{ color: '#faebd0' }} />
+								</IconButton>
+							</a>
+						)}
+					</Visit>
+				)}
+			</Details>
+		</Container>
+	)
+}
+
+export default Project
+
+const Container = styled.div`
+	overflow: visible;
+	padding: 30px 0px;
+	overflow: hidden;
+`
+const ProjectImage = styled.img`
+	height: 400px;
+	margin-bottom: 50px;
+	z-index: 999;
+	cursor: pointer;
+`
+const ZoomImage = styled.img`
+	width: 100%;
+`
+const Title = styled.div`
+	color: #eee;
+	font-weight: 300;
+	line-height: 1.2;
+	font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+	margin-bottom: 50px;
+	text-align: center;
+`
+const Details = styled.div`
+	text-align: center;
+`
+const More = styled.p`
+	color: whitesmoke;
+	font-size: 32px;
+	font-family: monospace;
+	margin-bottom: 10px;
+`
+const Detail = styled.div`
+	color: white;
+`
+const Visit = styled.div`
+	margin-top: 20px;
+`
