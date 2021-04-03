@@ -1,7 +1,7 @@
 import React, { useState }from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import SwiperCore, { EffectCoverflow, Navigation, Pagination } from 'swiper'
-import { IconButton } from '@material-ui/core'
+import { IconButton, Typography } from '@material-ui/core'
 import { Modal, List } from 'semantic-ui-react'
 import styled from 'styled-components'
 import 'swiper/swiper-bundle.css'
@@ -75,6 +75,7 @@ const Project = ({ title, images, features, url, github, color }) => {
 				</Detail>
 				{(url || github) && (
 					<Visit>
+                        <Typography varianth="body1" style={{ color: '#ddd' }}>Visit</Typography>
 						{url && (
 							<a href={url}>
 								<IconButton>

@@ -10,6 +10,10 @@ const Home = () => {
 		<Container item xs={12} id="Home">
 			<ImageBanner
 				src={width < 450 ? Banner2:Banner}
+                style={{ 
+                    height: width < 450 ? '100vh':'initial', 
+                    width: '100%' 
+                }}
 				alt="Home Banner"
 			/>
 		</Container>
