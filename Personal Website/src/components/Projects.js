@@ -23,9 +23,25 @@ import p215 from '../assets/p2_15.png'
 import p216 from '../assets/p2_16.png'
 import p217 from '../assets/p2_17.png'
 import p218 from '../assets/p2_18.png'
+import p30 from '../assets/p3_0.png'
+import p31 from '../assets/p3_1.png'
+import p32 from '../assets/p3_2.png'
+import p33 from '../assets/p3_3.png'
+import p34 from '../assets/p3_4.png'
+import p35 from '../assets/p3_5.png'
+import p36 from '../assets/p3_6.png'
+import p37 from '../assets/p3_7.png'
+import p38 from '../assets/p3_8.png'
+import p41 from '../assets/p4_1.png'
+import p42 from '../assets/p4_2.png'
+import p43 from '../assets/p4_3.png'
+import p44 from '../assets/p4_4.png'
+import p45 from '../assets/p4_5.png'
+import p46 from '../assets/p4_6.png'
+import p47 from '../assets/p4_7.png'
+import p48 from '../assets/p4_8.png'
 
-
-const Projects = (props) => {
+const Projects = () => {
 
     useEffect(() => {
 		const wow = new WOW()
@@ -58,13 +74,41 @@ const Projects = (props) => {
 						github="https://github.com/erhanyaylali1/MediaRead"
 					/>
 			</Tab.Pane>
-		),
+		    ),
 		},
+        {
+            menuItem: 'Weather App',
+            render: () => (
+              <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                  <Project 
+                        title="Weather App"
+                        images={[p30, p31,p32,p33,p34,p35,p36,p37,p38]}
+                        features={["React", "Redux", "Google Map API", "Wikipedia API", "OpenWeatherMap"]}
+                        github="https://github.com/erhanyaylali1/ReactApps/tree/main/WeatherApp"
+                        url="https://weatherapp-erhan.netlify.app"
+                    />
+              </Tab.Pane>
+              ),
+          },
+          {
+              menuItem: 'Amazon Website',
+              render: () => (
+                <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                    <Project 
+                          title="Amazon Website"
+                          images={[p41,p42,p43,p44,p45,p46,p47, p48, p44]}
+                          features={["React", "Redux", "Firebase", "Splash"]}
+                          github="https://github.com/erhanyaylali1/ReactApps/tree/main/Amazon%20Clone"
+                          url="https://ey1-f69b8.web.app"
+                      />
+                </Tab.Pane>
+                ),
+            },
 	  ]
 
 	return (
 		<Container id="Projects">
-			<Tab menu={{ secondary: true, pointing: true }} panes={panes} />
+			<Tab menu={{ secondary: true, pointing: true }} panes={panes}/>
 		</Container>
 	)
 }

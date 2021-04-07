@@ -8,6 +8,7 @@
 	box-shadow: none !important;
 }
 .ui.secondary.pointing.menu {
+    flex-wrap: wrap;
 	display: flex !important;
 	justify-content: center !important;
 	border-bottom: none !important;
@@ -16,6 +17,7 @@
 }
 .ui.secondary.pointing.menu .item {
 	color: #ddd !important;
+    justify-content: center !important;
 }
 .ui.secondary.pointing.menu .active.item {
 	color: whitesmoke !important;

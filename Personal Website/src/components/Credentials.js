@@ -17,7 +17,7 @@ const Credentials = () => {
 	}, [])
 
 	return (
-		<Container style={{ padding: width < 450 ? '10px':'20px 100px' }} id="About">
+		<Container style={{ padding: width < 450 ? '30px':'20px 100px' }} id="About">
             <Main>
                 <PermContactCalendarIcon fontSize="large" />
                 <Typography variant="h4" style={{ marginLeft: '20px '}}>

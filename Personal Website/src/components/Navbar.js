@@ -7,25 +7,55 @@ const Navbar = ({ activeItem, setActiveItem }) => {
 	const [width, setWidth] = useState(0)
 	const navs = ["Home","About","Projects","Contact"]
 	const navRef = useRef(null);
+    const divs = [document.querySelector("#Home"), document.querySelector("#About"), document.querySelector("#Projects"), document.querySelector("#Contact")]
+    const height = window.innerHeight
 
 	useEffect(() => {
 		if(navRef.current) {
 			setWidth(navRef.current.offsetWidth)
 		}
-	},[])
+        const HandleScroll = () => {
+            divs.forEach((item, index) => {
+                if(item?.getBoundingClientRect().y < (height / 4) && (item?.getBoundingClientRect().height + item?.getBoundingClientRect().y) > (height / 2)){
+                    setActiveItem(navs[index])
+                }
+            }) 
+        }
+        window.addEventListener('scroll', HandleScroll)
+	},[divs, height, navs, setActiveItem])
 
     const Scroll = (name) => {
-        document.getElementById(name)?.scrollIntoView({
-            behavior: 'smooth'
-        })
+        const y = document.getElementById(name).getBoundingClientRect().top + window.pageYOffset - navRef.current.offsetHeight + 4
+        window.scrollTo({top: y, behavior: 'smooth'});
+    }
+    
+    let backgroundColor = '#3D138D'
+
+    switch(activeItem) {
+        case 'Home':
+            backgroundColor = '#1aa39c'
+            break
+        case 'About':
+            backgroundColor = '#333'
+            break
+        case 'Projects':
+            backgroundColor = '#1aa39c'
+            break
+        case 'Contact':
+            backgroundColor = '#3D138D'
+            break
+        default: 
+            backgroundColor = '#1aa39c'
+            break
     }
 
 	return (
 		<Container 
 			container
+            style={{ backgroundColor }}
 		>
 			<Menu container justify="center">
-				<Grid item container xs={0} lg={7} />
+				<Grid item container lg={7} />
 				<Grid item container xs={11} lg={5} style={{ position: 'relative' }} ref={navRef}>
 					<Grid item container xs={3} justify="center" alignItems="center"
                         onClick={() => Scroll('Home')}
@@ -33,7 +63,6 @@ const Navbar = ({ activeItem, setActiveItem }) => {
                         <NavbarItem 
                             title={navs[0]}
                             active={activeItem === navs[0]}
-                            callBack={setActiveItem}
                         />
 					</Grid>
 					<Grid item container xs={3} justify="center" alignItems="center"
@@ -42,7 +71,6 @@ const Navbar = ({ activeItem, setActiveItem }) => {
                         <NavbarItem 
                             title={navs[1]}
                             active={activeItem === navs[1]}
-                            callBack={setActiveItem}
                         />
 					</Grid>
 					<Grid item container xs={3} justify="center" alignItems="center"
@@ -51,7 +79,6 @@ const Navbar = ({ activeItem, setActiveItem }) => {
                         <NavbarItem 
                             title={navs[2]}
                             active={activeItem === navs[2]}
-                            callBack={setActiveItem}
                         />
 					</Grid>
 					<Grid item container xs={3} justify="center" alignItems="center"
@@ -60,7 +87,6 @@ const Navbar = ({ activeItem, setActiveItem }) => {
                         <NavbarItem 
                             title={navs[3]}
                             active={activeItem === navs[3]}
-                            callBack={setActiveItem}
                         />
 					</Grid>
 					<Line 
@@ -75,9 +101,8 @@ const Navbar = ({ activeItem, setActiveItem }) => {
 export default Navbar
 
 const Container = styled(Grid)`
-	position: absolute;
+	position: fixed;
     top: 0;
-    background-color: #1aa39c;
 `
 const Menu = styled(Grid)`
 	display: flex;

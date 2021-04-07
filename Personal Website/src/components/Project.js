@@ -37,7 +37,6 @@ const Project = ({ title, images, features, url, github, color }) => {
 				autoplay				
 				effect="coverflow"
 				loop
-				initialSlide={0}
 				coverflowEffect={{
 					rotate: 40,
 					stretch: 0,

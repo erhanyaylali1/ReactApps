@@ -25,6 +25,7 @@ export default Home
 const Container = styled(Grid)`
 	height: min-content;
 	position: relative;
+    margin-top: -50px;
 `
 const ImageBanner = styled.img`
 	width: 100%;

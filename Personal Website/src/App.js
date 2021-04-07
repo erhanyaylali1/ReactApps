@@ -6,23 +6,27 @@ import Projects from './components/Projects';
 import { Grid } from '@material-ui/core'
 import 'antd/dist/antd.css'; 
 import 'semantic-ui-css/semantic.min.css'
+import Contact from './components/Contact';
 
 function App() {
     const [activeItem, setActiveItem] = useState('Home')
     return (
 		<Grid container style={{ position: 'relative' }}> 
-			<Grid container item xs={12} style={{ position: 'sticky', top: '0px', zIndex: 99999  }}>
+			<Grid container item xs={12} style={{ position: 'sticky', top: '0px', zIndex: 99999, marginBottom: '50px' }}>
 				<Navbar activeItem={activeItem} setActiveItem={setActiveItem} />
 			</Grid>
 			<Grid item xs={12}>
-				<Home setActiveItem={setActiveItem} />
+				<Home />
 			</Grid>
 			<Grid item xs={12}>
-				<Credentials setActiveItem={setActiveItem} />
+				<Credentials />
 			</Grid>
 			<Grid item xs={12}>
-				<Projects setActiveItem={setActiveItem} />
+				<Projects />
 			</Grid>
+            <Grid item xs={12}>
+                <Contact />
+            </Grid>
 		</Grid>
     );
 }

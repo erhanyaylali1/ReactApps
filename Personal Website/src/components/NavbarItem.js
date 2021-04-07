@@ -2,14 +2,14 @@ import React from 'react'
 import styled from 'styled-components'
 import { Grid } from '@material-ui/core'
 
-const NavbarItem = ({ active, title, callBack }) => {
+const NavbarItem = ({ active, title }) => {
 
 	return active ? (
-		<ActiveItem item xs={12} onClick={() => callBack(title)}>
+		<ActiveItem item xs={12}>
             <p style={{ color: 'white' }}>{ title }</p>
 		</ActiveItem>
 	):(
-		<NotActiveItem item xs={12} onClick={() => callBack(title)}>
+		<NotActiveItem item xs={12}>
             <p style={{ color: '#ddd' }}>{ title }</p>
 		</NotActiveItem>
 	)
