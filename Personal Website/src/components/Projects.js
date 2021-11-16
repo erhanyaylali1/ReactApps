@@ -40,6 +40,16 @@ import p45 from '../assets/p4_5.png'
 import p46 from '../assets/p4_6.png'
 import p47 from '../assets/p4_7.png'
 import p48 from '../assets/p4_8.png'
+import p51 from '../assets/p5_1.jpeg'
+import p52 from '../assets/p5_2.jpeg'
+import p53 from '../assets/p5_3.jpeg'
+import p54 from '../assets/p5_4.jpeg'
+import p55 from '../assets/p5_5.jpeg'
+import p56 from '../assets/p5_6.jpeg'
+import p57 from '../assets/p5_7.jpeg'
+import p58 from '../assets/p5_8.jpeg'
+import p59 from '../assets/p5_9.jpeg'
+import p510 from '../assets/p5_10.jpeg'
 
 const Projects = () => {
 
@@ -63,6 +73,21 @@ const Projects = () => {
 				</Tab.Pane>
 			),
 		},
+        {
+            menuItem: 'E-Wallet',
+            render: () => (
+              <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                  <Project 
+                      title="Socialony - Social Media"
+                      images={[p51,p52,p53,p54,p55,p56,p57,p58,p59, p510]}
+                      features={["React", "Redux", "Material-UI", "Ant Desing UI Kit", "Chart Js",
+                      "Node JS", "Express.js","Bcryptjs", "Jsonwebtoken", "Sequelize", "MySQL"]}
+                      github="https://github.com/erhanyaylali1/wallet-client"
+                      url="http://portfolio-wallet.s3-website.eu-north-1.amazonaws.com/"
+                  />
+              </Tab.Pane>
+          ),
+        },
 		{
 		  menuItem: 'Media Read',
 		  render: () => (

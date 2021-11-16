@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { Icon, Form } from 'semantic-ui-react'
 import ContactSupportIcon from '@material-ui/icons/ContactSupport';
 import WOW from "wow.js"
+import { send } from 'emailjs-com';
+import { message } from 'antd';
 
 const Contact = () => {
     const width = window.innerWidth
@@ -11,10 +13,30 @@ const Contact = () => {
     const [email, setEmail] = useState('')
     const [content, setContent] = useState('')
 
+
     useEffect(() => {
 		const wow = new WOW()
 		wow.init();
 	}, [])
+
+    const sendEmail = (e) => {       
+        e.preventDefault();
+        const infos =  {
+            from_name: name,
+            to_name: "Erhan Yaylalı",
+            message: content,
+            reply_to: "erhanyaylali9@gmail.com"
+        };
+
+        send('service_jb8gjbo', 'template_9m24rwt', infos, 'user_ZluoX0lqzOOy2QYqXllv1')
+        .then(() => {
+            message.success('Email Sent Successfully!');
+        })
+        .catch(() => {
+            message.error('Email Could not Sent!');
+        });
+      
+    }
     
     return ( 
         <Grid container alignItems="flex-start" justify="center" className={classes.root} id="Contact" style={{ paddingTop: width < 450 ? '20px':'20px' }}
@@ -46,7 +68,7 @@ const Contact = () => {
                         required
                         onChange={(e) => setContent(e.target.value)}
                     />
-                    <Button variant="contained" className={classes.sendbutton}>Send</Button>
+                    <Button variant="contained" className={classes.sendbutton} onClick={(e) => sendEmail(e)}>Send</Button>
                 </Form>
             </Grid>
             <Grid container item xs={12} justify="center" className={classes.infos}>

@@ -41,7 +41,7 @@ const Credentials = () => {
                             Erhan Yaylalı
                         </Name>
                         <Name style={{ fontSize: width < 450 ? '15px':'25px' }}>
-                            22 Years Old
+                            23 Years Old
                         </Name>
                         <Name style={{ fontSize: width < 450 ? '15px':'25px' }}>
                             Born at İzmir, 27.03.1998
@@ -86,13 +86,22 @@ const Credentials = () => {
 					</Hdr>
 				</Divider>
 				<Education>
+                    <Grid container className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s" style={{ marginTop: '70px'}}>
+						<Grid item container xs={12} md={4} alignItems="center" justify="center">
+							<Description style={{ textAlign: width < 450 ? 'center':'right', marginBottom: width < 450 ? '25px':'0' }}>Yapı Kredi Teknoloji</Description>
+						</Grid>
+						<Grid item container xs={12} md={8} direction="column" justify="center">
+							<SubTitle>Fullstack Developer</SubTitle>
+							<Date>07.2021 - Now</Date>
+						</Grid>
+					</Grid>
 					<Grid container className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s" style={{ marginTop: '70px'}}>
 						<Grid item container xs={12} md={4} alignItems="center" justify="center">
 							<Description style={{ textAlign: width < 450 ? 'center':'right', marginBottom: width < 450 ? '25px':'0' }}>Ibtech</Description>
 						</Grid>
 						<Grid item container xs={12} md={8} direction="column" justify="center">
 							<SubTitle>Front End Developer</SubTitle>
-							<Date>02.2021 - Now</Date>
+							<Date>02.2021 - 07.2021</Date>
 						</Grid>
 					</Grid>
 					<Grid container className={width < 450 ? 'wow bounceInUp':'wow bounceInLeft'}data-wow-duration="1s" data-wow-delay="0.5s" style={{ marginTop: '80px'}}>

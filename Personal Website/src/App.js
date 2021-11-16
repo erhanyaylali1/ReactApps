@@ -12,7 +12,7 @@ function App() {
     const [activeItem, setActiveItem] = useState('Home')
     return (
 		<Grid container style={{ position: 'relative' }}> 
-			<Grid container item xs={12} style={{ position: 'sticky', top: '0px', zIndex: 99999, marginBottom: '50px' }}>
+			<Grid container item xs={12} style={{ position: 'sticky', top: '0px', zIndex: 2, marginBottom: '50px' }}>
 				<Navbar activeItem={activeItem} setActiveItem={setActiveItem} />
 			</Grid>
 			<Grid item xs={12}>
