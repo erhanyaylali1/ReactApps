@@ -78,7 +78,7 @@ const Projects = () => {
             render: () => (
               <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
                   <Project 
-                      title="Socialony - Social Media"
+                      title="E-Wallet"
                       images={[p51,p52,p53,p54,p55,p56,p57,p58,p59, p510]}
                       features={["React", "Redux", "Material-UI", "Ant Desing UI Kit", "Chart Js",
                       "Node JS", "Express.js","Bcryptjs", "Jsonwebtoken", "Sequelize", "MySQL"]}
