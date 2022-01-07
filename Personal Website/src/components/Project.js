@@ -1,4 +1,4 @@
-import React, { useState }from 'react'
+import React, { useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import SwiperCore, { EffectCoverflow, Navigation, Pagination } from 'swiper'
 import { IconButton, Typography } from '@material-ui/core'
@@ -11,89 +11,89 @@ import LinkOutlinedIcon from '@material-ui/icons/LinkOutlined'
 SwiperCore.use([EffectCoverflow, Navigation, Pagination]);
 
 const Project = ({ title, images, features, url, github, color }) => {
-	
-	const [open, setOpen] = useState(false);
-	const [active, setActive] = useState(0);
-	const width = window.innerWidth
 
-	return (
-		<Container style={{ background: color }}>
-			<Modal
-				onClose={() => setOpen(false)}
-				onOpen={() => setOpen(true)}
-				open={open}
-				>
-				<ZoomImage 
-					src={images[active]}
-				/>
-			</Modal>
-			<Title style={{ fontSize: width < 450 ? '25px':'40px' }}>{ title }</Title>
-			<Swiper
-				style={{ overflow: 'visible' }}
-				centeredSlides
-				slidesPerView="auto"
-				navigation
-				pagination
-				autoplay				
-				effect="coverflow"
-				loop
-				coverflowEffect={{
-					rotate: 40,
-					stretch: 0,
-					depth: 100,
-					modifier: 1,
-					slideShadows: false
-				}}
-			>
-				{images.map((img, index) => (
-					<SwiperSlide style={{ width: 'max-content' }} key={index}>
-							<ProjectImage 
-								src={img}
-								style={{ height: width < 450 ? 'auto':'400px', width: width < 450 ? '300px':'auto'}}
-								onClick={async() => {
-									await setActive(index)
-									setOpen(true)
-								}}
-							/>
-					</SwiperSlide>
-				))}
-			</Swiper>	
-			
-			<Details>
-				<More>Specifications</More>
-				<Detail>
-					<List selection horizontal verticalAlign='middle'>
-						{features.map((feature, index) => (
-							<List.Item key={index}>
-								<List.Content>
-									<Detail>{feature}</Detail>
-								</List.Content>
-							</List.Item>
-						))}
-					</List>
-				</Detail>
-				{(url || github) && (
-					<Visit>
+    const [open, setOpen] = useState(false);
+    const [active, setActive] = useState(0);
+    const width = window.innerWidth
+
+    return (
+        <Container style={{ background: color }}>
+            <Modal
+                onClose={() => setOpen(false)}
+                onOpen={() => setOpen(true)}
+                open={open}
+            >
+                <ZoomImage
+                    src={images[active]}
+                />
+            </Modal>
+            <Title style={{ fontSize: width < 450 ? '25px' : '40px' }}>{title}</Title>
+            <Swiper
+                style={{ overflow: 'visible' }}
+                centeredSlides
+                slidesPerView="auto"
+                navigation
+                pagination
+                autoplay
+                effect="coverflow"
+                loop
+                coverflowEffect={{
+                    rotate: 40,
+                    stretch: 0,
+                    depth: 100,
+                    modifier: 1,
+                    slideShadows: false
+                }}
+            >
+                {images.map((img, index) => (
+                    <SwiperSlide style={{ width: 'max-content' }} key={index}>
+                        <ProjectImage
+                            src={img}
+                            style={{ height: 'auto', width: '300px' }}
+                            onClick={async () => {
+                                await setActive(index)
+                                setOpen(true)
+                            }}
+                        />
+                    </SwiperSlide>
+                ))}
+            </Swiper>
+
+            <Details>
+                <More>Specifications</More>
+                <Detail>
+                    <List selection horizontal verticalAlign='middle'>
+                        {features.map((feature, index) => (
+                            <List.Item key={index}>
+                                <List.Content>
+                                    <Detail>{feature}</Detail>
+                                </List.Content>
+                            </List.Item>
+                        ))}
+                    </List>
+                </Detail>
+                {(url || github) && (
+                    <Visit>
                         <Typography varianth="body1" style={{ color: '#ddd' }}>Visit</Typography>
-						{url && (
-							<a href={url}>
-								<IconButton>
-									<LinkOutlinedIcon style={{ color: '#faebd0' }} />
-								</IconButton>
-							</a>
-						)}
-						{github && (
-							<a href={github}>
-								<IconButton>
-									<GitHubIcon style={{ color: '#faebd0' }} />
-								</IconButton>
-							</a>
-						)}
-					</Visit>
-				)}
-			</Details>
-		</Container>
-	)
+                        {url && (
+                            <a href={url}>
+                                <IconButton>
+                                    <LinkOutlinedIcon style={{ color: '#faebd0' }} />
+                                </IconButton>
+                            </a>
+                        )}
+                        {github && (
+                            <a href={github}>
+                                <IconButton>
+                                    <GitHubIcon style={{ color: '#faebd0' }} />
+                                </IconButton>
+                            </a>
+                        )}
+                    </Visit>
+                )}
+            </Details>
+        </Container>
+    )
 }
 
 export default Project
