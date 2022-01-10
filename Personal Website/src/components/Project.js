@@ -8,7 +8,7 @@ import 'swiper/swiper-bundle.css'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import LinkOutlinedIcon from '@material-ui/icons/LinkOutlined'
 
-SwiperCore.use([EffectCoverflow, Navigation, Pagination]);
+// SwiperCore.use([EffectCoverflow, Navigation, Pagination]);
 
 const Project = ({ title, images, features, url, github, color }) => {
 
@@ -29,27 +29,15 @@ const Project = ({ title, images, features, url, github, color }) => {
             </Modal>
             <Title style={{ fontSize: width < 450 ? '25px' : '40px' }}>{title}</Title>
             <Swiper
-                style={{ overflow: 'visible' }}
+                style={{ overflow: 'hidden' }}
                 centeredSlides
                 slidesPerView="auto"
-                navigation
-                pagination
-                autoplay
-                effect="coverflow"
-                loop
-                coverflowEffect={{
-                    rotate: 40,
-                    stretch: 0,
-                    depth: 100,
-                    modifier: 1,
-                    slideShadows: false
-                }}
             >
                 {images.map((img, index) => (
                     <SwiperSlide style={{ width: 'max-content' }} key={index}>
                         <ProjectImage
                             src={img}
-                            style={{ height: 'auto', width: '300px' }}
+                            style={{ height: 'auto', width: width < 450 ? '300px' : '500px', margin: 10 }}
                             onClick={async () => {
                                 await setActive(index)
                                 setOpen(true)

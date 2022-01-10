@@ -54,88 +54,115 @@ import p510 from '../assets/p5_10.jpeg'
 const Projects = () => {
 
     useEffect(() => {
-		const wow = new WOW()
-		wow.init();
-	}, [])
+        const wow = new WOW()
+        wow.init();
+    }, [])
 
-	const panes = [
-		{
-		  	menuItem: 'Socialony',
-		  	render: () => (
-				<Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
-					<Project 
-						title="Socialony - Social Media"
-						images={[p11,p12,p13,p14,p15,p16,p17,p18,p19]}
-						features={["React", "Redux", "Material-UI", "Firebase", "Express.js","Ant-Design", "Grommet", "Semantic UI"]}
-						github="https://github.com/erhanyaylali1/Socialony-SocialMedia"
-						url="https://socialony.web.app/"
-					/>
-				</Tab.Pane>
-			),
-		},
+    const panes = [
         {
             menuItem: 'E-Wallet',
             render: () => (
-              <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
-                  <Project 
-                      title="E-Wallet"
-                      images={[p51,p52,p53,p54,p55,p56,p57,p58,p59, p510]}
-                      features={["React", "Redux", "Material-UI", "Ant Desing UI Kit", "Chart Js",
-                      "Node JS", "Express.js","Bcryptjs", "Jsonwebtoken", "Sequelize", "MySQL"]}
-                      github="https://github.com/erhanyaylali1/wallet-client"
-                      url="http://portfolio-wallet.s3-website.eu-north-1.amazonaws.com/"
-                  />
-              </Tab.Pane>
-          ),
+                <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                    <Project
+                        title="E-Wallet"
+                        images={[p51, p52, p53, p54, p55, p56, p57, p58, p59, p510]}
+                        features={["React", "Redux", "Material-UI", "Ant Desing UI Kit", "Chart Js",
+                            "Node JS", "Express.js", "Bcryptjs", "Jsonwebtoken", "Sequelize", "MySQL"]}
+                        github="https://github.com/erhanyaylali1/wallet-client"
+                        url="http://portfolio-wallet.s3-website.eu-north-1.amazonaws.com/"
+                    />
+                </Tab.Pane>
+            ),
         },
-		{
-		  menuItem: 'Media Read',
-		  render: () => (
-			<Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
-				<Project 
-						title="Media Read"
-						images={[p210,p211,p212,p213,p214,p215,p216,p217,p218]}
-						features={["Python", "Flask", "Bootstrap", "JQuery", "MySQL"]}
-						github="https://github.com/erhanyaylali1/MediaRead"
-					/>
-			</Tab.Pane>
-		    ),
-		},
+        {
+            menuItem: 'UniHub',
+            render: () => (
+                <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                    <Project
+                        title="UniHub"
+                        images={[
+                            "https://user-images.githubusercontent.com/32177766/148796699-ebb0b24a-da55-40d8-9f7a-506cf736138c.png",
+                            "https://user-images.githubusercontent.com/32177766/148796789-0dcd85b3-d9ec-40f1-876c-d0292d732808.png",
+                            "https://user-images.githubusercontent.com/32177766/148797111-530810df-94f5-45d7-a573-71e1b96c59be.png",
+                            "https://user-images.githubusercontent.com/32177766/148797040-4624f3e9-9603-454d-9f54-9d4fd211b7a7.png",
+                            "https://user-images.githubusercontent.com/32177766/148797054-0b5bc34a-bfab-4d48-b27e-e7f8ca0c7706.png",
+                            "https://user-images.githubusercontent.com/32177766/148797069-729e0d6e-1359-4795-826e-d5db8095c26d.png",
+                            "https://user-images.githubusercontent.com/32177766/148797089-dbdd5fec-4bc7-4c14-93ac-9575bd66081f.png",
+                            "https://user-images.githubusercontent.com/32177766/148797512-51f89c5a-cc33-4cba-a56b-1adc52c265a6.png",
+                            "https://user-images.githubusercontent.com/32177766/148797530-e4c7fe56-67a8-41e2-8c9c-1eb3bbaef87a.png",
+                            "https://user-images.githubusercontent.com/32177766/148797551-c055ab98-f00c-4d0c-925d-46b193c10797.png",
+                            "https://user-images.githubusercontent.com/32177766/148797592-a36b3488-81b3-460a-abca-2e3b1763f2cc.png",
+                            "https://user-images.githubusercontent.com/32177766/148797921-e8550e43-a955-451a-a9dc-1c65f5f3c125.png"
+                        ]}
+                        features={["React", "Redux", "Node JS", "Express.js", "AWS", "Jsonwebtoken", "Sequelize", "MySQL"]}
+                        github="https://github.com/erhanyaylali1/uniHub-Client"
+                        url="http://unihub-client.s3-website.us-east-2.amazonaws.com/"
+                    />
+                </Tab.Pane>
+            ),
+        },
+        {
+            menuItem: 'Socialony',
+            render: () => (
+                <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                    <Project
+                        title="Socialony - Social Media"
+                        images={[p11, p12, p13, p14, p15, p16, p17, p18, p19]}
+                        features={["React", "Redux", "Material-UI", "Firebase", "Express.js", "Ant-Design", "Grommet", "Semantic UI"]}
+                        github="https://github.com/erhanyaylali1/Socialony-SocialMedia"
+                        url="https://socialony.web.app/"
+                    />
+                </Tab.Pane>
+            ),
+        },
+        {
+            menuItem: 'Media Read',
+            render: () => (
+                <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                    <Project
+                        title="Media Read"
+                        images={[p210, p211, p212, p213, p214, p215, p216, p217, p218]}
+                        features={["Python", "Flask", "Bootstrap", "JQuery", "MySQL"]}
+                        github="https://github.com/erhanyaylali1/MediaRead"
+                    />
+                </Tab.Pane>
+            ),
+        },
         {
             menuItem: 'Weather App',
             render: () => (
-              <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
-                  <Project 
+                <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                    <Project
                         title="Weather App"
-                        images={[p30, p31,p32,p33,p34,p35,p36,p37,p38]}
+                        images={[p30, p31, p32, p33, p34, p35, p36, p37, p38]}
                         features={["React", "Redux", "Google Map API", "Wikipedia API", "OpenWeatherMap"]}
                         github="https://github.com/erhanyaylali1/ReactApps/tree/main/WeatherApp"
                         url="https://weatherapp-erhan.netlify.app"
                     />
-              </Tab.Pane>
-              ),
-          },
-          {
-              menuItem: 'Amazon Website',
-              render: () => (
-                <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
-                    <Project 
-                          title="Amazon Website"
-                          images={[p41,p42,p43,p44,p45,p46,p47, p48, p44]}
-                          features={["React", "Redux", "Firebase", "Splash"]}
-                          github="https://github.com/erhanyaylali1/ReactApps/tree/main/Amazon%20Clone"
-                          url="https://ey1-f69b8.web.app"
-                      />
                 </Tab.Pane>
-                ),
-            },
-	  ]
+            ),
+        },
+        {
+            menuItem: 'Amazon Website',
+            render: () => (
+                <Tab.Pane attached={false} className="wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+                    <Project
+                        title="Amazon Website"
+                        images={[p41, p42, p43, p44, p45, p46, p47, p48, p44]}
+                        features={["React", "Redux", "Firebase", "Splash"]}
+                        github="https://github.com/erhanyaylali1/ReactApps/tree/main/Amazon%20Clone"
+                        url="https://ey1-f69b8.web.app"
+                    />
+                </Tab.Pane>
+            ),
+        },
+    ]
 
-	return (
-		<Container id="Projects">
-			<Tab menu={{ secondary: true, pointing: true }} panes={panes}/>
-		</Container>
-	)
+    return (
+        <Container id="Projects">
+            <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
+        </Container>
+    )
 }
 
 
