@@ -3,9 +3,10 @@ import styled from 'styled-components'
 import { Divider, Header as Hdr, Icon } from 'semantic-ui-react'
 import { Grid, Typography } from '@material-ui/core'
 import PermContactCalendarIcon from '@material-ui/icons/PermContactCalendar';
-import WOW from "wow.js"
-import './style.css'
-import Me from '../assets/me.jpg'
+import WOW from "wow.js";
+import './style.css';
+import Me from '../assets/me.jpg';
+import CV from '../assets/Erhan_Yaylalı_CV.pdf';
 
 const Credentials = () => {
 
@@ -49,6 +50,18 @@ const Credentials = () => {
                     </Grid>
                 </Grid>
             </Header>
+            <Grid
+                className="wow bounceInUp"
+                item container justify="center"
+                style={{ marginBottom: 30 }}
+            >
+                <a href={CV} download>
+                    <Name style={{ fontSize: width < 450 ? '15x' : '18px', marginBottom: 0 }}>
+                        <Icon name='download' style={{ marginRight: 10 }} />
+                        My Resume
+                    </Name>
+                </a>
+            </Grid>
             <EachPart>
                 <Divider horizontal className={width < 450 ? 'wow bounceInUp' : 'wow bounceInLeft'} data-wow-duration="1s" data-wow-delay="0.5s">
                     <Hdr as='h3'>

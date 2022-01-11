@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import SwiperCore, { EffectCoverflow, Navigation, Pagination } from 'swiper'
 import { IconButton, Typography } from '@material-ui/core'
 import { Modal, List } from 'semantic-ui-react'
 import styled from 'styled-components'
@@ -8,7 +7,6 @@ import 'swiper/swiper-bundle.css'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import LinkOutlinedIcon from '@material-ui/icons/LinkOutlined'
 
-// SwiperCore.use([EffectCoverflow, Navigation, Pagination]);
 
 const Project = ({ title, images, features, url, github, color }) => {
 
