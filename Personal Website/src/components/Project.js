@@ -70,11 +70,10 @@ const Project = ({ title, images, features, url, github, color }) => {
             <ProjectImage
               src={img}
               style={{
-                height: "auto",
-                maxHeight: 600,
+                height: width < 450 ? "60vh" : 400,
                 objectFit: "cover",
                 objectPosition: "top center",
-                width: width < 450 ? "300px" : "500px",
+                width: width < 450 ? "80vw" : "auto",
                 margin: 10,
               }}
               onClick={async () => {
@@ -135,7 +134,12 @@ const Container = styled.div`
 const ProjectImage = styled.img`
   margin-bottom: 50px;
   z-index: 999;
-  cursor: ne-resize;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 `;
 const ZoomImage = styled.img``;
 const Title = styled.div`

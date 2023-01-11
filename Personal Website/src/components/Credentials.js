@@ -16,6 +16,17 @@ const Credentials = () => {
     wow.init();
   }, []);
 
+  const calculateTheAge = () => {
+    const today = new window.Date();
+    const birthDate = new window.Date("1998-03-27");
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   return (
     <Container
       style={{ padding: width < 450 ? "30px" : "20px 100px" }}
@@ -60,10 +71,10 @@ const Credentials = () => {
               Erhan Yaylalı
             </Name>
             <Name style={{ fontSize: width < 450 ? "15px" : "25px" }}>
-              23 Years Old
+              {`${calculateTheAge()} Years Old`}
             </Name>
             <Name style={{ fontSize: width < 450 ? "15px" : "25px" }}>
-              Born at İzmir, 27.03.1998
+              Born at Izmir, Turkey. 27.03.1998
             </Name>
           </Grid>
         </Grid>
