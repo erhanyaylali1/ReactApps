@@ -149,7 +149,7 @@ const Contact = () => {
             className={classes.socialInfo}
             variant="overline"
           >
-            Mobile Phone: +90 554 643 08 24
+            Mobile Phone: +45 50 23 19 14
           </Typography>
         </Grid>
       </Grid>
