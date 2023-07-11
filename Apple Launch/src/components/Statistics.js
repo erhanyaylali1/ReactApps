@@ -9,27 +9,27 @@ const Statistics = () => {
 	const classes = useStyle()
 
 	return (
-		<Grid container justify="center" className={classes.statistic}>
-			<Statistic>
-				<Statistic.Value>
-					<CountUp 
-						start={0}
-						end={218012463}
-						separator=','
-						redraw={true}
-						duration={4}
-					>
-						{({ countUpRef, start }) => (
-							<VisibilitySensor onChange={start} delayedCall>
-								<span ref={countUpRef} />
-							</VisibilitySensor>
-						)}
-					</CountUp>
-				</Statistic.Value>
-				<Statistic.Label className={classes.label}>Iphone User</Statistic.Label>
-			</Statistic>
-		</Grid>	
-	)
+    <Grid container justifyContent="center" className={classes.statistic}>
+      <Statistic>
+        <Statistic.Value>
+          <CountUp
+            start={0}
+            end={218012463}
+            separator=","
+            redraw={true}
+            duration={4}
+          >
+            {({ countUpRef, start }) => (
+              <VisibilitySensor onChange={start} delayedCall>
+                <span ref={countUpRef} />
+              </VisibilitySensor>
+            )}
+          </CountUp>
+        </Statistic.Value>
+        <Statistic.Label className={classes.label}>Iphone User</Statistic.Label>
+      </Statistic>
+    </Grid>
+  );
 }
 
 export default Statistics

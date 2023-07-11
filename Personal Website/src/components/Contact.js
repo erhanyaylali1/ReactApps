@@ -1,10 +1,11 @@
-import { Button, Grid, makeStyles, Typography } from "@material-ui/core";
+import { Grid, makeStyles, Typography } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { Icon, Form } from "semantic-ui-react";
 import ContactSupportIcon from "@material-ui/icons/ContactSupport";
 import WOW from "wow.js";
 import { send } from "emailjs-com";
 import { message } from "antd";
+import { LoadingButton } from "@mui/lab";
 
 const Contact = () => {
   const width = window.innerWidth;
@@ -12,6 +13,7 @@ const Contact = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const wow = new WOW();
@@ -19,25 +21,38 @@ const Contact = () => {
   }, []);
 
   const sendEmail = (e) => {
+    setLoading(true);
     e.preventDefault();
     const infos = {
       from_name: name,
-      to_name: "Erhan Yaylalı",
+      to_name: "Erhan Yaylali",
       message: content,
       reply_to: "erhanyaylali9@gmail.com",
     };
 
+    const {
+      REACT_APP_EMAIL_SERVICE_ID,
+      REACT_APP_EMAIL_TEMPLATE_ID,
+      REACT_APP_EMAIL_USER_ID,
+    } = process.env;
+
     send(
-      "service_jb8gjbo",
-      "template_9m24rwt",
+      REACT_APP_EMAIL_SERVICE_ID,
+      REACT_APP_EMAIL_TEMPLATE_ID,
       infos,
-      "user_ZluoX0lqzOOy2QYqXllv1"
+      REACT_APP_EMAIL_USER_ID
     )
       .then(() => {
         message.success("Email Sent Successfully!");
+        setName("");
+        setEmail("");
+        setContent("");
       })
       .catch(() => {
         message.error("Email Could not Sent!");
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -45,7 +60,7 @@ const Contact = () => {
     <Grid
       container
       alignItems="flex-start"
-      justify="center"
+      justifyContent="center"
       className={classes.root}
       id="Contact"
       style={{ paddingTop: width < 450 ? "20px" : "20px" }}
@@ -55,7 +70,7 @@ const Contact = () => {
         item
         xs={10}
         md={6}
-        justify="center"
+        justifyContent="center"
         className="wow bounceInLeft"
         data-wow-duration="1s"
         data-wow-delay="0.5s"
@@ -68,7 +83,7 @@ const Contact = () => {
           >
             <Grid
               container
-              justify="center"
+              justifyContent="center"
               alignItems="center"
               className={classes.contact}
             >
@@ -83,7 +98,6 @@ const Contact = () => {
             </Grid>
           </Grid>
           <Form.Input
-            fluid
             label="Name Surname"
             placeholder="Name"
             value={name}
@@ -92,7 +106,6 @@ const Contact = () => {
             onChange={(e) => setName(e.target.value)}
           />
           <Form.Input
-            fluid
             label="Email Address"
             placeholder="Email"
             type="email"
@@ -101,28 +114,35 @@ const Contact = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
           <Form.TextArea
-            fluid
             label="Content"
             placeholder="Content"
             value={content}
             required
             onChange={(e) => setContent(e.target.value)}
           />
-          <Button
+          <LoadingButton
             variant="contained"
             className={classes.sendbutton}
             type="submit"
+            color="info"
+            loading={loading}
           >
             Send
-          </Button>
+          </LoadingButton>
         </Form>
       </Grid>
-      <Grid container item xs={12} justify="center" className={classes.infos}>
+      <Grid
+        container
+        item
+        xs={12}
+        justifyContent="center"
+        className={classes.infos}
+      >
         <Grid
           item
           container
           xs={12}
-          justify="center"
+          justifyContent="center"
           className="wow bounceInLeft"
           data-wow-duration="1s"
           data-wow-delay="0.5s"
@@ -139,7 +159,7 @@ const Contact = () => {
           item
           container
           xs={12}
-          justify="center"
+          justifyContent="center"
           className="wow bounceInLeft"
           data-wow-duration="1s"
           data-wow-delay="0.5s"
@@ -153,7 +173,13 @@ const Contact = () => {
           </Typography>
         </Grid>
       </Grid>
-      <Grid container item xs={12} justify="center" className={classes.socials}>
+      <Grid
+        container
+        item
+        xs={12}
+        justifyContent="center"
+        className={classes.socials}
+      >
         <Grid
           container
           item

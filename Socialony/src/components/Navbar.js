@@ -104,110 +104,188 @@ const Navbar = (props) => {
     }
     
 	return (
-		<Grommet theme={grommet}>	
-			<Grid className={classes.root} style={{ backgroundColor: "#333333", height: isOpen ? "21vh":"8vh" }}>
-				<Grid alignItems="center" justify="space-around"  container>
-					<Grid container item xs={11} lg={2} justify="flex-start" onClick={() => setTab(0)}>
-						<Link to="/" className={classes.brand}>
-                            <GrommetIcon color="status-warning" />
-                            <p className={classes.link3}>Socialony</p>
-						</Link>
-					</Grid>
+    <Grommet theme={grommet}>
+      <Grid
+        className={classes.root}
+        style={{ backgroundColor: "#333333", height: isOpen ? "21vh" : "8vh" }}
+      >
+        <Grid alignItems="center" justifyContent="space-around" container>
+          <Grid
+            container
+            item
+            xs={11}
+            lg={2}
+            justifyContent="flex-start"
+            onClick={() => setTab(0)}
+          >
+            <Link to="/" className={classes.brand}>
+              <GrommetIcon color="status-warning" />
+              <p className={classes.link3}>Socialony</p>
+            </Link>
+          </Grid>
 
-					<Grid item xs={1} onClick={() => dispatch(toggleNavbar())} style={{ display: width < 450 ? 'flex':'none'}}>
-                        <Tooltip placement="bottomRight" title={<span>{isOpen ? 'Close Menu':'Open Menu'}</span>}>
-						    <DownCircleOutlined style={{ color: "white", transform: isOpen ? 'rotate(180deg)':'rotate(0deg)' }}/>
-                        </Tooltip>
-					</Grid>
-					
-					<Grid item container xs={12} lg={6} style={{ display: (width < 450) ? (isOpen ? 'flex':'none'):'flex' }} className={classes.navbarsearch}>
-                        <Grid item container xs={12} ref={searchBar}>  
-                            <Input placeholder="Search User..." suffix={<SearchOutlined />} 
-                                className={classes.searchdiv}
-                                value={key}
-                                onInput={(e) => {
-                                    setKey(e.target.value)
-                                    search(e.target.value)
-                                }}
-                            />
-                        </Grid>						
-                        <Grid item container xs={11} lg={7} 
-                            className={classes.searchresults} 
-                            style={{ display: showSearch ? ( results.length ? 'flex':'none'):'none' }}
-                            ref={searchRef}
-                        >
-                            {renderResults()}
-                        </Grid>
-					</Grid>
-					<Grid item container xs={12} lg={4} spacing={2} alignItems="center"
-                        className={classes.navbarButtonsDiv}
-						style={{ display: (width < 450) ? (isOpen ? 'flex':'none'):'flex', justifyContent: width < 450 ? 'space-around':'flex-end'
-					 }}>
-						{isLogged ? (
-							<React.Fragment>
-                                <BottomNavigation
-                                    style={{ justifyContent: (width < 450) ? 'space-between':'flex-end' }}
-                                    className={classes.navbartop}
-                                    value={tab}
-                                    onChange={(e, newTab) => {
-                                        setTab(newTab);
-                                        if(newTab === 0) {
-                                            props.history.push('/');
-                                        } else if(newTab === 1) {
-                                            props.history.push('/messages');
-                                        } else if(newTab === 2) {
-                                            props.history.push('/notifications');
-                                        } else if(newTab === 3) {
-                                            props.history.push(`/user/${user.userId}`);
-                                        } else if(newTab === 4) {
-                                            setTab(0);
-                                            logout();
-                                        }
-                                    }}
-                                    showLabels
-                                >
-                                    <BottomNavigationAction label="Home" icon={<HomeIcon />} />
-                                    <BottomNavigationAction label="Messages" icon={
-                                        <Badge color="secondary" variant="dot" invisible={!messagesNotification.length}>
-                                           <MailOutlineIcon />
-                                        </Badge>
-                                    }/>
-                                    <BottomNavigationAction label="Notifications" icon={
-                                        <Badge badgeContent={notificationsCount} color="primary">
-                                            <NotificationsIcon />
-                                        </Badge>
-                                    }/>
-                                    <BottomNavigationAction label="Profile" icon={<PersonIcon />} />
-                                    <BottomNavigationAction label="Logout" icon={<ExitToAppIcon />} />
-                                </BottomNavigation>
-							</React.Fragment>
-						):(
-							<React.Fragment>
-								<BottomNavigation
-                                    style={{ justifyContent: (width < 450) ? 'space-around':'flex-end' }}
-                                    className={classes.navbartop}
-                                    value={tab}
-                                    onChange={(e, newTab) => {
-                                        setTab(newTab);
-                                        if(newTab === 0) {
-                                            props.history.push('/login');   
-                                        } else if(newTab === 1) {
-                                            props.history.push('/register');
-                                        } 
-                                    }}
-                                    showLabels
-                                >
-                                    <BottomNavigationAction label="Login" icon={<ExitToAppIcon />} />
-                                    <BottomNavigationAction label="Register" icon={<AssignmentIndIcon />} />
-                                </BottomNavigation>
-							</React.Fragment>
-						)}
-						
-					</Grid>
-				</Grid>
-			</Grid>
-		</Grommet>
-	)
+          <Grid
+            item
+            xs={1}
+            onClick={() => dispatch(toggleNavbar())}
+            style={{ display: width < 450 ? "flex" : "none" }}
+          >
+            <Tooltip
+              placement="bottomRight"
+              title={<span>{isOpen ? "Close Menu" : "Open Menu"}</span>}
+            >
+              <DownCircleOutlined
+                style={{
+                  color: "white",
+                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
+            </Tooltip>
+          </Grid>
+
+          <Grid
+            item
+            container
+            xs={12}
+            lg={6}
+            style={{
+              display: width < 450 ? (isOpen ? "flex" : "none") : "flex",
+            }}
+            className={classes.navbarsearch}
+          >
+            <Grid item container xs={12} ref={searchBar}>
+              <Input
+                placeholder="Search User..."
+                suffix={<SearchOutlined />}
+                className={classes.searchdiv}
+                value={key}
+                onInput={(e) => {
+                  setKey(e.target.value);
+                  search(e.target.value);
+                }}
+              />
+            </Grid>
+            <Grid
+              item
+              container
+              xs={11}
+              lg={7}
+              className={classes.searchresults}
+              style={{
+                display: showSearch
+                  ? results.length
+                    ? "flex"
+                    : "none"
+                  : "none",
+              }}
+              ref={searchRef}
+            >
+              {renderResults()}
+            </Grid>
+          </Grid>
+          <Grid
+            item
+            container
+            xs={12}
+            lg={4}
+            spacing={2}
+            alignItems="center"
+            className={classes.navbarButtonsDiv}
+            style={{
+              display: width < 450 ? (isOpen ? "flex" : "none") : "flex",
+              justifyContent: width < 450 ? "space-around" : "flex-end",
+            }}
+          >
+            {isLogged ? (
+              <React.Fragment>
+                <BottomNavigation
+                  style={{
+                    justifyContent: width < 450 ? "space-between" : "flex-end",
+                  }}
+                  className={classes.navbartop}
+                  value={tab}
+                  onChange={(e, newTab) => {
+                    setTab(newTab);
+                    if (newTab === 0) {
+                      props.history.push("/");
+                    } else if (newTab === 1) {
+                      props.history.push("/messages");
+                    } else if (newTab === 2) {
+                      props.history.push("/notifications");
+                    } else if (newTab === 3) {
+                      props.history.push(`/user/${user.userId}`);
+                    } else if (newTab === 4) {
+                      setTab(0);
+                      logout();
+                    }
+                  }}
+                  showLabels
+                >
+                  <BottomNavigationAction label="Home" icon={<HomeIcon />} />
+                  <BottomNavigationAction
+                    label="Messages"
+                    icon={
+                      <Badge
+                        color="secondary"
+                        variant="dot"
+                        invisible={!messagesNotification.length}
+                      >
+                        <MailOutlineIcon />
+                      </Badge>
+                    }
+                  />
+                  <BottomNavigationAction
+                    label="Notifications"
+                    icon={
+                      <Badge badgeContent={notificationsCount} color="primary">
+                        <NotificationsIcon />
+                      </Badge>
+                    }
+                  />
+                  <BottomNavigationAction
+                    label="Profile"
+                    icon={<PersonIcon />}
+                  />
+                  <BottomNavigationAction
+                    label="Logout"
+                    icon={<ExitToAppIcon />}
+                  />
+                </BottomNavigation>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <BottomNavigation
+                  style={{
+                    justifyContent: width < 450 ? "space-around" : "flex-end",
+                  }}
+                  className={classes.navbartop}
+                  value={tab}
+                  onChange={(e, newTab) => {
+                    setTab(newTab);
+                    if (newTab === 0) {
+                      props.history.push("/login");
+                    } else if (newTab === 1) {
+                      props.history.push("/register");
+                    }
+                  }}
+                  showLabels
+                >
+                  <BottomNavigationAction
+                    label="Login"
+                    icon={<ExitToAppIcon />}
+                  />
+                  <BottomNavigationAction
+                    label="Register"
+                    icon={<AssignmentIndIcon />}
+                  />
+                </BottomNavigation>
+              </React.Fragment>
+            )}
+          </Grid>
+        </Grid>
+      </Grid>
+    </Grommet>
+  );
 }
 
 export default withRouter(Navbar);

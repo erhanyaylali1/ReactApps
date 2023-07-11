@@ -18,79 +18,96 @@ const SignIn = () => {
 	const classes = useStyle()
 
 	return (
-		<div className={classes.root}>
-			<Background 
-				isSignIn={true}
-			/>
-			<div className={classes.img}>
-				<ImageSlide />
-			</div>
-			<div className={classes.logo_title}>
-				<Typography variant='h1'>
-					iPhone 11
-				</Typography>
-			</div>
+    <div className={classes.root}>
+      <Background isSignIn={true} />
+      <div className={classes.img}>
+        <ImageSlide />
+      </div>
+      <div className={classes.logo_title}>
+        <Typography variant="h1">iPhone 11</Typography>
+      </div>
 
-			<Grid container justify="center">
-				<Grid item container  md={6}>
-					<Card className={classes.form}>
-						<Link to='/' className={classes.logo}>
-							<AppleIcon />
-							<Typography variant="subtitle1">Apple</Typography>
-						</Link>
-						<Typography variant="h4" align="center" className={classes.title}>Sign Up</Typography>
-						<Form>
-							<Form.Item className={classes.form_item}>
-								<Typography variant="body1">Name & Surname</Typography>
-								<Input className={classes.input}
-									value={name}
-									onChange={(e) => setName(e.target.value)}
-									type="text"
-								/>
-							</Form.Item>
-							<Form.Item className={classes.form_item}>
-								<Typography variant="body1">Phone</Typography>
-								<Input className={classes.input}
-									value={phone}
-									onChange={(e) => setPhone(e.target.value)}
-									type="number"
-								/>
-							</Form.Item>
-							<Form.Item className={classes.form_item}>
-								<Typography variant="body1">Email</Typography>
-								<Input className={classes.input}
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									type="email"
-								/>
-							</Form.Item>
-							<Form.Item className={classes.form_item}>
-								<Typography variant="body1">Address</Typography>
-								<TextArea className={classes.input}
-									value={address}
-									onChange={(e) => setAddress(e.target.value)}
-									type="text"
-								/>
-							</Form.Item>
-							<Form.Item className={classes.form_item}>
-								<Grid container justify="space-between">
-									<Grid item container direction="column" md={8}>
-										<Typography variant="body1">Avaible Dates</Typography>
-										<RangePicker className={classes.input} showTime format="YYYY-MM-DD HH:mm:ss"/>
-									</Grid>
-									<Grid item container alignItems="flex-end" justify="flex-end" md={3}>
-										<Button fullWidth variant="outlined" type="submit" color="primary">
-											Submit
-										</Button>
-									</Grid>									
-								</Grid>
-							</Form.Item>
-						</Form>
-					</Card>
-				</Grid>
-			</Grid>
-		</div>
-	)
+      <Grid container justifyContent="center">
+        <Grid item container md={6}>
+          <Card className={classes.form}>
+            <Link to="/" className={classes.logo}>
+              <AppleIcon />
+              <Typography variant="subtitle1">Apple</Typography>
+            </Link>
+            <Typography variant="h4" align="center" className={classes.title}>
+              Sign Up
+            </Typography>
+            <Form>
+              <Form.Item className={classes.form_item}>
+                <Typography variant="body1">Name & Surname</Typography>
+                <Input
+                  className={classes.input}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  type="text"
+                />
+              </Form.Item>
+              <Form.Item className={classes.form_item}>
+                <Typography variant="body1">Phone</Typography>
+                <Input
+                  className={classes.input}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  type="number"
+                />
+              </Form.Item>
+              <Form.Item className={classes.form_item}>
+                <Typography variant="body1">Email</Typography>
+                <Input
+                  className={classes.input}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                />
+              </Form.Item>
+              <Form.Item className={classes.form_item}>
+                <Typography variant="body1">Address</Typography>
+                <TextArea
+                  className={classes.input}
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  type="text"
+                />
+              </Form.Item>
+              <Form.Item className={classes.form_item}>
+                <Grid container justifyContent="space-between">
+                  <Grid item container direction="column" md={8}>
+                    <Typography variant="body1">Avaible Dates</Typography>
+                    <RangePicker
+                      className={classes.input}
+                      showTime
+                      format="YYYY-MM-DD HH:mm:ss"
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    container
+                    alignItems="flex-end"
+                    justifyContent="flex-end"
+                    md={3}
+                  >
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      type="submit"
+                      color="primary"
+                    >
+                      Submit
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Grid>
+      </Grid>
+    </div>
+  );
 }
 
 export default SignIn

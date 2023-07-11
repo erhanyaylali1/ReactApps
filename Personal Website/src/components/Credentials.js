@@ -45,7 +45,7 @@ const Credentials = () => {
         data-wow-delay="0.5s"
       >
         <Grid container direction="row">
-          <Grid item container xs={4} lg={5} justify="flex-end">
+          <Grid item container xs={4} lg={5} justifyContent="flex-end">
             <img
               src={Me}
               alt="Erhan Yaylalı"
@@ -65,7 +65,7 @@ const Credentials = () => {
             xs={7}
             lg={6}
             direction="column"
-            justify="center"
+            justifyContent="center"
           >
             <Name style={{ fontSize: width < 450 ? "25px" : "35px" }}>
               Erhan Yaylalı
@@ -83,7 +83,7 @@ const Credentials = () => {
         className="wow bounceInUp"
         item
         container
-        justify="center"
+        justifyContent="center"
         style={{ marginBottom: 30 }}
       >
         <a href={CV} download>
@@ -123,7 +123,7 @@ const Credentials = () => {
               xs={12}
               md={4}
               alignItems="center"
-              justify="center"
+              justifyContent="center"
             >
               <Description
                 style={{
@@ -140,7 +140,7 @@ const Credentials = () => {
               xs={12}
               md={8}
               direction="column"
-              justify="center"
+              justifyContent="center"
             >
               <Title>Istanbul Technical University</Title>
               <SubTitle>Computer Engineering</SubTitle>
@@ -162,7 +162,7 @@ const Credentials = () => {
               xs={12}
               md={4}
               alignItems="center"
-              justify="center"
+              justifyContent="center"
             >
               <Description
                 style={{
@@ -179,7 +179,7 @@ const Credentials = () => {
               xs={12}
               md={8}
               direction="column"
-              justify="center"
+              justifyContent="center"
             >
               <Title>Çiğli Science High Scool</Title>
               <SubTitle>2012-2016</SubTitle>
@@ -213,7 +213,7 @@ const Credentials = () => {
               xs={12}
               md={4}
               alignItems="center"
-              justify="center"
+              justifyContent="center"
             >
               <Description
                 style={{
@@ -230,7 +230,7 @@ const Credentials = () => {
               xs={12}
               md={8}
               direction="column"
-              justify="center"
+              justifyContent="center"
             >
               <SubTitle>Frontend Developer</SubTitle>
               <Date>Denmark-Odense</Date>
@@ -250,7 +250,7 @@ const Credentials = () => {
               xs={12}
               md={4}
               alignItems="center"
-              justify="center"
+              justifyContent="center"
             >
               <Description
                 style={{
@@ -267,7 +267,7 @@ const Credentials = () => {
               xs={12}
               md={8}
               direction="column"
-              justify="center"
+              justifyContent="center"
             >
               <SubTitle>Full Stack Developer</SubTitle>
               <Date>Turkey-Istanbul</Date>
@@ -287,7 +287,7 @@ const Credentials = () => {
               xs={12}
               md={4}
               alignItems="center"
-              justify="center"
+              justifyContent="center"
             >
               <Description
                 style={{
@@ -304,7 +304,7 @@ const Credentials = () => {
               xs={12}
               md={8}
               direction="column"
-              justify="center"
+              justifyContent="center"
             >
               <SubTitle>Full Stack Intern</SubTitle>
               <Date>Turkey-Istanbul</Date>
@@ -324,7 +324,7 @@ const Credentials = () => {
               xs={12}
               md={4}
               alignItems="center"
-              justify="center"
+              justifyContent="center"
             >
               <Description
                 style={{
@@ -341,7 +341,7 @@ const Credentials = () => {
               xs={12}
               md={8}
               direction="column"
-              justify="center"
+              justifyContent="center"
             >
               <SubTitle>Student Worker Front End Developer</SubTitle>
               <Date>Turkey-Istanbul</Date>
@@ -361,7 +361,7 @@ const Credentials = () => {
               xs={12}
               md={4}
               alignItems="center"
-              justify="center"
+              justifyContent="center"
             >
               <Description
                 style={{
@@ -378,7 +378,7 @@ const Credentials = () => {
               xs={12}
               md={8}
               direction="column"
-              justify="center"
+              justifyContent="center"
             >
               <SubTitle>Intern</SubTitle>
               <Date>Turkey-Istanbul</Date>
