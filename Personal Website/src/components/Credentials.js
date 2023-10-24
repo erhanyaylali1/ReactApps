@@ -86,7 +86,7 @@ const Credentials = () => {
         justifyContent="center"
         style={{ marginBottom: 30 }}
       >
-        <a href={CV} download>
+        <a href={CV} download="Erhan_Yaylali_CV">
           <Name
             style={{ fontSize: width < 450 ? "15x" : "18px", marginBottom: 0 }}
           >
@@ -258,7 +258,7 @@ const Credentials = () => {
                   marginBottom: width < 450 ? "25px" : "0",
                 }}
               >
-                Orion Innovation
+                Yapı Kredi Technology
               </Description>
             </Grid>
             <Grid
