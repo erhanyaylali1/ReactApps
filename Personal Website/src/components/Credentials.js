@@ -73,9 +73,6 @@ const Credentials = () => {
             <Name style={{ fontSize: width < 450 ? "15px" : "25px" }}>
               {`${calculateTheAge()} Years Old`}
             </Name>
-            <Name style={{ fontSize: width < 450 ? "15px" : "25px" }}>
-              Born at Izmir, Turkey. 27.03.1998
-            </Name>
           </Grid>
         </Grid>
       </Header>
