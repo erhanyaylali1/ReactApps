@@ -308,7 +308,7 @@ const Credentials = () => {
                         >
                             <SubTitle>Full Stack Developer</SubTitle>
                             <Date>Turkey-Istanbul</Date>
-                            <Date>06.2021 - 12.2022</Date>
+                            <Date>06.2021 - 12.2021</Date>
                         </Grid>
                     </Grid>
                     <Grid
@@ -345,7 +345,7 @@ const Credentials = () => {
                         >
                             <SubTitle>Jr. Full Stack</SubTitle>
                             <Date>Turkey-Istanbul</Date>
-                            <Date>02.2021 - 07.2021</Date>
+                            <Date>02.2021 - 06.2021</Date>
                         </Grid>
                     </Grid>
                     <Grid
