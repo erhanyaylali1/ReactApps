@@ -60,6 +60,10 @@ import p57 from "../assets/p5_7.jpeg";
 import p58 from "../assets/p5_8.jpeg";
 import p59 from "../assets/p5_9.jpeg";
 import p510 from "../assets/p5_10.jpeg";
+import p60 from "../assets/p6_0.png";
+import p61 from "../assets/p6_1.png";
+import p62 from "../assets/p6_2.png";
+import p63 from "../assets/p6_3.png";
 
 const Projects = () => {
   useEffect(() => {
@@ -90,6 +94,26 @@ const Projects = () => {
             ]}
             github="https://github.com/erhanyaylali1/blog-post-client"
             url="https://blog-post-client.vercel.app/"
+          />
+        </Tab.Pane>
+      ),
+    },
+    {
+      menuItem: "Civil Defense Ukraine",
+      render: () => (
+        <Tab.Pane
+          attached={false}
+          className="wow bounceInUp"
+          data-wow-duration="1s"
+          data-wow-delay="0.5s"
+        >
+          <Project
+            title="Civil Defense Ukraine"
+            images={[p60, p61, p62, p63]}
+            features={[
+              "Figma",
+            ]}
+            url="https://www.figma.com/proto/Fl8NMovelipgIPGF3zz2FK/Civil-Defence-Ukraine?node-id=2-6&t=rftKaxqOcJzKUKW9-1&scaling=scale-down&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=2%3A6"
           />
         </Tab.Pane>
       ),
